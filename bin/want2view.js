@@ -60,6 +60,11 @@ Usage:
   want2view login [--api https://app.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
+  want2view catalog categories [--limit 20]
+  want2view catalog videos <category_key> [--limit 20]
+  want2view catalog export <category_key> --for codex|claude
+  want2view projects list
+  want2view project export <project_id> --for codex|claude
   want2view cloud research "<topic>" --sources youtube,tiktok,instagram,x [--mode demo|cloud]
   want2view cloud status <run_id>
   want2view cloud export <run_id> --for codex|claude
@@ -67,6 +72,8 @@ Usage:
 Examples:
   npx want2view research "ai video ads" --demo
   npx want2view export --for codex
+  npx want2view catalog categories
+  WANT2VIEW_PUBLIC_API_KEY=... npx want2view projects list
   WANT2VIEW_API_TOKEN=... npx want2view cloud research "fitness reels" --sources youtube,tiktok
 `);
 }
@@ -156,8 +163,9 @@ function initWorkspace(root) {
   if (!fs.existsSync(configPath)) {
     writeJson(configPath, {
       version: VERSION,
-      api_base_url: "https://app.want2view.com",
+      api_base_url: "https://api.want2view.com",
       token_env: "WANT2VIEW_API_TOKEN",
+      public_api_key_env: "WANT2VIEW_PUBLIC_API_KEY",
       created_at: new Date().toISOString(),
     });
   }
@@ -185,11 +193,15 @@ function readUserConfig() {
 function apiBaseUrl(args, root = workspacePath(args)) {
   const workspaceConfig = readWorkspaceConfig(root);
   const userConfig = readUserConfig();
-  return String(args.api || process.env.WANT2VIEW_API_BASE_URL || userConfig.api_base_url || workspaceConfig.api_base_url || "https://app.want2view.com").replace(/\/+$/, "");
+  return String(args.api || process.env.WANT2VIEW_API_BASE_URL || userConfig.api_base_url || workspaceConfig.api_base_url || "https://api.want2view.com").replace(/\/+$/, "");
 }
 
 function apiToken() {
   return process.env.WANT2VIEW_API_TOKEN || readUserConfig().api_token || "";
+}
+
+function publicApiKey() {
+  return process.env.WANT2VIEW_PUBLIC_API_KEY || readUserConfig().public_api_key || "";
 }
 
 function tokenSource() {
@@ -248,6 +260,20 @@ async function requestJson(url, options = {}) {
     throw new Error(data.detail || data.message || `HTTP ${response.status}`);
   }
   return data;
+}
+
+function parseLimit(args, fallback = 20, max = 100) {
+  const raw = Number(args.limit || fallback);
+  if (!Number.isFinite(raw) || raw < 1) return fallback;
+  return Math.min(max, Math.floor(raw));
+}
+
+function requirePublicApiKey() {
+  const key = publicApiKey();
+  if (!key) {
+    throw new Error("Missing WANT2VIEW_PUBLIC_API_KEY. Create an API key in WANT2VIEW API Access and export WANT2VIEW_PUBLIC_API_KEY=\"...\".");
+  }
+  return key;
 }
 
 function parseCsv(text) {
@@ -506,7 +532,7 @@ function commandExport(args) {
 async function commandLogin(args) {
   const root = workspacePath(args);
   const configPath = initWorkspace(root);
-  const apiBase = args.api || "https://app.want2view.com";
+  const apiBase = args.api || "https://api.want2view.com";
   const config = JSON.parse(readText(configPath));
   config.api_base_url = apiBase;
   config.token_env = "WANT2VIEW_API_TOKEN";
@@ -634,6 +660,10 @@ async function commandDoctor(args) {
       username: null,
       user_id: null,
     },
+    public_api: {
+      available: Boolean(publicApiKey()),
+      source: process.env.WANT2VIEW_PUBLIC_API_KEY ? "env" : (readUserConfig().public_api_key ? "config" : "missing"),
+    },
     local: {
       workspace_exists: fs.existsSync(root),
       records_available: loadRows(root).length,
@@ -656,6 +686,9 @@ async function commandDoctor(args) {
   if (!payload.local.records_available) {
     payload.next_steps.push("Run `want2view research \"ai video ads\" --demo` for a local pack.");
   }
+  if (!payload.public_api.available) {
+    payload.next_steps.push("Set WANT2VIEW_PUBLIC_API_KEY to list/export your WANT2VIEW projects.");
+  }
   if (args.json) {
     console.log(JSON.stringify(payload, null, 2));
     return;
@@ -664,6 +697,7 @@ async function commandDoctor(args) {
   console.log(`Workspace: ${payload.workspace}`);
   console.log(`API: ${payload.api_base_url}`);
   console.log(`Auth: ${payload.auth.available ? `${payload.auth.source} (${payload.auth.verified ? "verified" : "not verified"})` : "missing"}`);
+  console.log(`Public API key: ${payload.public_api.available ? payload.public_api.source : "missing"}`);
   if (payload.auth.username) console.log(`User: ${payload.auth.username}`);
   console.log(`Local records: ${payload.local.records_available}`);
   payload.next_steps.forEach((step) => console.log(`Next: ${step}`));
@@ -676,6 +710,162 @@ function writeCloudExport(root, payload) {
     fs.writeFileSync(path.join(exportDir, fileName), String(content));
   }
   return exportDir;
+}
+
+function writePack(root, packId, target, files) {
+  const exportDir = path.join(root, "exports", packId);
+  ensureDir(exportDir);
+  for (const [fileName, content] of Object.entries(files)) {
+    fs.writeFileSync(path.join(exportDir, fileName), String(content));
+  }
+  console.log(`Exported ${target} context pack: ${exportDir}`);
+  return exportDir;
+}
+
+function recordsToEvidence(rows) {
+  return `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`;
+}
+
+function packManifest(packId, target, topic, artifacts, extra = {}) {
+  return JSON.stringify({
+    pack_id: packId,
+    target,
+    topic,
+    artifacts,
+    generated_at: new Date().toISOString(),
+    ...extra,
+  }, null, 2);
+}
+
+async function commandCatalog(args) {
+  const action = args._[1] || "categories";
+  const root = workspacePath(args);
+  initWorkspace(root);
+  const base = apiBaseUrl(args, root);
+  const language = args.language || "en";
+  if (action === "categories") {
+    const data = await requestJson(`${base}/public/api/v1/catalog/categories?language=${encodeURIComponent(language)}`);
+    const items = (data.items || []).slice(0, parseLimit(args, 30, 100));
+    if (args.json) {
+      console.log(JSON.stringify({ items, count: items.length }, null, 2));
+      return;
+    }
+    items.forEach((item) => {
+      console.log(`${item.category_key || item.key}\t${item.title}\t${item.channel_count || 0} channels`);
+    });
+    return;
+  }
+  if (action === "videos") {
+    const category = args._[2];
+    if (!category) throw new Error("Missing category key. Example: want2view catalog videos ai");
+    const limit = parseLimit(args, 20, 100);
+    const data = await requestJson(`${base}/public/api/v1/catalog/categories/${encodeURIComponent(category)}/videos?language=${encodeURIComponent(language)}&limit=${limit}`);
+    if (args.json) {
+      console.log(JSON.stringify(data, null, 2));
+      return;
+    }
+    (data.items || []).forEach((item) => {
+      console.log(`${item.views || 0}\t${item.channel_title || ""}\t${item.title || ""}\t${item.url || ""}`);
+    });
+    return;
+  }
+  if (action === "export") {
+    const category = args._[2];
+    const target = String(args.for || "codex").toLowerCase();
+    if (!category) throw new Error("Missing category key. Example: want2view catalog export ai --for codex");
+    if (!["codex", "claude"].includes(target)) throw new Error("Use --for codex|claude");
+    const limit = parseLimit(args, 25, 100);
+    const [summary, videos] = await Promise.all([
+      requestJson(`${base}/public/api/v1/catalog/categories/${encodeURIComponent(category)}/summary?language=${encodeURIComponent(language)}`).catch(() => ({})),
+      requestJson(`${base}/public/api/v1/catalog/categories/${encodeURIComponent(category)}/videos?language=${encodeURIComponent(language)}&limit=${limit}`).catch(() => ({ items: [] })),
+    ]);
+    const rows = (videos.items || []).map((item) => normalizeRecord({
+      platform: "youtube",
+      account: item.channel_title,
+      title: item.title,
+      url: item.url,
+      views: item.views,
+      likes: item.likes,
+      comments: item.comments,
+      published_at: item.published_at,
+      text: item.description,
+    }, "catalog")).map(scoreRecord);
+    const packId = `catalog-${slugify(category)}-${Date.now()}`;
+    const files = {
+      "manifest.json": packManifest(packId, target, `catalog:${category}`, ["summary.md", "evidence.jsonl", "scored.csv", target === "codex" ? "codex_tasks.md" : "claude_brief.md"], { category_key: category }),
+      "summary.md": `# WANT2VIEW Catalog: ${category}\n\n${summary.summary_long || summary.summary_short || "Catalog evidence exported from WANT2VIEW."}\n\nRecords: ${rows.length}\n`,
+      "evidence.jsonl": recordsToEvidence(rows),
+      "scored.csv": toCsv(rows),
+      [target === "codex" ? "codex_tasks.md" : "claude_brief.md"]: target === "codex" ? buildCodexTasks(`catalog:${category}`, rows) : buildClaudeBrief(`catalog:${category}`, rows),
+    };
+    writePack(root, packId, target, files);
+    return;
+  }
+  throw new Error("Unknown catalog command. Use `catalog categories`, `catalog videos`, or `catalog export`.");
+}
+
+async function commandProjects(args) {
+  const root = workspacePath(args);
+  initWorkspace(root);
+  const base = apiBaseUrl(args, root);
+  const key = requirePublicApiKey();
+  const data = await requestJson(`${base}/public/projects`, {
+    headers: { "X-API-Key": key },
+  });
+  if (args.json) {
+    console.log(JSON.stringify(data, null, 2));
+    return;
+  }
+  const items = Array.isArray(data) ? data : (data.items || []);
+  items.forEach((item) => {
+    console.log(`${item.competitor_analysis_id || item.id || item.analysis_id}\t${item.name || item.title || item.query || "Untitled project"}`);
+  });
+}
+
+async function commandProject(args) {
+  const action = args._[1];
+  const projectId = args._[2];
+  const target = String(args.for || "codex").toLowerCase();
+  if (action !== "export") throw new Error("Unknown project command. Use `project export <project_id> --for codex|claude`.");
+  if (!projectId) throw new Error("Missing project id.");
+  if (!["codex", "claude"].includes(target)) throw new Error("Use --for codex|claude");
+  const root = workspacePath(args);
+  initWorkspace(root);
+  const base = apiBaseUrl(args, root);
+  const key = requirePublicApiKey();
+  const headers = { "X-API-Key": key };
+  const [overview, videos, channels, trends, keywords] = await Promise.all([
+    requestJson(`${base}/public/projects/${encodeURIComponent(projectId)}/overview`, { headers }).catch(() => ({})),
+    requestJson(`${base}/public/projects/${encodeURIComponent(projectId)}/videos`, { headers }).catch(() => ({ items: [] })),
+    requestJson(`${base}/public/projects/${encodeURIComponent(projectId)}/channels`, { headers }).catch(() => ({ items: [] })),
+    requestJson(`${base}/public/projects/${encodeURIComponent(projectId)}/trends`, { headers }).catch(() => ({ items: [] })),
+    requestJson(`${base}/public/projects/${encodeURIComponent(projectId)}/keywords`, { headers }).catch(() => ({ items: [] })),
+  ]);
+  const videoRows = (videos.items || []).map((item) => normalizeRecord({
+    platform: item.platform || "youtube",
+    account: item.channel_title || item.channel || item.author,
+    title: item.title,
+    url: item.url,
+    views: item.views,
+    likes: item.likes,
+    comments: item.comments,
+    published_at: item.published_at,
+    text: item.description || item.reason,
+  }, "project")).map(scoreRecord);
+  const topic = `project:${projectId}`;
+  const packId = `${slugify(topic)}-${Date.now()}`;
+  const summary = `# WANT2VIEW Project Export: ${projectId}\n\n## Overview\n\n${JSON.stringify(overview, null, 2)}\n\n## Counts\n\n- Videos: ${videoRows.length}\n- Channels: ${(channels.items || []).length}\n- Trends: ${(trends.items || []).length}\n- Keywords: ${(keywords.items || []).length}\n`;
+  const files = {
+    "manifest.json": packManifest(packId, target, topic, ["summary.md", "evidence.jsonl", "scored.csv", "channels.json", "trends.json", "keywords.json", target === "codex" ? "codex_tasks.md" : "claude_brief.md"], { project_id: projectId }),
+    "summary.md": summary,
+    "evidence.jsonl": recordsToEvidence(videoRows),
+    "scored.csv": toCsv(videoRows),
+    "channels.json": JSON.stringify(channels, null, 2),
+    "trends.json": JSON.stringify(trends, null, 2),
+    "keywords.json": JSON.stringify(keywords, null, 2),
+    [target === "codex" ? "codex_tasks.md" : "claude_brief.md"]: target === "codex" ? buildCodexTasks(topic, videoRows) : buildClaudeBrief(topic, videoRows),
+  };
+  writePack(root, packId, target, files);
 }
 
 async function commandCloud(args) {
@@ -762,6 +952,9 @@ async function main() {
     if (command === "login") return await commandLogin(args);
     if (command === "auth") return await commandAuth(args);
     if (command === "doctor") return await commandDoctor(args);
+    if (command === "catalog") return await commandCatalog(args);
+    if (command === "projects") return await commandProjects(args);
+    if (command === "project") return await commandProject(args);
     if (command === "cloud") return await commandCloud(args);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {

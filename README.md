@@ -28,6 +28,10 @@ npx github:kirbudilov01/want2view-cli export --for codex
 | Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
 | Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
 | Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
+| Browse the WANT2VIEW catalog | `catalog categories` | Shows public categories and trend surfaces |
+| Export catalog evidence | `catalog export ai --for codex` | Gives an AI pack from WANT2VIEW catalog data |
+| Use your own WANT2VIEW projects | `projects list` | Requires `WANT2VIEW_PUBLIC_API_KEY` from API Access |
+| Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
 | Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
 
@@ -97,7 +101,12 @@ claude_brief.md
 
 ## Interactive Login
 
-Cloud mode needs a WANT2VIEW account token. The login wizard gives users three paths:
+There are two keys because there are two product surfaces:
+
+- `WANT2VIEW_API_TOKEN`: Developer CLI token for cloud connector runs.
+- `WANT2VIEW_PUBLIC_API_KEY`: Public API key for your WANT2VIEW projects and reports.
+
+Cloud mode needs a WANT2VIEW Developer CLI token. The login wizard gives users three paths:
 
 ```bash
 npx github:kirbudilov01/want2view-cli login
@@ -123,6 +132,26 @@ Agent diagnostics:
 ```bash
 npx github:kirbudilov01/want2view-cli doctor --json
 ```
+
+Project API:
+
+```bash
+export WANT2VIEW_PUBLIC_API_KEY="your_dashboard_api_key"
+npx github:kirbudilov01/want2view-cli projects list
+npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
+```
+
+## WANT2VIEW Catalog
+
+Use catalog commands to discover what WANT2VIEW already tracks:
+
+```bash
+npx github:kirbudilov01/want2view-cli catalog categories
+npx github:kirbudilov01/want2view-cli catalog videos ai --limit 20
+npx github:kirbudilov01/want2view-cli catalog export ai --for claude
+```
+
+This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export their own projects and run cloud research.
 
 ## Cloud Social Research
 
@@ -194,6 +223,10 @@ Recommended columns:
 | --- | --- |
 | `want2view login` | Interactive auth wizard |
 | `want2view doctor --json` | Agent-readable setup diagnostics |
+| `want2view catalog categories` | Browse WANT2VIEW catalog categories |
+| `want2view catalog export ai --for codex` | Export catalog evidence for an agent |
+| `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
+| `want2view project export <id> --for codex` | Export your internal project to Codex/Claude |
 | `want2view research "topic" --demo` | Free local demo pack |
 | `want2view import ./file.csv` | Bring your own data |
 | `want2view score` | Score local records |
