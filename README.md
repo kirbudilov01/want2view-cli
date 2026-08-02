@@ -7,6 +7,13 @@ npx want2view research "ai video ads" --demo
 npx want2view export --for codex
 ```
 
+Before the npm package is published, run directly from GitHub:
+
+```bash
+npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli export --for codex
+```
+
 Open-source CLI for building AI-ready social content research packs from local data, demo datasets, and WANT2VIEW Cloud runs.
 
 The first useful experience is local and free. Paid WANT2VIEW Cloud is for managed social connectors, scheduled refreshes, team workspaces, historical indexes, and production-scale research.
@@ -31,6 +38,13 @@ npx want2view init
 npx want2view research "ai video ads" --demo
 npx want2view export --for codex
 npx want2view export --for claude
+```
+
+GitHub install path:
+
+```bash
+npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
 Agent handoff:
