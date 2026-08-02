@@ -1,0 +1,16 @@
+{
+  "pack_id": "local-research-1785689254731",
+  "target": "claude",
+  "topic": "local research",
+  "records": 3,
+  "artifacts": [
+    "summary.md",
+    "evidence.jsonl",
+    "scored.csv",
+    "claude_brief.md"
+  ],
+  "generated_at": "2026-08-02T16:47:34.733Z",
+  "upgrade_url": "https://app.want2view.com/register",
+  "developer_url": "https://want2view.com/developers",
+  "api_access_url": "https://app.want2view.com/api-access"
+}

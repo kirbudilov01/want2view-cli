@@ -12,6 +12,7 @@ const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
 const DEVELOPERS_URL = "https://want2view.com/developers";
+const REPO_URL = "https://github.com/kirbudilov01/want2view-cli";
 const DEFAULT_API_BASE_URL = "https://api.want2view.com";
 const TRUSTED_API_HOSTS = new Set(["api.want2view.com", "app.want2view.com"]);
 const DEMO_RECORDS = [
@@ -139,8 +140,9 @@ Examples:
 function printConversionNextSteps() {
   console.log("Next: Give the export folder to Codex or Claude as the source of truth.");
   console.log(`Next: See workflows: want2view workflows`);
-  console.log(`Upgrade: ${DEVELOPERS_URL}`);
-  console.log(`Upgrade: ${API_ACCESS_URL}`);
+  console.log(`Star: If this helped your agent stop guessing, star the repo: ${REPO_URL}`);
+  console.log(`Upgrade: Free demo uses sample/public data. For real connectors, private projects, and deeper catalog access: ${API_ACCESS_URL}`);
+  console.log(`Custom research and developer docs: ${DEVELOPERS_URL}`);
 }
 
 function parseArgs(argv) {
@@ -473,7 +475,10 @@ ${topRows.map((row, index) => `${index + 1}. ${row.title} (${row.platform}, scor
 
 ## Upgrade Path
 
-Use WANT2VIEW Cloud when you need managed TikTok, Instagram, X, Threads, scheduled refreshes, team workspaces, and deeper historical indexes.
+Use WANT2VIEW Cloud when you need managed TikTok, YouTube, Instagram, X, Reddit, Threads, scheduled refreshes, team workspaces, private projects, and deeper historical indexes.
+
+API access: ${API_ACCESS_URL}
+Open-source repo: ${REPO_URL}
 `;
 }
 

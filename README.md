@@ -46,6 +46,8 @@ npx github:kirbudilov01/want2view-cli export --for codex
 
 <p align="center">
   <a href="./docs/RECIPES.md">Workflows</a> ·
+  <a href="./examples/outputs">Example Outputs</a> ·
+  <a href="./docs/LAUNCH_POSTS.md">Launch Posts</a> ·
   <a href="./docs/API_ACCESS_FLOW.md">API Access Flow</a> ·
   <a href="./docs/LAUNCH_PLAYBOOK.md">Launch Playbook</a> ·
   <a href="./SUPPORT.md">Support</a>
@@ -85,6 +87,12 @@ Use the newest .want2view/exports/<pack_id> folder as the source of truth.
 Read manifest.json, summary.md, evidence.jsonl, scored.csv, and codex_tasks.md.
 Base recommendations only on evidence rows.
 ```
+
+Want to inspect the output before running anything? Open [examples/outputs](./examples/outputs).
+
+Before: Codex or Claude guesses from a prompt.
+
+After: Codex or Claude reads `manifest.json`, `summary.md`, `evidence.jsonl`, `scored.csv`, and an agent-specific brief.
 
 ## Pick Your Path
 
@@ -164,6 +172,8 @@ npx want2view export --for codex
 ```
 
 Package status: the `want2view` npm name is prepared for publishing, but this repository can already run through GitHub with `npx github:kirbudilov01/want2view-cli`.
+
+If the demo helps your agent stop guessing, star the repo. If you need real social connectors, private projects, deeper catalog access, API tokens, or scheduled refreshes, continue in [WANT2VIEW API Access](https://app.want2view.com/api-access).
 
 ## Agent Handoff
 
@@ -398,5 +408,8 @@ node bin/want2view.js doctor --json
 - Support: [SUPPORT.md](./SUPPORT.md)
 - Agent prompts: [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
 - Workflows: [docs/RECIPES.md](./docs/RECIPES.md)
+- Example outputs: [examples/outputs](./examples/outputs)
 - API access flow: [docs/API_ACCESS_FLOW.md](./docs/API_ACCESS_FLOW.md)
 - Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)
+- Launch posts: [docs/LAUNCH_POSTS.md](./docs/LAUNCH_POSTS.md)
+- NPM publish checklist: [docs/NPM_PUBLISH.md](./docs/NPM_PUBLISH.md)

@@ -1,0 +1,7 @@
+{
+  "version": "0.1.0",
+  "api_base_url": "https://api.want2view.com",
+  "token_env": "WANT2VIEW_API_TOKEN",
+  "public_api_key_env": "WANT2VIEW_PUBLIC_API_KEY",
+  "created_at": "2026-08-02T16:47:34.689Z"
+}

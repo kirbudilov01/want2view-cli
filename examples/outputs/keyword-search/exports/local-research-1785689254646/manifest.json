@@ -1,0 +1,16 @@
+{
+  "pack_id": "local-research-1785689254646",
+  "target": "codex",
+  "topic": "local research",
+  "records": 3,
+  "artifacts": [
+    "summary.md",
+    "evidence.jsonl",
+    "scored.csv",
+    "codex_tasks.md"
+  ],
+  "generated_at": "2026-08-02T16:47:34.649Z",
+  "upgrade_url": "https://app.want2view.com/register",
+  "developer_url": "https://want2view.com/developers",
+  "api_access_url": "https://app.want2view.com/api-access"
+}
