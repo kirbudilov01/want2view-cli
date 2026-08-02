@@ -1,0 +1,40 @@
+{
+  "name": "want2view",
+  "version": "0.0.1",
+  "description": "Open-source CLI for building AI-ready social content research packs.",
+  "type": "module",
+  "homepage": "https://want2view.com/#open-source-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirbudilov01/want2view-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kirbudilov01/want2view-cli/issues"
+  },
+  "bin": {
+    "want2view": "./bin/want2view.js"
+  },
+  "files": [
+    "bin",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node --check bin/want2view.js",
+    "demo": "node bin/want2view.js research \"ai video ads\" --demo --out ./.want2view-demo && node bin/want2view.js export --for codex --workspace ./.want2view-demo"
+  },
+  "keywords": [
+    "content-research",
+    "social-intelligence",
+    "codex",
+    "claude",
+    "ai-context"
+  ],
+  "author": "WANT2VIEW",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
