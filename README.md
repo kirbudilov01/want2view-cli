@@ -20,6 +20,17 @@ npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
+## Pick Your Path
+
+| You want to... | Run this | What happens |
+| --- | --- | --- |
+| Try it with zero setup | `research "ai video ads" --demo` | Creates a free local AI context pack |
+| Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
+| Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
+| Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
+| Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
+| Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
+
 ## Why This Exists
 
 Most AI agents are only as good as the context you give them. WANT2VIEW CLI turns social content evidence into clean, inspectable files that agents can use as a source of truth.
@@ -40,6 +51,7 @@ WANT2VIEW Cloud adds the paid moat:
 - team workspaces;
 - historical source index;
 - hosted dashboard and API.
+- custom research packages for teams that want the result done for them.
 
 <p align="center">
   <img src="./assets/architecture.svg" alt="Terminal to WANT2VIEW Cloud to AI context pack architecture" />
@@ -129,6 +141,24 @@ The CLI stores exported packs locally under:
 ```text
 .want2view/exports/<run_id>/
 ```
+
+## What You Can Buy From WANT2VIEW
+
+The open-source CLI is the free entrypoint. WANT2VIEW Cloud is for serious, repeated work:
+
+| Product | Best for |
+| --- | --- |
+| Managed connectors | Teams that need YouTube, TikTok, Instagram, X, Reddit, and Threads without maintaining provider access |
+| API access | Agencies, AI agents, automations, and internal tools |
+| Scheduled refreshes | Weekly monitoring of a niche, creator market, product category, or competitor set |
+| Custom research | Done-for-you category reports, competitor maps, content briefs, scripts, and client-ready insights |
+| Team workspace | Shared source-of-truth packs, saved history, and repeatable research workflows |
+
+Start here:
+
+- Website: [want2view.com](https://want2view.com)
+- App / API token: [app.want2view.com](https://app.want2view.com)
+- Custom research: open a WANT2VIEW account and request a research package from the dashboard.
 
 ## Bring Your Own Data
 
