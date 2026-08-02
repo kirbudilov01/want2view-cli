@@ -1,13 +1,13 @@
 ---
-name: Recipe request
-about: Ask for a practical workflow for your team, niche, or agent setup
-title: "Recipe: "
-labels: recipe
+name: Workflow request
+about: Ask for a practical keyword, channel, project, or agent workflow
+title: "Workflow: "
+labels: workflow
 ---
 
 ## Goal
 
-What are you trying to research, monitor, or hand off to an AI agent?
+What are you trying to search, audit, monitor, export, or hand off to an AI agent?
 
 ## Team Type
 
@@ -19,7 +19,8 @@ What are you trying to research, monitor, or hand off to an AI agent?
 
 ## Inputs You Have
 
-- Topic or niche:
+- Keyword:
+- Channel URL or handle:
 - Existing CSV/JSON data:
 - WANT2VIEW project:
 - Public links:

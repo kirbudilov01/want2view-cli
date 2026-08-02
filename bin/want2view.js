@@ -49,27 +49,37 @@ const DEMO_RECORDS = [
 ];
 
 const RECIPES = {
-  agency: {
-    title: "Agency client research",
-    goal: "Turn competitor exports into a client-ready content strategy brief.",
+  keyword: {
+    title: "Keyword search to Codex",
+    goal: "Search a keyword in WANT2VIEW style, export the evidence, and let Codex work from files.",
     commands: [
-      "want2view import ./client-competitors.csv",
+      "want2view search \"ai video ads\" --demo",
+      "want2view export --for codex",
+    ],
+    agent_prompt: "Use the newest export as source of truth. Find repeated hooks, content formats, audience pains, and evidence-backed recommendations.",
+    paid_next_step: "Use WANT2VIEW Cloud for deeper catalog results, real social connectors, saved searches, and API access.",
+  },
+  channel: {
+    title: "Channel audit to Claude",
+    goal: "Turn a channel URL or creator export into a Claude-ready content audit.",
+    commands: [
+      "want2view channel https://youtube.com/@example --demo",
       "want2view score",
       "want2view export --for claude",
     ],
-    agent_prompt: "Read claude_brief.md and evidence.jsonl. Create a client-ready brief with competitor patterns, hooks, risks, and next experiments. Cite evidence rows.",
-    paid_next_step: "Order custom research or connect the client workspace in WANT2VIEW Cloud.",
+    agent_prompt: "Read claude_brief.md and evidence.jsonl. Create a channel audit with formats, hooks, gaps, risks, and next content experiments. Cite evidence rows.",
+    paid_next_step: "Connect real channels in WANT2VIEW Cloud or order custom research for a deeper audit.",
   },
-  founder: {
-    title: "Founder niche check",
-    goal: "Check whether a niche has visible content demand before spending budget.",
+  project: {
+    title: "WANT2VIEW project to agent",
+    goal: "Export an existing WANT2VIEW project into a source-of-truth pack for Codex or Claude.",
     commands: [
-      "want2view research \"your niche\" --demo",
-      "want2view catalog categories",
-      "want2view catalog export ai --for codex",
+      "want2view login",
+      "want2view projects list",
+      "want2view project export <project_id> --for codex",
     ],
-    agent_prompt: "Use the newest export as source of truth. Create a niche validation brief with pains, formats, competitor signals, landing angles, and evidence gaps.",
-    paid_next_step: "Create a WANT2VIEW account for deeper catalog access, private projects, and API exports.",
+    agent_prompt: "Use the exported project as source of truth. Work only from the evidence files and separate observed signals from recommendations.",
+    paid_next_step: "Use API Access for private projects, team workflows, scheduled refreshes, and production agent handoffs.",
   },
   monitoring: {
     title: "Content team monitoring",
@@ -88,10 +98,12 @@ const RECIPES = {
 function printHelp() {
   console.log(`want2view ${VERSION}
 
-Open-source CLI for AI-ready social content research packs.
+Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
 
 Usage:
   want2view init [--workspace .want2view]
+  want2view search "<keyword>" --demo [--out .want2view]
+  want2view channel <channel_url_or_handle> --demo [--out .want2view]
   want2view import <file.csv|file.json|file.jsonl> [--workspace .want2view]
   want2view research "<topic>" --demo [--out .want2view]
   want2view normalize [--workspace .want2view]
@@ -100,7 +112,8 @@ Usage:
   want2view login [--api https://app.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
-  want2view recipes [agency|founder|monitoring] [--json]
+  want2view workflows [keyword|channel|project|monitoring] [--json]
+  want2view recipes [keyword|channel|project|monitoring] [--json]
   want2view catalog categories [--limit 20]
   want2view catalog videos <category_key> [--limit 20]
   want2view catalog export <category_key> --for codex|claude
@@ -111,9 +124,10 @@ Usage:
   want2view cloud export <run_id> --for codex|claude
 
 Examples:
-  npx want2view research "ai video ads" --demo
+  npx want2view search "ai video ads" --demo
+  npx want2view channel https://youtube.com/@example --demo
   npx want2view export --for codex
-  npx want2view recipes founder
+  npx want2view workflows keyword
   npx want2view catalog categories
   WANT2VIEW_PUBLIC_API_KEY=... npx want2view projects list
   WANT2VIEW_API_TOKEN=... npx want2view cloud research "fitness reels" --sources youtube,tiktok
@@ -122,7 +136,7 @@ Examples:
 
 function printConversionNextSteps() {
   console.log("Next: Give the export folder to Codex or Claude as the source of truth.");
-  console.log(`Next: See recipes: want2view recipes`);
+  console.log(`Next: See workflows: want2view workflows`);
   console.log(`Upgrade: ${DEVELOPERS_URL}`);
   console.log(`Upgrade: ${API_ACCESS_URL}`);
 }
@@ -529,7 +543,45 @@ function commandResearch(args) {
     records: rows.length,
     generated_at: new Date().toISOString(),
   });
-  console.log(`Created demo research for "${topic}" with ${rows.length} records.`);
+  const label = args.kind === "keyword" ? "keyword search pack" : "research pack";
+  console.log(`Created demo ${label} for "${topic}" with ${rows.length} records.`);
+  console.log(`Workspace: ${root}`);
+  console.log("Next: want2view export --for codex");
+  console.log("Next: want2view export --for claude");
+}
+
+function commandSearch(args) {
+  const keyword = args._[1] || "demo keyword";
+  const forwarded = { ...args, _: ["research", keyword], kind: "keyword" };
+  commandResearch(forwarded);
+}
+
+function commandChannel(args) {
+  const channel = args._[1];
+  if (!channel) throw new Error("Missing channel URL or handle. Example: want2view channel https://youtube.com/@example --demo");
+  const root = workspacePath(args);
+  initWorkspace(root);
+  if (!args.demo) {
+    console.log("Local live channel connectors are intentionally limited in the OSS skeleton.");
+    console.log("Use --demo, import a channel export, or connect WANT2VIEW Cloud with `want2view login`.");
+    return;
+  }
+  const topic = `channel:${channel}`;
+  const rows = DEMO_RECORDS.map((row, index) => normalizeRecord({
+    ...row,
+    account: channel,
+    url: `${String(channel).replace(/\/$/, "")}/demo-${index + 1}`,
+    topic,
+  }, row.platform)).map(scoreRecord);
+  writeJsonl(path.join(root, "data", "demo.jsonl"), rows);
+  writeJson(path.join(root, "manifest.seed.json"), {
+    topic,
+    channel,
+    mode: "demo",
+    records: rows.length,
+    generated_at: new Date().toISOString(),
+  });
+  console.log(`Created demo channel pack for "${channel}" with ${rows.length} records.`);
   console.log(`Workspace: ${root}`);
   console.log("Next: want2view export --for codex");
   console.log("Next: want2view export --for claude");
@@ -559,7 +611,7 @@ function commandExport(args) {
   const root = workspacePath(args);
   initWorkspace(root);
   const rows = loadRows(root).map((row) => (row.score === undefined ? scoreRecord(row) : row));
-  if (!rows.length) throw new Error("No records found. Run `want2view research --demo` or `want2view import` first.");
+  if (!rows.length) throw new Error("No records found. Run `want2view search \"ai video ads\" --demo`, `want2view channel <url> --demo`, or `want2view import` first.");
   const topic = args.topic || "local research";
   const exportId = `${slugify(topic)}-${Date.now()}`;
   const exportDir = path.join(root, "exports", exportId);
@@ -587,22 +639,22 @@ function commandRecipes(args) {
   const recipeKey = args._[1];
   if (args.json) {
     const payload = recipeKey ? { [recipeKey]: RECIPES[recipeKey] } : RECIPES;
-    if (recipeKey && !RECIPES[recipeKey]) throw new Error(`Unknown recipe: ${recipeKey}. Use agency, founder, or monitoring.`);
+    if (recipeKey && !RECIPES[recipeKey]) throw new Error(`Unknown workflow: ${recipeKey}. Use keyword, channel, project, or monitoring.`);
     console.log(JSON.stringify(payload, null, 2));
     return;
   }
   if (!recipeKey) {
-    console.log("WANT2VIEW CLI recipes:");
+    console.log("WANT2VIEW CLI workflows:");
     Object.entries(RECIPES).forEach(([key, recipe]) => {
       console.log(`- ${key}: ${recipe.title}`);
       console.log(`  ${recipe.goal}`);
     });
-    console.log("\nOpen a recipe: want2view recipes founder");
+    console.log("\nOpen a workflow: want2view workflows keyword");
     console.log(`Developer page: ${DEVELOPERS_URL}`);
     return;
   }
   const recipe = RECIPES[recipeKey];
-  if (!recipe) throw new Error(`Unknown recipe: ${recipeKey}. Use agency, founder, or monitoring.`);
+  if (!recipe) throw new Error(`Unknown workflow: ${recipeKey}. Use keyword, channel, project, or monitoring.`);
   console.log(`# ${recipe.title}`);
   console.log(`Goal: ${recipe.goal}`);
   console.log("\nCommands:");
@@ -769,7 +821,7 @@ async function commandDoctor(args) {
     payload.next_steps.push("Run `want2view login` for cloud connectors.");
   }
   if (!payload.local.records_available) {
-    payload.next_steps.push("Run `want2view research \"ai video ads\" --demo` for a local pack.");
+    payload.next_steps.push("Run `want2view search \"ai video ads\" --demo` for a local pack.");
   }
   if (!payload.public_api.available) {
     payload.next_steps.push("Set WANT2VIEW_PUBLIC_API_KEY to list/export your WANT2VIEW projects.");
@@ -1030,6 +1082,8 @@ async function main() {
     if (command === "version" || args.version) return console.log(VERSION);
     if (command === "init") return commandInit(args);
     if (command === "import") return commandImport(args);
+    if (command === "search") return commandSearch(args);
+    if (command === "channel") return commandChannel(args);
     if (command === "research") return commandResearch(args);
     if (command === "normalize") return commandNormalize(args);
     if (command === "score") return commandScore(args);
@@ -1037,7 +1091,7 @@ async function main() {
     if (command === "login") return await commandLogin(args);
     if (command === "auth") return await commandAuth(args);
     if (command === "doctor") return await commandDoctor(args);
-    if (command === "recipes") return commandRecipes(args);
+    if (command === "recipes" || command === "workflows") return commandRecipes(args);
     if (command === "catalog") return await commandCatalog(args);
     if (command === "projects") return await commandProjects(args);
     if (command === "project") return await commandProject(args);

@@ -3,7 +3,7 @@
 Use these prompts after running:
 
 ```bash
-npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 

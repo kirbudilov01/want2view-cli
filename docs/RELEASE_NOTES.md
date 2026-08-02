@@ -14,7 +14,7 @@ Highlights:
 - private project export client
 - Developer CLI token flow
 - WANT2VIEW Cloud research client
-- recipes for agencies, founders, and content teams
+- workflows for keyword search, channel audits, project exports, and content teams
 - demo GIF and social preview assets
 - CI workflow and npm-ready package metadata
 

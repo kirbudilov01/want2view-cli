@@ -12,14 +12,14 @@
 
 # WANT2VIEW CLI
 
-Open-source content research packs for Codex, Claude, and terminal agents.
+Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
 
-This repository is a free gift from the WANT2VIEW team: a lightweight terminal bridge that helps AI agents work with content evidence instead of guessing.
+This repository is a free gift from the WANT2VIEW team: a lightweight terminal bridge that helps AI agents work with WANT2VIEW content evidence instead of guessing.
 
-Start free from the terminal. The public catalog is intentionally limited, so anyone can try the workflow. Upgrade to WANT2VIEW Cloud when you need deeper catalog access, your own private projects, managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
+Start free from the terminal. Search by keyword, pass a channel URL, import your own exports, or connect an existing WANT2VIEW project. The public/demo layer is intentionally limited so anyone can try the workflow. Upgrade to the same WANT2VIEW Cloud product when you need deeper catalog access, private projects, managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
 
 ```bash
-npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
@@ -45,7 +45,7 @@ npx github:kirbudilov01/want2view-cli export --for codex
 </p>
 
 <p align="center">
-  <a href="./docs/RECIPES.md">Recipes</a> ·
+  <a href="./docs/RECIPES.md">Workflows</a> ·
   <a href="./docs/API_ACCESS_FLOW.md">API Access Flow</a> ·
   <a href="./docs/LAUNCH_PLAYBOOK.md">Launch Playbook</a> ·
   <a href="./SUPPORT.md">Support</a>
@@ -55,14 +55,14 @@ npx github:kirbudilov01/want2view-cli export --for codex
 
 WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
 
-- **Free:** local demo packs, your own CSV/JSON imports, limited public catalog samples, Codex/Claude exports.
-- **Paid/account:** deeper catalog, private WANT2VIEW projects, Developer CLI tokens, managed social connectors, scheduled refreshes, custom research.
-- **Best use:** give AI coding/research agents a real evidence folder instead of a vague prompt.
+- **Free:** local demo packs, channel/keyword examples, your own CSV/JSON imports, limited public catalog samples, Codex/Claude exports.
+- **Paid/account:** the same WANT2VIEW monetization layer: deeper catalog, private projects, Developer CLI tokens, managed social connectors, scheduled refreshes, custom research.
+- **Best use:** give Codex, Claude, and terminal agents real WANT2VIEW evidence folders instead of vague prompts.
 
 ## What You Get In 60 Seconds
 
 ```bash
-npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
@@ -90,7 +90,8 @@ Base recommendations only on evidence rows.
 
 | You want to... | Run this | What happens |
 | --- | --- | --- |
-| Try it with zero setup | `research "ai video ads" --demo` | Creates a free local AI context pack |
+| Try keyword search with zero setup | `search "ai video ads" --demo` | Creates a free local AI context pack |
+| Try a channel audit | `channel https://youtube.com/@example --demo` | Creates a channel-shaped evidence pack |
 | Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
 | Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
 | Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
@@ -100,7 +101,7 @@ Base recommendations only on evidence rows.
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
 | Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
-| Pick a ready workflow | `recipes founder` | Shows commands, agent prompt, and WANT2VIEW next step |
+| Pick a ready workflow | `workflows keyword` | Shows commands, agent prompt, and WANT2VIEW next step |
 
 ## Free vs WANT2VIEW Cloud
 
@@ -148,16 +149,17 @@ WANT2VIEW Cloud adds the paid product:
 Run directly from GitHub before the npm package is published:
 
 ```bash
-npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
 npx github:kirbudilov01/want2view-cli export --for codex
-npx github:kirbudilov01/want2view-cli recipes founder
+npx github:kirbudilov01/want2view-cli workflows keyword
 npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
 After npm publish, the same workflow becomes:
 
 ```bash
-npx want2view research "ai video ads" --demo
+npx want2view search "ai video ads" --demo
 npx want2view export --for codex
 ```
 
@@ -186,14 +188,15 @@ claude_brief.md
 
 More copy-paste prompts live in [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md).
 
-## Recipes
+## Workflows
 
-Recipes are not separate hidden features. They are practical paths that combine the existing CLI commands with WANT2VIEW product surfaces.
+Workflows are not separate hidden features. They are practical paths that combine the same WANT2VIEW product surfaces: keyword search, channel analysis, project export, catalog access, and cloud connectors.
 
-| Recipe | Start with CLI | Continue in WANT2VIEW |
+| Workflow | Start with CLI | Continue in WANT2VIEW |
 | --- | --- | --- |
-| Agency client research | `import ./client-competitors.csv` then `export --for claude` | Order a done-for-you report or connect the client workspace |
-| Founder niche check | `research "your niche" --demo` then `catalog export ai --for codex` | Unlock deeper catalog, private projects, and API access |
+| Keyword search to Codex | `search "ai video ads" --demo` then `export --for codex` | Unlock deeper catalog, saved searches, and API access |
+| Channel audit to Claude | `channel https://youtube.com/@example --demo` then `export --for claude` | Connect real channels or order a deeper audit |
+| WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
 | Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
 
 Full copy-paste workflows live in [docs/RECIPES.md](./docs/RECIPES.md).
@@ -278,7 +281,7 @@ The open-source CLI is the free entrypoint. WANT2VIEW Cloud is for serious, repe
 | --- | --- |
 | Managed connectors | Teams that need YouTube, TikTok, Instagram, X, Reddit, and Threads without maintaining provider access |
 | API access | Agencies, AI agents, automations, and internal tools |
-| Scheduled refreshes | Weekly monitoring of a niche, creator market, product category, or competitor set |
+| Scheduled refreshes | Weekly monitoring of keywords, channels, creator markets, product categories, or competitor sets |
 | Custom research | Done-for-you category reports, competitor maps, content briefs, scripts, and client-ready insights |
 | Team workspace | Shared source-of-truth packs, saved history, and repeatable research workflows |
 
@@ -293,7 +296,7 @@ Start here:
 
 - Content teams researching a new category before filming.
 - Agencies turning competitor data into client-ready strategy.
-- Founders checking whether a niche has real content demand.
+- Founders and operators checking keywords, channels, and categories before spending budget.
 - AI agents that need evidence files before writing briefs, scripts, landing pages, or reports.
 - Internal tools that need a clean bridge into WANT2VIEW data.
 
@@ -331,13 +334,15 @@ Recommended columns:
 | --- | --- |
 | `want2view login` | Interactive auth wizard |
 | `want2view doctor --json` | Agent-readable setup diagnostics |
-| `want2view recipes` | Show agency, founder, and monitoring workflows |
-| `want2view recipes founder` | Print a copy-pasteable niche-check workflow |
+| `want2view workflows` | Show keyword, channel, project, and monitoring workflows |
+| `want2view workflows keyword` | Print a copy-pasteable keyword-to-agent workflow |
+| `want2view search "topic" --demo` | Free local keyword demo pack |
+| `want2view channel <url> --demo` | Free local channel-shaped demo pack |
 | `want2view catalog categories` | Browse WANT2VIEW catalog categories |
 | `want2view catalog export ai --for codex` | Export catalog evidence for an agent |
 | `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
 | `want2view project export <id> --for codex` | Export your internal project to Codex/Claude |
-| `want2view research "topic" --demo` | Free local demo pack |
+| `want2view research "topic" --demo` | Backward-compatible alias for local demo research |
 | `want2view import ./file.csv` | Bring your own data |
 | `want2view score` | Score local records |
 | `want2view export --for codex` | Create Codex pack |
@@ -374,7 +379,7 @@ Paid WANT2VIEW Cloud:
 ## Local Development
 
 ```bash
-node bin/want2view.js research "ai video ads" --demo
+node bin/want2view.js search "ai video ads" --demo
 node bin/want2view.js export --for codex
 node bin/want2view.js doctor --json
 ```
@@ -390,6 +395,6 @@ node bin/want2view.js doctor --json
 - Security: [SECURITY.md](./SECURITY.md)
 - Support: [SUPPORT.md](./SUPPORT.md)
 - Agent prompts: [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
-- Recipes: [docs/RECIPES.md](./docs/RECIPES.md)
+- Workflows: [docs/RECIPES.md](./docs/RECIPES.md)
 - API access flow: [docs/API_ACCESS_FLOW.md](./docs/API_ACCESS_FLOW.md)
 - Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)

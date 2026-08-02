@@ -1,56 +1,78 @@
-# Recipes
+# Workflows
 
-Recipes are practical onboarding paths built from existing WANT2VIEW CLI commands and WANT2VIEW product surfaces.
+Workflows are practical onboarding paths built from existing WANT2VIEW CLI commands and WANT2VIEW product surfaces.
 
 They do not imply that every paid workflow is fully local. The open-source CLI creates useful context packs; WANT2VIEW Cloud provides deeper catalog data, private projects, managed social connectors, scheduled refreshes, API access, and custom research.
 
-## Agency Client Research
+## Keyword Search To Codex
 
-Use this when an agency wants a fast client-facing category or competitor brief.
+Use this when someone wants to search by keyword, create an evidence pack, and hand it to Codex.
 
 ```bash
-npx github:kirbudilov01/want2view-cli import ./client-competitors.csv
-npx github:kirbudilov01/want2view-cli score
+npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli export --for codex
+```
+
+Give Codex:
+
+```text
+Use the newest .want2view/exports/<pack_id> folder as the source of truth.
+Find repeated hooks, content formats, audience pains, and evidence-backed recommendations.
+Every recommendation must cite evidence rows from the pack.
+```
+
+Next WANT2VIEW step:
+
+- Unlock deeper catalog results for the keyword.
+- Save the search as a WANT2VIEW project.
+- Get API access for repeatable agent handoffs.
+
+## Channel Audit To Claude
+
+Use this when someone sends a channel URL or creator handle and wants a Claude-ready audit.
+
+```bash
+npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
 npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
 Give Claude:
 
 ```text
-Read .want2view/exports/<pack_id>/claude_brief.md and evidence.jsonl.
-Create a client-ready content research brief with competitor patterns, repeatable hooks, risks, and recommended next experiments.
-Every recommendation must cite evidence rows.
+Read claude_brief.md and evidence.jsonl.
+Create a channel audit with repeated formats, hooks, audience signals, gaps, risks, and next content experiments.
+Separate evidence from assumptions and cite evidence rows.
 ```
 
 Next WANT2VIEW step:
 
-- Order custom research for the client category.
-- Connect private projects through API Access.
-- Schedule recurring monitoring for the client account.
+- Connect the real channel in WANT2VIEW Cloud.
+- Compare it against competitors.
+- Order custom research when the team needs a polished report.
 
-## Founder Niche Check
+## WANT2VIEW Project To Agent
 
-Use this when a founder wants to test whether a niche has visible content demand.
+Use this when the user already has a WANT2VIEW account and wants Codex or Claude to work from an internal project.
 
 ```bash
-npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli catalog categories
-npx github:kirbudilov01/want2view-cli catalog export ai --for codex
+npx github:kirbudilov01/want2view-cli login
+npx github:kirbudilov01/want2view-cli projects list
+npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
 ```
 
-Give Codex:
+Give the agent:
 
 ```text
-Use the newest .want2view/exports/<pack_id> folder.
-Turn the evidence into a niche validation brief: audience pain, content formats, competitor signals, landing page angles, and next research gaps.
-Separate evidence from assumptions.
+Use the exported WANT2VIEW project folder as the source of truth.
+Read manifest.json, summary.md, evidence.jsonl, scored.csv, channels.json, trends.json, and keywords.json.
+Do not invent sources outside the project export.
 ```
 
 Next WANT2VIEW step:
 
-- Open the full catalog in the account.
-- Create a private project for the niche.
-- Get API access if the founder wants an agent or workflow to keep checking the niche.
+- Add more sources to the project.
+- Schedule refreshes.
+- Share the project with the team.
 
 ## Content Team Monitoring
 

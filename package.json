@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "check": "node --check bin/want2view.js",
-    "demo": "node bin/want2view.js research \"ai video ads\" --demo --out ./.want2view-demo && node bin/want2view.js export --for codex --workspace ./.want2view-demo",
+    "demo": "node bin/want2view.js search \"ai video ads\" --demo --out ./.want2view-demo && node bin/want2view.js export --for codex --workspace ./.want2view-demo",
     "prepublishOnly": "npm run check && npm run demo"
   },
   "publishConfig": {

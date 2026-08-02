@@ -30,17 +30,17 @@
     <text x="20" y="25" fill="#F7F3FF" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800" letter-spacing="1.4">WANT2VIEW</text>
   </g>
   <text x="86" y="196" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="68" font-weight="900" letter-spacing="-3">
-    AI content research
+    WANT2VIEW for
   </text>
   <text x="86" y="276" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="68" font-weight="900" letter-spacing="-3">
-    from your terminal.
+    Codex and Claude.
   </text>
   <text x="90" y="340" fill="#C8C0E4" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="500">
-    Open-source context packs for Codex, Claude, and terminal agents.
+    Search keywords, audit channels, export projects, and hand agents real evidence.
   </text>
   <rect x="90" y="470" width="424" height="66" rx="33" fill="url(#accent)"/>
   <text x="122" y="512" fill="#05030C" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900">
-    npx github:kirbudilov01/want2view-cli
+    npx github:kirbudilov01/want2view-cli search
   </text>
   <g filter="url(#shadow)">
     <rect x="660" y="96" width="520" height="420" rx="24" fill="#090813" stroke="#FFFFFF" stroke-opacity="0.16"/>
@@ -49,11 +49,11 @@
     <circle cx="718" cy="123" r="7" fill="#FFD166"/>
     <circle cx="742" cy="123" r="7" fill="#28D7C7"/>
     <text x="1038" y="129" fill="#9E95BC" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="1.2">TERMINAL</text>
-    <text x="700" y="198" fill="#28D7C7" font-family="SFMono-Regular, Consolas, monospace" font-size="20" font-weight="700">$ want2view login</text>
-    <text x="700" y="244" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">1. Open browser auth</text>
-    <text x="700" y="284" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">2. Paste API token</text>
-    <text x="700" y="324" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">3. Use env token</text>
-    <text x="700" y="390" fill="#28D7C7" font-family="SFMono-Regular, Consolas, monospace" font-size="20">$ want2view cloud research</text>
-    <text x="700" y="430" fill="#B9AFD6" font-family="SFMono-Regular, Consolas, monospace" font-size="18">youtube,tiktok,instagram,x</text>
+    <text x="700" y="198" fill="#28D7C7" font-family="SFMono-Regular, Consolas, monospace" font-size="20" font-weight="700">$ want2view search "ugc ads"</text>
+    <text x="700" y="244" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">manifest.json</text>
+    <text x="700" y="284" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">evidence.jsonl</text>
+    <text x="700" y="324" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">codex_tasks.md</text>
+    <text x="700" y="390" fill="#28D7C7" font-family="SFMono-Regular, Consolas, monospace" font-size="20">$ want2view project export</text>
+    <text x="700" y="430" fill="#B9AFD6" font-family="SFMono-Regular, Consolas, monospace" font-size="18">WANT2VIEW Cloud + API access</text>
   </g>
 </svg>
