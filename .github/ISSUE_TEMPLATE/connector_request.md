@@ -26,4 +26,3 @@ What do you want to research or export?
 - CSV
 - JSONL
 - Other:
-

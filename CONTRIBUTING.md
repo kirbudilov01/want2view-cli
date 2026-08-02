@@ -27,4 +27,3 @@ Good PRs include:
 - a local command used for verification;
 - sample input/output when changing export format;
 - no secrets or generated auth tokens.
-

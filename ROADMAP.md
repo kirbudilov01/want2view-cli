@@ -26,4 +26,3 @@
 - Historical source index.
 - MCP/server mode for agent platforms.
 - Partner connector marketplace.
-

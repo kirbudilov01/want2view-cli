@@ -13,12 +13,27 @@
 
 Open-source AI content research packs for Codex, Claude, and terminal agents.
 
-Start free from the terminal. Upgrade to WANT2VIEW Cloud when you need managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
+This repository is a free gift from the WANT2VIEW team: a lightweight terminal bridge that helps AI agents work with content evidence instead of guessing.
+
+Start free from the terminal. The public catalog is intentionally limited, so anyone can try the workflow. Upgrade to WANT2VIEW Cloud when you need deeper catalog access, your own private projects, managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
 
 ```bash
 npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
+
+<p align="center">
+  <a href="https://want2view.com">
+    <img src="./assets/want2view-product-preview.png" alt="WANT2VIEW product landing page" />
+  </a>
+</p>
+
+<p align="center">
+  <strong>Free CLI for discovery. Full WANT2VIEW for real research operations.</strong><br />
+  <a href="https://want2view.com">Website</a> ·
+  <a href="https://app.want2view.com">Create account</a> ·
+  <a href="https://app.want2view.com/api-access">Get API access</a>
+</p>
 
 ## Pick Your Path
 
@@ -28,8 +43,8 @@ npx github:kirbudilov01/want2view-cli export --for codex
 | Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
 | Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
 | Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
-| Browse the WANT2VIEW catalog | `catalog categories` | Shows public categories and trend surfaces |
-| Export catalog evidence | `catalog export ai --for codex` | Gives an AI pack from WANT2VIEW catalog data |
+| Browse the public catalog | `catalog categories` | Shows a limited public sample of WANT2VIEW categories |
+| Export public catalog evidence | `catalog export ai --for codex` | Gives an agent-readable sample pack from public catalog data |
 | Use your own WANT2VIEW projects | `projects list` | Requires `WANT2VIEW_PUBLIC_API_KEY` from API Access |
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
 | Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
@@ -47,14 +62,16 @@ Local open-source mode gives immediate value:
 - Codex-ready task packs;
 - Claude-ready research briefs.
 
-WANT2VIEW Cloud adds the paid moat:
+WANT2VIEW Cloud adds the paid product:
 
+- deeper catalog data beyond the public sample;
+- private project exports from the WANT2VIEW dashboard;
 - managed YouTube, TikTok, Instagram, X, Reddit, and Threads connectors;
 - provider keys, retries, source warnings, and cost controls;
 - scheduled refreshes;
 - team workspaces;
 - historical source index;
-- hosted dashboard and API.
+- hosted dashboard and API;
 - custom research packages for teams that want the result done for them.
 
 <p align="center">
@@ -143,7 +160,7 @@ npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
 
 ## WANT2VIEW Catalog
 
-Use catalog commands to discover what WANT2VIEW already tracks:
+Use catalog commands to discover a limited public sample of what WANT2VIEW already tracks:
 
 ```bash
 npx github:kirbudilov01/want2view-cli catalog categories
@@ -151,7 +168,7 @@ npx github:kirbudilov01/want2view-cli catalog videos ai --limit 20
 npx github:kirbudilov01/want2view-cli catalog export ai --for claude
 ```
 
-This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export their own projects and run cloud research.
+This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export private projects, run cloud research, and unlock deeper social intelligence.
 
 ## Cloud Social Research
 
@@ -187,6 +204,7 @@ Start here:
 
 - Website: [want2view.com](https://want2view.com)
 - App / API token: [app.want2view.com](https://app.want2view.com)
+- API Access: [app.want2view.com/api-access](https://app.want2view.com/api-access)
 - Custom research: open a WANT2VIEW account and request a research package from the dashboard.
 
 ## Bring Your Own Data
@@ -243,6 +261,7 @@ Open-source:
 - CLI runner;
 - local imports;
 - demo data;
+- limited public catalog access;
 - normalization;
 - basic scoring;
 - Codex and Claude context-pack exports;
@@ -250,6 +269,8 @@ Open-source:
 
 Paid WANT2VIEW Cloud:
 
+- deeper catalog access;
+- private project exports;
 - managed platform connectors;
 - approved API/bridge infrastructure;
 - TikTok, Instagram, X, Reddit, Threads production collection;
