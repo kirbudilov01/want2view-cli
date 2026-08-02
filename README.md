@@ -23,6 +23,10 @@ npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
 <p align="center">
+  <img src="./assets/demo-flow.gif" alt="Terminal to WANT2VIEW research pack demo" />
+</p>
+
+<p align="center">
   <img src="./assets/terminal-demo.svg" alt="WANT2VIEW CLI terminal demo" />
 </p>
 
@@ -147,6 +151,8 @@ npx want2view research "ai video ads" --demo
 npx want2view export --for codex
 ```
 
+Package status: the `want2view` npm name is prepared for publishing, but this repository can already run through GitHub with `npx github:kirbudilov01/want2view-cli`.
+
 ## Agent Handoff
 
 Tell Codex, Claude Code, or another terminal agent:
@@ -169,6 +175,18 @@ claude_brief.md
 ```
 
 More copy-paste prompts live in [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md).
+
+## Recipes
+
+Recipes are not separate hidden features. They are practical paths that combine the existing CLI commands with WANT2VIEW product surfaces.
+
+| Recipe | Start with CLI | Continue in WANT2VIEW |
+| --- | --- | --- |
+| Agency client research | `import ./client-competitors.csv` then `export --for claude` | Order a done-for-you report or connect the client workspace |
+| Founder niche check | `research "your niche" --demo` then `catalog export ai --for codex` | Unlock deeper catalog, private projects, and API access |
+| Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
+
+Full copy-paste workflows live in [docs/RECIPES.md](./docs/RECIPES.md).
 
 ## Interactive Login
 
@@ -358,4 +376,6 @@ node bin/want2view.js doctor --json
 - Roadmap: [ROADMAP.md](./ROADMAP.md)
 - Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Agent prompts: [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
+- Recipes: [docs/RECIPES.md](./docs/RECIPES.md)
+- API access flow: [docs/API_ACCESS_FLOW.md](./docs/API_ACCESS_FLOW.md)
 - Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)

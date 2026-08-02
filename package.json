@@ -1,6 +1,6 @@
 {
   "name": "want2view",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Open-source CLI for building AI-ready social content research packs.",
   "type": "module",
   "homepage": "https://want2view.com/#open-source-cli",
@@ -24,7 +24,11 @@
   ],
   "scripts": {
     "check": "node --check bin/want2view.js",
-    "demo": "node bin/want2view.js research \"ai video ads\" --demo --out ./.want2view-demo && node bin/want2view.js export --for codex --workspace ./.want2view-demo"
+    "demo": "node bin/want2view.js research \"ai video ads\" --demo --out ./.want2view-demo && node bin/want2view.js export --for codex --workspace ./.want2view-demo",
+    "prepublishOnly": "npm run check && npm run demo"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "content-research",

@@ -1,4 +1,5 @@
 node_modules/
 .want2view/
 .want2view-demo/
+.playwright-cli/
 npm-debug.log*
