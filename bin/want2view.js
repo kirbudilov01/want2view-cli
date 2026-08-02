@@ -58,6 +58,7 @@ Usage:
   want2view login [--api https://app.want2view.com] [--token w2v_...]
   want2view auth status
   want2view cloud research "<topic>" --sources youtube,tiktok,instagram,x [--mode demo|cloud]
+  want2view cloud status <run_id>
   want2view cloud export <run_id> --for codex|claude
 
 Examples:
@@ -538,7 +539,12 @@ async function commandCloud(args) {
       topic,
       sources: String(args.sources || "youtube,reddit").split(",").map((item) => item.trim()).filter(Boolean),
       mode: args.mode === "cloud" ? "cloud" : "demo",
+      kind: "outliers",
+      language: args.language || "en",
+      region_code: args.region || args.region_code || "US",
+      lookback_hours: Number(args.lookback || args.lookback_hours || 72),
       limit: Number(args.limit || 25),
+      content_type: args.content_type || "all",
     };
     const result = await requestJson(`${base}/api/v1/developer/cloud/research`, {
       method: "POST",
@@ -548,6 +554,22 @@ async function commandCloud(args) {
     writeJson(path.join(root, "last-cloud-run.json"), result);
     console.log(`Cloud run ${result.run_id}: ${result.status}`);
     console.log(`Records: ${result.records}`);
+    if (result.warnings?.length) result.warnings.forEach((warning) => console.log(`Warning: ${warning}`));
+    (result.next_commands || []).forEach((command) => console.log(`Next: ${command}`));
+    return;
+  }
+  if (action === "status") {
+    const runId = args._[2];
+    if (!runId) throw new Error("Missing run id. Example: want2view cloud status w2v_run_...");
+    const result = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(runId)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Cloud run ${result.run_id}: ${result.status}`);
+    console.log(`Topic: ${result.topic}`);
+    console.log(`Records: ${result.records}`);
+    if (result.source_statuses) {
+      Object.entries(result.source_statuses).forEach(([source, status]) => console.log(`Source ${source}: ${status}`));
+    }
     if (result.warnings?.length) result.warnings.forEach((warning) => console.log(`Warning: ${warning}`));
     (result.next_commands || []).forEach((command) => console.log(`Next: ${command}`));
     return;
@@ -564,7 +586,7 @@ async function commandCloud(args) {
     console.log(`Downloaded ${target} cloud context pack: ${exportDir}`);
     return;
   }
-  throw new Error("Unknown cloud command. Use `cloud research` or `cloud export`.");
+  throw new Error("Unknown cloud command. Use `cloud research`, `cloud status`, or `cloud export`.");
 }
 
 async function main() {

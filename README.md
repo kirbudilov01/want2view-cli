@@ -94,7 +94,8 @@ Recommended columns:
 npx want2view login
 export WANT2VIEW_API_TOKEN="..."
 npx want2view auth status
-npx want2view cloud research "fitness reels" --sources youtube,tiktok,instagram,x
+npx want2view cloud research "fitness reels" --sources youtube,tiktok,instagram,x --mode cloud
+npx want2view cloud status w2v_run_abc123
 npx want2view cloud export w2v_run_abc123 --for codex
 ```
 
@@ -152,6 +153,7 @@ npx want2view export --for codex
 npx want2view export --for claude
 npx want2view login
 npx want2view auth status
-npx want2view cloud research "ai video ads" --sources youtube,tiktok,instagram,x
+npx want2view cloud research "ai video ads" --sources youtube,tiktok,instagram,x --mode cloud
+npx want2view cloud status w2v_run_abc123
 npx want2view cloud export w2v_run_abc123 --for codex
 ```
