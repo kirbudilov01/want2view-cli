@@ -1,0 +1,44 @@
+<svg width="1280" height="520" viewBox="0 0 1280 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WANT2VIEW CLI architecture">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#161326"/>
+      <stop offset="1" stop-color="#0B0A14"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#28D7C7"/>
+      <stop offset="1" stop-color="#7C5CFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="520" rx="32" fill="#08070D"/>
+  <text x="74" y="88" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="900" letter-spacing="-1.6">How the loop works</text>
+  <text x="76" y="124" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="18">Open-source locally. Managed social connectors when the user needs real scale.</text>
+  <g transform="translate(76 184)">
+    <rect width="240" height="174" rx="22" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="28" y="48" fill="#28D7C7" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="900">STEP 1</text>
+    <text x="28" y="84" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="900">Terminal</text>
+    <text x="28" y="120" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">npx want2view</text>
+    <text x="28" y="146" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">local/demo/BYO data</text>
+  </g>
+  <path d="M340 270H430" stroke="url(#line)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M414 252L436 270L414 288" stroke="#7C5CFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(456 184)">
+    <rect width="240" height="174" rx="22" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="28" y="48" fill="#28D7C7" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="900">STEP 2</text>
+    <text x="28" y="84" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="900">WANT2VIEW</text>
+    <text x="28" y="120" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">cloud API token</text>
+    <text x="28" y="146" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">managed connectors</text>
+  </g>
+  <path d="M720 270H810" stroke="url(#line)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M794 252L816 270L794 288" stroke="#7C5CFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(836 184)">
+    <rect width="240" height="174" rx="22" fill="url(#card)" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="28" y="48" fill="#28D7C7" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="900">STEP 3</text>
+    <text x="28" y="84" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="900">AI pack</text>
+    <text x="28" y="120" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">summary + evidence</text>
+    <text x="28" y="146" fill="#B9AFD6" font-family="Inter, Arial, sans-serif" font-size="16">Codex / Claude ready</text>
+  </g>
+  <g transform="translate(84 408)">
+    <rect width="1112" height="56" rx="28" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.12"/>
+    <text x="28" y="36" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="18">manifest.json · summary.md · evidence.jsonl · scored.csv · codex_tasks.md · claude_brief.md</text>
+  </g>
+</svg>

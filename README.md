@@ -1,53 +1,70 @@
+<p align="center">
+  <img src="./assets/hero.svg" alt="WANT2VIEW CLI - AI content research from your terminal" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/kirbudilov01/want2view-cli"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-open--source-111827?style=for-the-badge&logo=github" /></a>
+  <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-28D7C7?style=for-the-badge" />
+  <img alt="Node 18+" src="https://img.shields.io/badge/node-18%2B-7C5CFF?style=for-the-badge&logo=node.js" />
+  <img alt="Agent ready" src="https://img.shields.io/badge/Codex%20%2B%20Claude-ready-0B0A14?style=for-the-badge" />
+</p>
+
 # WANT2VIEW CLI
 
 Open-source AI content research packs for Codex, Claude, and terminal agents.
 
-```bash
-npx want2view research "ai video ads" --demo
-npx want2view export --for codex
-```
-
-Before the npm package is published, run directly from GitHub:
+Start free from the terminal. Upgrade to WANT2VIEW Cloud when you need managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
 
 ```bash
 npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
-Open-source CLI for building AI-ready social content research packs from local data, demo datasets, and WANT2VIEW Cloud runs.
+## Why This Exists
 
-The first useful experience is local and free. Paid WANT2VIEW Cloud is for managed social connectors, scheduled refreshes, team workspaces, historical indexes, and production-scale research.
+Most AI agents are only as good as the context you give them. WANT2VIEW CLI turns social content evidence into clean, inspectable files that agents can use as a source of truth.
 
-## What It Does
+Local open-source mode gives immediate value:
 
-WANT2VIEW CLI turns social content evidence into files that AI agents can actually use:
+- demo research;
+- CSV / JSON / JSONL imports;
+- basic normalization and scoring;
+- Codex-ready task packs;
+- Claude-ready research briefs.
 
-- `manifest.json`
-- `summary.md`
-- `evidence.jsonl`
-- `scored.csv`
-- `codex_tasks.md`
-- `claude_brief.md`
+WANT2VIEW Cloud adds the paid moat:
 
-Use it locally with your own data, or connect it to WANT2VIEW Cloud when you need managed social parsing across YouTube, TikTok, Instagram, X, Reddit, Threads, and future sources.
+- managed YouTube, TikTok, Instagram, X, Reddit, and Threads connectors;
+- provider keys, retries, source warnings, and cost controls;
+- scheduled refreshes;
+- team workspaces;
+- historical source index;
+- hosted dashboard and API.
 
-## Quick Start
+<p align="center">
+  <img src="./assets/architecture.svg" alt="Terminal to WANT2VIEW Cloud to AI context pack architecture" />
+</p>
 
-```bash
-npx want2view init
-npx want2view research "ai video ads" --demo
-npx want2view export --for codex
-npx want2view export --for claude
-```
+## One-Command Demo
 
-GitHub install path:
+Run directly from GitHub before the npm package is published:
 
 ```bash
 npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
-Agent handoff:
+After npm publish, the same workflow becomes:
+
+```bash
+npx want2view research "ai video ads" --demo
+npx want2view export --for codex
+```
+
+## Agent Handoff
+
+Tell Codex, Claude Code, or another terminal agent:
 
 ```text
 Use the newest .want2view/exports/<pack_id> folder as the source of truth.
@@ -55,19 +72,70 @@ Read manifest.json, summary.md, evidence.jsonl, scored.csv, and codex_tasks.md.
 Base recommendations only on evidence rows.
 ```
 
-Local development from this repo:
+Generated packs contain:
+
+```text
+manifest.json
+summary.md
+evidence.jsonl
+scored.csv
+codex_tasks.md
+claude_brief.md
+```
+
+## Interactive Login
+
+Cloud mode needs a WANT2VIEW account token. The login wizard gives users three paths:
 
 ```bash
-node bin/want2view.js research "ai video ads" --demo
-node bin/want2view.js export --for codex
+npx github:kirbudilov01/want2view-cli login
+```
+
+```text
+Choose authentication method:
+  1. Open browser and create/paste Developer CLI token
+  2. Paste API token now
+  3. Use WANT2VIEW_API_TOKEN from environment
+  4. Skip for now
+```
+
+Fast paths:
+
+```bash
+npx github:kirbudilov01/want2view-cli login --token w2v_your_token
+export WANT2VIEW_API_TOKEN="w2v_your_token"
+```
+
+Agent diagnostics:
+
+```bash
+npx github:kirbudilov01/want2view-cli doctor --json
+```
+
+## Cloud Social Research
+
+Once authenticated, the CLI can ask WANT2VIEW Cloud to run managed social collection:
+
+```bash
+npx github:kirbudilov01/want2view-cli cloud research "fitness reels" \
+  --sources youtube,tiktok,instagram,x --mode cloud
+
+npx github:kirbudilov01/want2view-cli cloud status w2v_run_abc123
+npx github:kirbudilov01/want2view-cli cloud export w2v_run_abc123 --for codex
+```
+
+The CLI stores exported packs locally under:
+
+```text
+.want2view/exports/<run_id>/
 ```
 
 ## Bring Your Own Data
 
 ```bash
-npx want2view import ./competitors.csv
-npx want2view score
-npx want2view export --for codex
+npx github:kirbudilov01/want2view-cli import examples/competitors.csv
+npx github:kirbudilov01/want2view-cli score
+npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
 Supported local inputs:
@@ -78,63 +146,32 @@ Supported local inputs:
 
 Recommended columns:
 
-- `platform`
-- `account`
-- `title`
-- `url`
-- `views`
-- `likes`
-- `comments`
-- `published_at`
-- `text`
+| Column | Meaning |
+| --- | --- |
+| `platform` | YouTube, TikTok, Instagram, X, Reddit, Threads, or custom source |
+| `account` | Creator, channel, author, subreddit, or profile |
+| `title` | Content title or post headline |
+| `url` | Source URL |
+| `views` | Reach metric |
+| `likes` | Likes or equivalent reaction count |
+| `comments` | Comment count |
+| `published_at` | Publication date |
+| `text` | Caption, summary, or note |
 
-## Cloud Upgrade Path
+## Command Map
 
-```bash
-npx want2view login
-export WANT2VIEW_API_TOKEN="..."
-npx want2view doctor --json
-npx want2view auth status
-npx want2view cloud research "fitness reels" --sources youtube,tiktok,instagram,x --mode cloud
-npx want2view cloud status w2v_run_abc123
-npx want2view cloud export w2v_run_abc123 --for codex
-```
-
-The CLI does not write API tokens to project files. Tokens should live in your shell, CI secret store, or another secure environment.
-
-You can also save a token in your user-level config:
-
-```bash
-npx want2view login
-npx want2view login --token w2v_your_token
-npx want2view auth status
-```
-
-Saved tokens go to `~/.config/want2view/config.json` with private file permissions where supported.
-
-Interactive login gives users three paths:
-
-- open browser and paste a Developer CLI token from WANT2VIEW;
-- paste an existing `w2v_...` token;
-- use `WANT2VIEW_API_TOKEN` from the environment.
-
-Agent diagnostics:
-
-```bash
-npx want2view doctor --json
-```
-
-## Output
-
-Every export creates a folder under `.want2view/exports/` with:
-
-- `manifest.json`
-- `summary.md`
-- `evidence.jsonl`
-- `scored.csv`
-- `codex_tasks.md` or `claude_brief.md`
-
-These files are designed to be easy for Codex, Claude, and human content teams to inspect.
+| Command | Purpose |
+| --- | --- |
+| `want2view login` | Interactive auth wizard |
+| `want2view doctor --json` | Agent-readable setup diagnostics |
+| `want2view research "topic" --demo` | Free local demo pack |
+| `want2view import ./file.csv` | Bring your own data |
+| `want2view score` | Score local records |
+| `want2view export --for codex` | Create Codex pack |
+| `want2view export --for claude` | Create Claude brief |
+| `want2view cloud research "topic" --mode cloud` | Start managed WANT2VIEW Cloud run |
+| `want2view cloud status <run_id>` | Poll cloud run |
+| `want2view cloud export <run_id> --for codex` | Download cloud context pack |
 
 ## Open Core Boundary
 
@@ -145,30 +182,31 @@ Open-source:
 - demo data;
 - normalization;
 - basic scoring;
-- Codex and Claude context-pack exports.
+- Codex and Claude context-pack exports;
+- auth wizard and cloud API client.
 
 Paid WANT2VIEW Cloud:
 
 - managed platform connectors;
 - approved API/bridge infrastructure;
-- TikTok, Instagram, X, Threads production collection;
+- TikTok, Instagram, X, Reddit, Threads production collection;
 - scheduled refreshes;
 - team workspaces;
 - deeper scoring and historical indexes;
 - dashboard and API.
 
-## Website Commands
-
-Use this block on the website:
+## Local Development
 
 ```bash
-npx want2view research "ai video ads" --demo
-npx want2view export --for codex
-npx want2view export --for claude
-npx want2view login
-npx want2view doctor --json
-npx want2view auth status
-npx want2view cloud research "ai video ads" --sources youtube,tiktok,instagram,x --mode cloud
-npx want2view cloud status w2v_run_abc123
-npx want2view cloud export w2v_run_abc123 --for codex
+node bin/want2view.js research "ai video ads" --demo
+node bin/want2view.js export --for codex
+node bin/want2view.js doctor --json
 ```
+
+## Links
+
+- Website: [want2view.com](https://want2view.com)
+- App: [app.want2view.com](https://app.want2view.com)
+- Repo: [github.com/kirbudilov01/want2view-cli](https://github.com/kirbudilov01/want2view-cli)
+- Roadmap: [ROADMAP.md](./ROADMAP.md)
+- Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
