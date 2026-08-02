@@ -15,6 +15,12 @@ Never commit:
 - `WANT2VIEW_PUBLIC_API_KEY`
 - provider API keys
 - exported cookies or browser sessions
-- generated `.want2view/` workspaces
+- generated `.want2view*/` workspaces
 
 The CLI masks tokens in diagnostics and stores local token config with `0600` permissions where supported.
+
+## Credential Safety
+
+Token-bearing commands ignore project/workspace API base overrides. A cloned repository cannot redirect `WANT2VIEW_API_TOKEN` or `WANT2VIEW_PUBLIC_API_KEY` to an arbitrary host through `want2view.config.json`.
+
+By default, credentials are only sent to trusted WANT2VIEW API hosts or localhost development endpoints. Custom API endpoints require an explicit `--allow-untrusted-api` flag.

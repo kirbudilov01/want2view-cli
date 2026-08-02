@@ -12,6 +12,8 @@ const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
 const DEVELOPERS_URL = "https://want2view.com/developers";
+const DEFAULT_API_BASE_URL = "https://api.want2view.com";
+const TRUSTED_API_HOSTS = new Set(["api.want2view.com", "app.want2view.com"]);
 const DEMO_RECORDS = [
   {
     platform: "youtube",
@@ -109,7 +111,7 @@ Usage:
   want2view normalize [--workspace .want2view]
   want2view score [--workspace .want2view]
   want2view export --for codex|claude [--workspace .want2view]
-  want2view login [--api https://app.want2view.com] [--token w2v_...]
+  want2view login [--api https://api.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
   want2view workflows [keyword|channel|project|monitoring] [--json]
@@ -226,7 +228,7 @@ function initWorkspace(root) {
   if (!fs.existsSync(configPath)) {
     writeJson(configPath, {
       version: VERSION,
-      api_base_url: "https://api.want2view.com",
+      api_base_url: DEFAULT_API_BASE_URL,
       token_env: "WANT2VIEW_API_TOKEN",
       public_api_key_env: "WANT2VIEW_PUBLIC_API_KEY",
       created_at: new Date().toISOString(),
@@ -256,7 +258,27 @@ function readUserConfig() {
 function apiBaseUrl(args, root = workspacePath(args)) {
   const workspaceConfig = readWorkspaceConfig(root);
   const userConfig = readUserConfig();
-  return String(args.api || process.env.WANT2VIEW_API_BASE_URL || userConfig.api_base_url || workspaceConfig.api_base_url || "https://api.want2view.com").replace(/\/+$/, "");
+  return String(args.api || process.env.WANT2VIEW_API_BASE_URL || userConfig.api_base_url || workspaceConfig.api_base_url || DEFAULT_API_BASE_URL).replace(/\/+$/, "");
+}
+
+function isTrustedApiBase(base) {
+  try {
+    const parsed = new URL(base);
+    if (parsed.protocol === "https:" && TRUSTED_API_HOSTS.has(parsed.hostname)) return true;
+    if (["localhost", "127.0.0.1", "::1"].includes(parsed.hostname)) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+function credentialApiBaseUrl(args) {
+  const userConfig = readUserConfig();
+  const base = String(args.api || process.env.WANT2VIEW_API_BASE_URL || userConfig.api_base_url || DEFAULT_API_BASE_URL).replace(/\/+$/, "");
+  if (!isTrustedApiBase(base) && !args["allow-untrusted-api"]) {
+    throw new Error(`Refusing to send credentials to untrusted API base: ${base}. Use --allow-untrusted-api only for your own trusted development endpoint.`);
+  }
+  return base;
 }
 
 function apiToken() {
@@ -669,7 +691,7 @@ function commandRecipes(args) {
 async function commandLogin(args) {
   const root = workspacePath(args);
   const configPath = initWorkspace(root);
-  const apiBase = args.api || "https://api.want2view.com";
+  const apiBase = credentialApiBaseUrl(args);
   const config = JSON.parse(readText(configPath));
   config.api_base_url = apiBase;
   config.token_env = "WANT2VIEW_API_TOKEN";
@@ -772,7 +794,7 @@ async function commandAuth(args) {
     process.exitCode = 2;
     return;
   }
-  const base = apiBaseUrl(args);
+  const base = credentialApiBaseUrl(args);
   const me = await requestJson(`${base}/api/v1/developer/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -782,7 +804,7 @@ async function commandAuth(args) {
 
 async function commandDoctor(args) {
   const root = workspacePath(args);
-  const base = apiBaseUrl(args, root);
+  const base = credentialApiBaseUrl(args);
   const token = apiToken();
   const payload = {
     version: VERSION,
@@ -944,7 +966,7 @@ async function commandCatalog(args) {
 async function commandProjects(args) {
   const root = workspacePath(args);
   initWorkspace(root);
-  const base = apiBaseUrl(args, root);
+  const base = credentialApiBaseUrl(args);
   const key = requirePublicApiKey();
   const data = await requestJson(`${base}/public/projects`, {
     headers: { "X-API-Key": key },
@@ -968,7 +990,7 @@ async function commandProject(args) {
   if (!["codex", "claude"].includes(target)) throw new Error("Use --for codex|claude");
   const root = workspacePath(args);
   initWorkspace(root);
-  const base = apiBaseUrl(args, root);
+  const base = credentialApiBaseUrl(args);
   const key = requirePublicApiKey();
   const headers = { "X-API-Key": key };
   const [overview, videos, channels, trends, keywords] = await Promise.all([
@@ -1016,7 +1038,7 @@ async function commandCloud(args) {
   }
   const root = workspacePath(args);
   initWorkspace(root);
-  const base = apiBaseUrl(args, root);
+  const base = credentialApiBaseUrl(args);
   if (action === "research") {
     const topic = args._[2] || "";
     if (!topic) throw new Error("Missing topic. Example: want2view cloud research \"ai video ads\"");

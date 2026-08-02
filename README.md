@@ -229,6 +229,8 @@ npx github:kirbudilov01/want2view-cli login --token w2v_your_token
 export WANT2VIEW_API_TOKEN="w2v_your_token"
 ```
 
+Credential safety: token-bearing commands ignore project-level API base overrides. A cloned repository cannot redirect your `WANT2VIEW_API_TOKEN` or `WANT2VIEW_PUBLIC_API_KEY` to an arbitrary host through local config. Non-WANT2VIEW API endpoints require an explicit `--allow-untrusted-api` flag.
+
 Agent diagnostics:
 
 ```bash
