@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Open-source CLI for building AI-ready social content research packs.",
   "type": "module",
-  "homepage": "https://want2view.com/#open-source-cli",
+  "homepage": "https://want2view.com/developers",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kirbudilov01/want2view-cli.git"

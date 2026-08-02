@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: WANT2VIEW Cloud and API access
+    url: https://app.want2view.com/api-access
+    about: Get a token for private projects, cloud research, and deeper catalog access.
+  - name: Custom research
+    url: https://want2view.com/developers
+    about: Ask WANT2VIEW for done-for-you reports, competitor maps, and category briefs.
