@@ -7,8 +7,11 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.0.1";
+const VERSION = "0.1.0";
 const DEFAULT_WORKSPACE = ".want2view";
+const APP_URL = "https://app.want2view.com/register";
+const API_ACCESS_URL = "https://app.want2view.com/api-access";
+const DEVELOPERS_URL = "https://want2view.com/developers";
 const DEMO_RECORDS = [
   {
     platform: "youtube",
@@ -45,6 +48,43 @@ const DEMO_RECORDS = [
   },
 ];
 
+const RECIPES = {
+  agency: {
+    title: "Agency client research",
+    goal: "Turn competitor exports into a client-ready content strategy brief.",
+    commands: [
+      "want2view import ./client-competitors.csv",
+      "want2view score",
+      "want2view export --for claude",
+    ],
+    agent_prompt: "Read claude_brief.md and evidence.jsonl. Create a client-ready brief with competitor patterns, hooks, risks, and next experiments. Cite evidence rows.",
+    paid_next_step: "Order custom research or connect the client workspace in WANT2VIEW Cloud.",
+  },
+  founder: {
+    title: "Founder niche check",
+    goal: "Check whether a niche has visible content demand before spending budget.",
+    commands: [
+      "want2view research \"your niche\" --demo",
+      "want2view catalog categories",
+      "want2view catalog export ai --for codex",
+    ],
+    agent_prompt: "Use the newest export as source of truth. Create a niche validation brief with pains, formats, competitor signals, landing angles, and evidence gaps.",
+    paid_next_step: "Create a WANT2VIEW account for deeper catalog access, private projects, and API exports.",
+  },
+  monitoring: {
+    title: "Content team monitoring",
+    goal: "Create repeatable weekly research packs from managed social sources.",
+    commands: [
+      "want2view login",
+      "want2view cloud research \"fitness reels\" --sources youtube,tiktok,instagram,x --mode cloud",
+      "want2view cloud status w2v_run_abc123",
+      "want2view cloud export w2v_run_abc123 --for codex",
+    ],
+    agent_prompt: "Read the exported cloud run. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
+    paid_next_step: "Schedule refreshes and share project packs with your team in WANT2VIEW Cloud.",
+  },
+};
+
 function printHelp() {
   console.log(`want2view ${VERSION}
 
@@ -60,6 +100,7 @@ Usage:
   want2view login [--api https://app.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
+  want2view recipes [agency|founder|monitoring] [--json]
   want2view catalog categories [--limit 20]
   want2view catalog videos <category_key> [--limit 20]
   want2view catalog export <category_key> --for codex|claude
@@ -72,10 +113,18 @@ Usage:
 Examples:
   npx want2view research "ai video ads" --demo
   npx want2view export --for codex
+  npx want2view recipes founder
   npx want2view catalog categories
   WANT2VIEW_PUBLIC_API_KEY=... npx want2view projects list
   WANT2VIEW_API_TOKEN=... npx want2view cloud research "fitness reels" --sources youtube,tiktok
 `);
+}
+
+function printConversionNextSteps() {
+  console.log("Next: Give the export folder to Codex or Claude as the source of truth.");
+  console.log(`Next: See recipes: want2view recipes`);
+  console.log(`Upgrade: ${DEVELOPERS_URL}`);
+  console.log(`Upgrade: ${API_ACCESS_URL}`);
 }
 
 function parseArgs(argv) {
@@ -482,6 +531,8 @@ function commandResearch(args) {
   });
   console.log(`Created demo research for "${topic}" with ${rows.length} records.`);
   console.log(`Workspace: ${root}`);
+  console.log("Next: want2view export --for codex");
+  console.log("Next: want2view export --for claude");
 }
 
 function commandNormalize(args) {
@@ -524,9 +575,43 @@ function commandExport(args) {
     records: rows.length,
     artifacts: ["summary.md", "evidence.jsonl", "scored.csv", target === "codex" ? "codex_tasks.md" : "claude_brief.md"],
     generated_at: new Date().toISOString(),
-    upgrade_url: "https://app.want2view.com/register",
+    upgrade_url: APP_URL,
+    developer_url: DEVELOPERS_URL,
+    api_access_url: API_ACCESS_URL,
   });
   console.log(`Exported ${target} context pack: ${exportDir}`);
+  printConversionNextSteps();
+}
+
+function commandRecipes(args) {
+  const recipeKey = args._[1];
+  if (args.json) {
+    const payload = recipeKey ? { [recipeKey]: RECIPES[recipeKey] } : RECIPES;
+    if (recipeKey && !RECIPES[recipeKey]) throw new Error(`Unknown recipe: ${recipeKey}. Use agency, founder, or monitoring.`);
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+  if (!recipeKey) {
+    console.log("WANT2VIEW CLI recipes:");
+    Object.entries(RECIPES).forEach(([key, recipe]) => {
+      console.log(`- ${key}: ${recipe.title}`);
+      console.log(`  ${recipe.goal}`);
+    });
+    console.log("\nOpen a recipe: want2view recipes founder");
+    console.log(`Developer page: ${DEVELOPERS_URL}`);
+    return;
+  }
+  const recipe = RECIPES[recipeKey];
+  if (!recipe) throw new Error(`Unknown recipe: ${recipeKey}. Use agency, founder, or monitoring.`);
+  console.log(`# ${recipe.title}`);
+  console.log(`Goal: ${recipe.goal}`);
+  console.log("\nCommands:");
+  recipe.commands.forEach((command) => console.log(`  ${command}`));
+  console.log("\nAgent prompt:");
+  console.log(`  ${recipe.agent_prompt}`);
+  console.log("\nWANT2VIEW next step:");
+  console.log(`  ${recipe.paid_next_step}`);
+  console.log(`  ${DEVELOPERS_URL}`);
 }
 
 async function commandLogin(args) {
@@ -952,6 +1037,7 @@ async function main() {
     if (command === "login") return await commandLogin(args);
     if (command === "auth") return await commandAuth(args);
     if (command === "doctor") return await commandDoctor(args);
+    if (command === "recipes") return commandRecipes(args);
     if (command === "catalog") return await commandCatalog(args);
     if (command === "projects") return await commandProjects(args);
     if (command === "project") return await commandProject(args);

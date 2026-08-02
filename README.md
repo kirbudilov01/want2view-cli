@@ -43,6 +43,13 @@ npx github:kirbudilov01/want2view-cli export --for codex
   <a href="https://app.want2view.com/api-access">Get API access</a>
 </p>
 
+<p align="center">
+  <a href="./docs/RECIPES.md">Recipes</a> ·
+  <a href="./docs/API_ACCESS_FLOW.md">API Access Flow</a> ·
+  <a href="./docs/LAUNCH_PLAYBOOK.md">Launch Playbook</a> ·
+  <a href="./SUPPORT.md">Support</a>
+</p>
+
 ## TL;DR
 
 WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
@@ -92,6 +99,7 @@ Base recommendations only on evidence rows.
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
 | Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
+| Pick a ready workflow | `recipes founder` | Shows commands, agent prompt, and WANT2VIEW next step |
 
 ## Free vs WANT2VIEW Cloud
 
@@ -141,6 +149,7 @@ Run directly from GitHub before the npm package is published:
 ```bash
 npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli recipes founder
 npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
@@ -321,6 +330,8 @@ Recommended columns:
 | --- | --- |
 | `want2view login` | Interactive auth wizard |
 | `want2view doctor --json` | Agent-readable setup diagnostics |
+| `want2view recipes` | Show agency, founder, and monitoring workflows |
+| `want2view recipes founder` | Print a copy-pasteable niche-check workflow |
 | `want2view catalog categories` | Browse WANT2VIEW catalog categories |
 | `want2view catalog export ai --for codex` | Export catalog evidence for an agent |
 | `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
@@ -375,6 +386,8 @@ node bin/want2view.js doctor --json
 - Repo: [github.com/kirbudilov01/want2view-cli](https://github.com/kirbudilov01/want2view-cli)
 - Roadmap: [ROADMAP.md](./ROADMAP.md)
 - Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Security: [SECURITY.md](./SECURITY.md)
+- Support: [SUPPORT.md](./SUPPORT.md)
 - Agent prompts: [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
 - Recipes: [docs/RECIPES.md](./docs/RECIPES.md)
 - API access flow: [docs/API_ACCESS_FLOW.md](./docs/API_ACCESS_FLOW.md)

@@ -8,11 +8,13 @@
 - Codex and Claude context-pack exports.
 - WANT2VIEW Cloud auth through API token.
 - Cloud research/export API contract.
+- Recipes for founder, agency, and monitoring workflows.
+- CI, security, support, and release docs.
 
 ## Next
 
 - Published npm package.
-- GitHub repo with docs site.
+- GitHub social preview uploaded in repository settings.
 - API token creation in WANT2VIEW web account.
 - Cloud demo quotas for free users.
 - Connector SDK interface.
