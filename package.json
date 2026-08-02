@@ -15,6 +15,7 @@
     "want2view": "./bin/want2view.js"
   },
   "files": [
+    "assets",
     "bin",
     "docs",
     "examples",
@@ -30,7 +31,11 @@
     "social-intelligence",
     "codex",
     "claude",
-    "ai-context"
+    "ai-context",
+    "ai-agents",
+    "trend-research",
+    "terminal-agents",
+    "open-source"
   ],
   "author": "WANT2VIEW",
   "license": "MIT",

@@ -11,7 +11,7 @@
 
 # WANT2VIEW CLI
 
-Open-source AI content research packs for Codex, Claude, and terminal agents.
+Open-source content research packs for Codex, Claude, and terminal agents.
 
 This repository is a free gift from the WANT2VIEW team: a lightweight terminal bridge that helps AI agents work with content evidence instead of guessing.
 
@@ -21,6 +21,10 @@ Start free from the terminal. The public catalog is intentionally limited, so an
 npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
+
+<p align="center">
+  <img src="./assets/terminal-demo.svg" alt="WANT2VIEW CLI terminal demo" />
+</p>
 
 <p align="center">
   <a href="https://want2view.com">
@@ -34,6 +38,41 @@ npx github:kirbudilov01/want2view-cli export --for codex
   <a href="https://app.want2view.com">Create account</a> ·
   <a href="https://app.want2view.com/api-access">Get API access</a>
 </p>
+
+## TL;DR
+
+WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
+
+- **Free:** local demo packs, your own CSV/JSON imports, limited public catalog samples, Codex/Claude exports.
+- **Paid/account:** deeper catalog, private WANT2VIEW projects, Developer CLI tokens, managed social connectors, scheduled refreshes, custom research.
+- **Best use:** give AI coding/research agents a real evidence folder instead of a vague prompt.
+
+## What You Get In 60 Seconds
+
+```bash
+npx github:kirbudilov01/want2view-cli research "ai video ads" --demo
+npx github:kirbudilov01/want2view-cli export --for codex
+```
+
+Output:
+
+```text
+.want2view/exports/<pack_id>/
+  manifest.json
+  summary.md
+  evidence.jsonl
+  scored.csv
+  codex_tasks.md
+  claude_brief.md
+```
+
+Then tell your agent:
+
+```text
+Use the newest .want2view/exports/<pack_id> folder as the source of truth.
+Read manifest.json, summary.md, evidence.jsonl, scored.csv, and codex_tasks.md.
+Base recommendations only on evidence rows.
+```
 
 ## Pick Your Path
 
@@ -49,6 +88,19 @@ npx github:kirbudilov01/want2view-cli export --for codex
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
 | Use real social connectors | `login` then `cloud research --mode cloud` | Runs through WANT2VIEW Cloud |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
+
+## Free vs WANT2VIEW Cloud
+
+| Layer | Open-source CLI | WANT2VIEW Cloud |
+| --- | --- | --- |
+| Local demo | Included | Included |
+| Import your CSV/JSON/JSONL | Included | Included |
+| Public catalog | Limited sample | Deeper catalog and history |
+| Private projects | API client only | Full dashboard, saved projects, reports |
+| Social connectors | Client interface | Managed YouTube, TikTok, Instagram, X, Reddit, Threads |
+| Refreshes | Manual | Scheduled and monitored |
+| Agent packs | Codex and Claude exports | Codex, Claude, API, team workflows |
+| Custom research | Not included | Done-for-you reports and briefs |
 
 ## Why This Exists
 
@@ -115,6 +167,8 @@ scored.csv
 codex_tasks.md
 claude_brief.md
 ```
+
+More copy-paste prompts live in [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md).
 
 ## Interactive Login
 
@@ -207,6 +261,14 @@ Start here:
 - API Access: [app.want2view.com/api-access](https://app.want2view.com/api-access)
 - Custom research: open a WANT2VIEW account and request a research package from the dashboard.
 
+## Built For These Workflows
+
+- Content teams researching a new category before filming.
+- Agencies turning competitor data into client-ready strategy.
+- Founders checking whether a niche has real content demand.
+- AI agents that need evidence files before writing briefs, scripts, landing pages, or reports.
+- Internal tools that need a clean bridge into WANT2VIEW data.
+
 ## Bring Your Own Data
 
 ```bash
@@ -291,6 +353,9 @@ node bin/want2view.js doctor --json
 
 - Website: [want2view.com](https://want2view.com)
 - App: [app.want2view.com](https://app.want2view.com)
+- API Access: [app.want2view.com/api-access](https://app.want2view.com/api-access)
 - Repo: [github.com/kirbudilov01/want2view-cli](https://github.com/kirbudilov01/want2view-cli)
 - Roadmap: [ROADMAP.md](./ROADMAP.md)
 - Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Agent prompts: [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
+- Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)
