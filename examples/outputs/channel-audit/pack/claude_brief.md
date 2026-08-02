@@ -1,4 +1,4 @@
-# Claude Brief: local research
+# Claude Brief: channel:https://youtube.com/@example
 
 You are analyzing a WANT2VIEW source-of-truth pack. Use the evidence conservatively and separate observed patterns from recommendations.
 

@@ -1,4 +1,4 @@
-# Codex Tasks: local research
+# Codex Tasks: keyword:ai video ads
 
 1. Inspect `manifest.json`, `summary.md`, `evidence.jsonl`, and `scored.csv`.
 2. Identify the top repeated hooks, formats, pains, and creator patterns.
@@ -7,7 +7,7 @@
 
 ## Suggested Implementation Prompts
 
-- "Use this pack to create a landing section for local research."
+- "Use this pack to create a landing section for keyword:ai video ads."
 - "Create 10 short-form video scripts from the strongest evidence."
 - "Find gaps in the current content strategy using the scored records."
 

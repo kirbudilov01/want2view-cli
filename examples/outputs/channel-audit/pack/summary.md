@@ -1,4 +1,4 @@
-# WANT2VIEW Research Pack: local research
+# WANT2VIEW Research Pack: channel:https://youtube.com/@example
 
 ## What This Is
 
@@ -8,7 +8,7 @@ This is a local, open-source WANT2VIEW context pack for AI content research.
 
 - Records: 3
 - Platforms: youtube, reddit, x
-- Generated at: 2026-08-02T16:47:34.647Z
+- Generated at: 2026-08-02T16:47:34.731Z
 
 ## Top Signals
 

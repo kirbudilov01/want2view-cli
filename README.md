@@ -48,6 +48,7 @@ npx github:kirbudilov01/want2view-cli export --for codex
   <a href="./docs/RECIPES.md">Workflows</a> ·
   <a href="./examples/outputs">Example Outputs</a> ·
   <a href="./docs/LAUNCH_POSTS.md">Launch Posts</a> ·
+  <a href="./docs/LAUNCH_CHECKLIST.md">Launch Checklist</a> ·
   <a href="./docs/API_ACCESS_FLOW.md">API Access Flow</a> ·
   <a href="./docs/LAUNCH_PLAYBOOK.md">Launch Playbook</a> ·
   <a href="./SUPPORT.md">Support</a>
@@ -412,4 +413,5 @@ node bin/want2view.js doctor --json
 - API access flow: [docs/API_ACCESS_FLOW.md](./docs/API_ACCESS_FLOW.md)
 - Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)
 - Launch posts: [docs/LAUNCH_POSTS.md](./docs/LAUNCH_POSTS.md)
+- Launch checklist: [docs/LAUNCH_CHECKLIST.md](./docs/LAUNCH_CHECKLIST.md)
 - NPM publish checklist: [docs/NPM_PUBLISH.md](./docs/NPM_PUBLISH.md)

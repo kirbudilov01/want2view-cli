@@ -13,11 +13,11 @@ npx github:kirbudilov01/want2view-cli export --for codex
 
 Output:
 
-- `keyword-search/exports/*/manifest.json`
-- `keyword-search/exports/*/summary.md`
-- `keyword-search/exports/*/evidence.jsonl`
-- `keyword-search/exports/*/scored.csv`
-- `keyword-search/exports/*/codex_tasks.md`
+- `keyword-search/pack/manifest.json`
+- `keyword-search/pack/summary.md`
+- `keyword-search/pack/evidence.jsonl`
+- `keyword-search/pack/scored.csv`
+- `keyword-search/pack/codex_tasks.md`
 
 ## Channel Audit
 
@@ -30,11 +30,11 @@ npx github:kirbudilov01/want2view-cli export --for claude
 
 Output:
 
-- `channel-audit/exports/*/manifest.json`
-- `channel-audit/exports/*/summary.md`
-- `channel-audit/exports/*/evidence.jsonl`
-- `channel-audit/exports/*/scored.csv`
-- `channel-audit/exports/*/claude_brief.md`
+- `channel-audit/pack/manifest.json`
+- `channel-audit/pack/summary.md`
+- `channel-audit/pack/evidence.jsonl`
+- `channel-audit/pack/scored.csv`
+- `channel-audit/pack/claude_brief.md`
 
 ## Project Export
 
