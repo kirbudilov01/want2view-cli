@@ -93,6 +93,7 @@ Recommended columns:
 ```bash
 npx want2view login
 export WANT2VIEW_API_TOKEN="..."
+npx want2view doctor --json
 npx want2view auth status
 npx want2view cloud research "fitness reels" --sources youtube,tiktok,instagram,x --mode cloud
 npx want2view cloud status w2v_run_abc123
@@ -104,11 +105,24 @@ The CLI does not write API tokens to project files. Tokens should live in your s
 You can also save a token in your user-level config:
 
 ```bash
+npx want2view login
 npx want2view login --token w2v_your_token
 npx want2view auth status
 ```
 
 Saved tokens go to `~/.config/want2view/config.json` with private file permissions where supported.
+
+Interactive login gives users three paths:
+
+- open browser and paste a Developer CLI token from WANT2VIEW;
+- paste an existing `w2v_...` token;
+- use `WANT2VIEW_API_TOKEN` from the environment.
+
+Agent diagnostics:
+
+```bash
+npx want2view doctor --json
+```
 
 ## Output
 
@@ -152,6 +166,7 @@ npx want2view research "ai video ads" --demo
 npx want2view export --for codex
 npx want2view export --for claude
 npx want2view login
+npx want2view doctor --json
 npx want2view auth status
 npx want2view cloud research "ai video ads" --sources youtube,tiktok,instagram,x --mode cloud
 npx want2view cloud status w2v_run_abc123

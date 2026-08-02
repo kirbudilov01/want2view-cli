@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import readline from "node:readline/promises";
 
 const VERSION = "0.0.1";
 const DEFAULT_WORKSPACE = ".want2view";
@@ -57,6 +59,7 @@ Usage:
   want2view export --for codex|claude [--workspace .want2view]
   want2view login [--api https://app.want2view.com] [--token w2v_...]
   want2view auth status
+  want2view doctor [--json]
   want2view cloud research "<topic>" --sources youtube,tiktok,instagram,x [--mode demo|cloud]
   want2view cloud status <run_id>
   want2view cloud export <run_id> --for codex|claude
@@ -187,6 +190,47 @@ function apiBaseUrl(args, root = workspacePath(args)) {
 
 function apiToken() {
   return process.env.WANT2VIEW_API_TOKEN || readUserConfig().api_token || "";
+}
+
+function tokenSource() {
+  if (process.env.WANT2VIEW_API_TOKEN) return "env";
+  if (readUserConfig().api_token) return "config";
+  return "missing";
+}
+
+function maskToken(token) {
+  if (!token) return "";
+  return `${token.slice(0, 8)}...${token.slice(-4)}`;
+}
+
+function openUrl(url) {
+  const platform = process.platform;
+  const command = platform === "darwin" ? "open" : platform === "win32" ? "cmd" : "xdg-open";
+  const args = platform === "win32" ? ["/c", "start", "", url] : [url];
+  const child = spawn(command, args, { detached: true, stdio: "ignore" });
+  child.unref();
+}
+
+async function promptLine(question) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    return (await rl.question(question)).trim();
+  } finally {
+    rl.close();
+  }
+}
+
+async function verifyToken(base, token) {
+  return await requestJson(`${base}/api/v1/developer/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+function saveUserToken(apiBase, token) {
+  const userConfig = readUserConfig();
+  userConfig.api_base_url = apiBase;
+  userConfig.api_token = token.trim();
+  writePrivateJson(userConfigPath(), userConfig);
 }
 
 async function requestJson(url, options = {}) {
@@ -471,27 +515,89 @@ async function commandLogin(args) {
   const userConfig = readUserConfig();
   userConfig.api_base_url = apiBase;
   if (args.token) {
-    userConfig.api_token = String(args.token).trim();
-    writePrivateJson(userConfigPath(), userConfig);
+    const token = String(args.token).trim();
+    saveUserToken(apiBase, token);
     console.log(`Saved WANT2VIEW API token to ${userConfigPath()}`);
     console.log("Token file permissions were set to 0600 where supported.");
+    try {
+      const me = await verifyToken(apiBase, token);
+      console.log(`Authenticated as ${me.username} (user ${me.user_id})`);
+    } catch (error) {
+      console.log(`Token saved, but verification failed: ${error.message}`);
+      process.exitCode = 2;
+    }
     return;
   }
 
-  console.log(`Configured WANT2VIEW API base: ${apiBase}`);
+  if (!process.stdin.isTTY || args.noInteractive || args["no-interactive"]) {
+    console.log(`Configured WANT2VIEW API base: ${apiBase}`);
+    console.log("Create an account at https://app.want2view.com/register and create a Developer API token.");
+    console.log("Then run one of:");
+    console.log("  export WANT2VIEW_API_TOKEN=\"w2v_...\"");
+    console.log("  want2view login --token w2v_...");
+    console.log("Project files never receive API tokens.");
+    return;
+  }
+
+  console.log("WANT2VIEW CLI login");
+  console.log(`API base: ${apiBase}`);
+  console.log("");
+  console.log("Choose authentication method:");
+  console.log("  1. Open browser and create/paste Developer CLI token");
+  console.log("  2. Paste API token now");
+  console.log("  3. Use WANT2VIEW_API_TOKEN from environment");
+  console.log("  4. Skip for now");
+  const choice = await promptLine("Select 1-4: ");
+
   try {
     const loginInfo = await requestJson(`${apiBase}/api/v1/developer/cli/login`);
-    console.log(loginInfo.message || "Create a WANT2VIEW account and Developer API token.");
-    console.log(`Login: ${loginInfo.login_url}`);
-    console.log(`Register: ${loginInfo.register_url}`);
-    console.log(`Token endpoint: ${loginInfo.token_endpoint}`);
-  } catch {
+    if (choice === "1") {
+      const targetUrl = `${loginInfo.login_url || "https://app.want2view.com/login"}?redirect=${encodeURIComponent("/api-access")}`;
+      console.log(`Opening browser: ${targetUrl}`);
+      try {
+        openUrl(targetUrl);
+      } catch {
+        console.log(`Open this URL manually: ${targetUrl}`);
+      }
+      console.log("In WANT2VIEW, open API Access, create a Developer CLI token, then paste it below.");
+      const token = await promptLine("Paste token (w2v_...): ");
+      if (!token) throw new Error("No token pasted.");
+      saveUserToken(apiBase, token);
+      const me = await verifyToken(apiBase, token);
+      console.log(`Authenticated as ${me.username} (user ${me.user_id})`);
+      console.log(`Saved token to ${userConfigPath()}`);
+      return;
+    }
+    if (choice === "2") {
+      const token = await promptLine("Paste token (w2v_...): ");
+      if (!token) throw new Error("No token pasted.");
+      saveUserToken(apiBase, token);
+      const me = await verifyToken(apiBase, token);
+      console.log(`Authenticated as ${me.username} (user ${me.user_id})`);
+      console.log(`Saved token to ${userConfigPath()}`);
+      return;
+    }
+    if (choice === "3") {
+      const token = process.env.WANT2VIEW_API_TOKEN || "";
+      if (!token) {
+        console.log("WANT2VIEW_API_TOKEN is not set.");
+        console.log("Run: export WANT2VIEW_API_TOKEN=\"w2v_...\"");
+        process.exitCode = 2;
+        return;
+      }
+      const me = await verifyToken(apiBase, token);
+      console.log(`Authenticated as ${me.username} (user ${me.user_id})`);
+      console.log("Using token from environment; nothing was written to config.");
+      return;
+    }
+    console.log("Skipped. You can still use local demo/import/export without authentication.");
+    console.log("Run `want2view login` again when you want cloud connectors.");
+  } catch (error) {
+    if (choice === "1" || choice === "2" || choice === "3") {
+      throw error;
+    }
     console.log("Create an account at https://app.want2view.com/register and create a Developer API token.");
   }
-  console.log("Then run one of:");
-  console.log("  export WANT2VIEW_API_TOKEN=\"w2v_...\"");
-  console.log("  want2view login --token w2v_...");
-  console.log("Project files never receive API tokens.");
 }
 
 async function commandAuth(args) {
@@ -509,6 +615,58 @@ async function commandAuth(args) {
   });
   console.log(`Authenticated as ${me.username} (user ${me.user_id})`);
   if (me.token_prefix) console.log(`Token: ${me.token_prefix}...`);
+}
+
+async function commandDoctor(args) {
+  const root = workspacePath(args);
+  const base = apiBaseUrl(args, root);
+  const token = apiToken();
+  const payload = {
+    version: VERSION,
+    workspace: root,
+    api_base_url: base,
+    user_config_path: userConfigPath(),
+    auth: {
+      available: Boolean(token),
+      source: tokenSource(),
+      token_preview: token ? maskToken(token) : null,
+      verified: false,
+      username: null,
+      user_id: null,
+    },
+    local: {
+      workspace_exists: fs.existsSync(root),
+      records_available: loadRows(root).length,
+    },
+    next_steps: [],
+  };
+  if (token) {
+    try {
+      const me = await verifyToken(base, token);
+      payload.auth.verified = true;
+      payload.auth.username = me.username;
+      payload.auth.user_id = me.user_id;
+    } catch (error) {
+      payload.auth.error = error.message;
+      payload.next_steps.push("Run `want2view login` or set a valid WANT2VIEW_API_TOKEN.");
+    }
+  } else {
+    payload.next_steps.push("Run `want2view login` for cloud connectors.");
+  }
+  if (!payload.local.records_available) {
+    payload.next_steps.push("Run `want2view research \"ai video ads\" --demo` for a local pack.");
+  }
+  if (args.json) {
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+  console.log(`want2view ${payload.version}`);
+  console.log(`Workspace: ${payload.workspace}`);
+  console.log(`API: ${payload.api_base_url}`);
+  console.log(`Auth: ${payload.auth.available ? `${payload.auth.source} (${payload.auth.verified ? "verified" : "not verified"})` : "missing"}`);
+  if (payload.auth.username) console.log(`User: ${payload.auth.username}`);
+  console.log(`Local records: ${payload.local.records_available}`);
+  payload.next_steps.forEach((step) => console.log(`Next: ${step}`));
 }
 
 function writeCloudExport(root, payload) {
@@ -603,6 +761,7 @@ async function main() {
     if (command === "export") return commandExport(args);
     if (command === "login") return await commandLogin(args);
     if (command === "auth") return await commandAuth(args);
+    if (command === "doctor") return await commandDoctor(args);
     if (command === "cloud") return await commandCloud(args);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
