@@ -4,7 +4,6 @@
 
 <p align="center">
   <a href="https://github.com/kirbudilov01/want2view-cli"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-open--source-111827?style=for-the-badge&logo=github" /></a>
-  <a href="https://github.com/kirbudilov01/want2view-cli/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/kirbudilov01/want2view-cli/ci.yml?branch=main&style=for-the-badge&label=CI" /></a>
   <a href="https://github.com/kirbudilov01/want2view-cli/releases/tag/v0.1.0"><img alt="Release v0.1.0" src="https://img.shields.io/github/v/release/kirbudilov01/want2view-cli?style=for-the-badge&label=release" /></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-28D7C7?style=for-the-badge" />
   <img alt="Node 18+" src="https://img.shields.io/badge/node-18%2B-7C5CFF?style=for-the-badge&logo=node.js" />
