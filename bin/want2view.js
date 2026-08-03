@@ -104,6 +104,7 @@ function printHelp() {
 Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
 
 Usage:
+  want2view start codex|claude "<keyword>" [--channel] [--out .want2view]
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
   want2view channel <channel_url_or_handle> --demo [--out .want2view]
@@ -127,6 +128,8 @@ Usage:
   want2view cloud export <run_id> --for codex|claude
 
 Examples:
+  npx want2view start codex "ai video ads"
+  npx want2view start claude https://youtube.com/@example --channel
   npx want2view search "ai video ads" --demo
   npx want2view channel https://youtube.com/@example --demo
   npx want2view export --for codex
@@ -571,10 +574,12 @@ function commandResearch(args) {
     generated_at: new Date().toISOString(),
   });
   const label = args.kind === "keyword" ? "keyword search pack" : "research pack";
-  console.log(`Created demo ${label} for "${topic}" with ${rows.length} records.`);
-  console.log(`Workspace: ${root}`);
-  console.log("Next: want2view export --for codex");
-  console.log("Next: want2view export --for claude");
+  if (!args.quiet) {
+    console.log(`Created demo ${label} for "${topic}" with ${rows.length} records.`);
+    console.log(`Workspace: ${root}`);
+    console.log("Next: want2view export --for codex");
+    console.log("Next: want2view export --for claude");
+  }
 }
 
 function commandSearch(args) {
@@ -608,10 +613,37 @@ function commandChannel(args) {
     records: rows.length,
     generated_at: new Date().toISOString(),
   });
-  console.log(`Created demo channel pack for "${channel}" with ${rows.length} records.`);
-  console.log(`Workspace: ${root}`);
-  console.log("Next: want2view export --for codex");
-  console.log("Next: want2view export --for claude");
+  if (!args.quiet) {
+    console.log(`Created demo channel pack for "${channel}" with ${rows.length} records.`);
+    console.log(`Workspace: ${root}`);
+    console.log("Next: want2view export --for codex");
+    console.log("Next: want2view export --for claude");
+  }
+}
+
+function commandStart(args) {
+  const target = String(args._[1] || "").toLowerCase();
+  const query = args._[2];
+  if (!["codex", "claude"].includes(target)) {
+    throw new Error("Missing agent target. Use: want2view start codex|claude \"keyword\" [--channel]");
+  }
+  if (!query) {
+    throw new Error("Missing keyword or channel. Example: want2view start codex \"ai video ads\"");
+  }
+  const root = workspacePath(args);
+  const mode = args.channel ? "channel" : "keyword";
+  const topic = mode === "channel" ? `channel:${query}` : `keyword:${query}`;
+  console.log(`WANT2VIEW one-command setup for ${target}`);
+  console.log(`Mode: ${mode}`);
+  if (mode === "channel") {
+    commandChannel({ ...args, _: ["channel", query], demo: true, quiet: true, workspace: root });
+  } else {
+    commandSearch({ ...args, _: ["search", query], demo: true, quiet: true, workspace: root });
+  }
+  const exportDir = commandExport({ ...args, _: ["export"], for: target, workspace: root, topic });
+  console.log("");
+  console.log("Copy this into your agent:");
+  console.log(`Use ${exportDir} as the source of truth. Read manifest.json, summary.md, evidence.jsonl, scored.csv, and ${target === "codex" ? "codex_tasks.md" : "claude_brief.md"}. Base recommendations only on evidence rows.`);
 }
 
 function commandNormalize(args) {
@@ -660,6 +692,7 @@ function commandExport(args) {
   });
   console.log(`Exported ${target} context pack: ${exportDir}`);
   printConversionNextSteps();
+  return exportDir;
 }
 
 function commandRecipes(args) {
@@ -1107,6 +1140,7 @@ async function main() {
   try {
     if (!command || command === "help" || args.help) return printHelp();
     if (command === "version" || args.version) return console.log(VERSION);
+    if (command === "start") return commandStart(args);
     if (command === "init") return commandInit(args);
     if (command === "import") return commandImport(args);
     if (command === "search") return commandSearch(args);

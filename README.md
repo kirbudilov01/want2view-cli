@@ -12,15 +12,20 @@
 
 # WANT2VIEW CLI
 
-Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
+One command gives Codex and Claude real WANT2VIEW evidence.
 
-This repository is a free gift from the WANT2VIEW team: a lightweight terminal bridge that helps AI agents work with WANT2VIEW content evidence instead of guessing.
+WANT2VIEW CLI is an open-source connector for terminal agents. It turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs your agents can read directly.
 
-Start free from the terminal. Search by keyword, pass a channel URL, import your own exports, or connect an existing WANT2VIEW project. The public/demo layer is intentionally limited so anyone can try the workflow. Upgrade to the same WANT2VIEW Cloud product when you need deeper catalog access, private projects, managed social connectors, scheduled refreshes, team workspaces, and production-scale content intelligence.
+Start free in 60 seconds. Upgrade to the same WANT2VIEW Cloud product when you need real social connectors, private projects, deeper catalog access, scheduled refreshes, API tokens, team workspaces, or custom research.
 
 ```bash
-npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+```
+
+Also works with Claude:
+
+```bash
+npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
 ```
 
 <p align="center">
@@ -54,6 +59,34 @@ npx github:kirbudilov01/want2view-cli export --for codex
   <a href="./SUPPORT.md">Support</a>
 </p>
 
+## Setup In 60 Seconds
+
+Pick your agent and run one command.
+
+| Agent | One command |
+| --- | --- |
+| Codex | `npx github:kirbudilov01/want2view-cli start codex "ai video ads"` |
+| Claude | `npx github:kirbudilov01/want2view-cli start claude "ugc ads"` |
+| Claude channel audit | `npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel` |
+| Any terminal agent | `npx github:kirbudilov01/want2view-cli start codex "your keyword"` |
+
+Once npm is published, the same flow becomes:
+
+```bash
+npx want2view start codex "ai video ads"
+```
+
+The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
+
+## Same Prompt. Different Intelligence.
+
+| Without WANT2VIEW CLI | With WANT2VIEW CLI |
+| --- | --- |
+| Agent guesses from a vague prompt | Agent reads `evidence.jsonl`, `scored.csv`, and `summary.md` |
+| No source rows | Every recommendation can cite evidence |
+| Manual copy-paste research | One local pack for Codex, Claude, Cursor, OpenClaw, and other terminal agents |
+| Hard to upsell into real data | Clear path to WANT2VIEW Cloud, API Access, private projects, and custom research |
+
 ## TL;DR
 
 WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
@@ -62,11 +95,10 @@ WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
 - **Paid/account:** the same WANT2VIEW monetization layer: deeper catalog, private projects, Developer CLI tokens, managed social connectors, scheduled refreshes, custom research.
 - **Best use:** give Codex, Claude, and terminal agents real WANT2VIEW evidence folders instead of vague prompts.
 
-## What You Get In 60 Seconds
+## What The Command Creates
 
 ```bash
-npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
 ```
 
 Output:
@@ -91,16 +123,25 @@ Base recommendations only on evidence rows.
 
 Want to inspect the output before running anything? Open [examples/outputs](./examples/outputs).
 
-Before: Codex or Claude guesses from a prompt.
+## Prompt Library
 
-After: Codex or Claude reads `manifest.json`, `summary.md`, `evidence.jsonl`, `scored.csv`, and an agent-specific brief.
+Copy these after running `start`.
+
+| Goal | Prompt |
+| --- | --- |
+| Codex strategy | `Use the newest .want2view/exports folder as the source of truth. Read manifest.json, summary.md, evidence.jsonl, scored.csv, and codex_tasks.md. Recommend only from evidence rows.` |
+| Claude brief | `Read claude_brief.md and evidence.jsonl. Create a decision-ready content brief with hooks, risks, gaps, and next experiments. Mark assumptions clearly.` |
+| Landing page | `Use the WANT2VIEW pack to write landing copy. Tie claims to evidence rows and separate observed patterns from creative recommendations.` |
+| Content scripts | `Create 10 short-form scripts from the strongest evidence. For each script, cite the row or URL that inspired it.` |
 
 ## Pick Your Path
 
 | You want to... | Run this | What happens |
 | --- | --- | --- |
-| Try keyword search with zero setup | `search "ai video ads" --demo` | Creates a free local AI context pack |
-| Try a channel audit | `channel https://youtube.com/@example --demo` | Creates a channel-shaped evidence pack |
+| Start with Codex in one command | `start codex "ai video ads"` | Creates a pack and prints the Codex prompt |
+| Start with Claude in one command | `start claude https://youtube.com/@example --channel` | Creates a channel pack and prints the Claude prompt |
+| Try keyword search manually | `search "ai video ads" --demo` | Creates a free local AI context pack |
+| Try a channel audit manually | `channel https://youtube.com/@example --demo` | Creates a channel-shaped evidence pack |
 | Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
 | Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
 | Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
@@ -158,18 +199,15 @@ WANT2VIEW Cloud adds the paid product:
 Run directly from GitHub before the npm package is published:
 
 ```bash
-npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
-npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
 npx github:kirbudilov01/want2view-cli workflows keyword
-npx github:kirbudilov01/want2view-cli export --for claude
 ```
 
 After npm publish, the same workflow becomes:
 
 ```bash
-npx want2view search "ai video ads" --demo
-npx want2view export --for codex
+npx want2view start codex "ai video ads"
 ```
 
 Package status: the `want2view` npm name is prepared for publishing, but this repository can already run through GitHub with `npx github:kirbudilov01/want2view-cli`.
@@ -205,8 +243,8 @@ Workflows are not separate hidden features. They are practical paths that combin
 
 | Workflow | Start with CLI | Continue in WANT2VIEW |
 | --- | --- | --- |
-| Keyword search to Codex | `search "ai video ads" --demo` then `export --for codex` | Unlock deeper catalog, saved searches, and API access |
-| Channel audit to Claude | `channel https://youtube.com/@example --demo` then `export --for claude` | Connect real channels or order a deeper audit |
+| Keyword search to Codex | `start codex "ai video ads"` | Unlock deeper catalog, saved searches, and API access |
+| Channel audit to Claude | `start claude https://youtube.com/@example --channel` | Connect real channels or order a deeper audit |
 | WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
 | Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
 
@@ -345,6 +383,8 @@ Recommended columns:
 
 | Command | Purpose |
 | --- | --- |
+| `want2view start codex "topic"` | One-command Codex setup |
+| `want2view start claude <channel> --channel` | One-command Claude channel setup |
 | `want2view login` | Interactive auth wizard |
 | `want2view doctor --json` | Agent-readable setup diagnostics |
 | `want2view workflows` | Show keyword, channel, project, and monitoring workflows |
@@ -392,8 +432,7 @@ Paid WANT2VIEW Cloud:
 ## Local Development
 
 ```bash
-node bin/want2view.js search "ai video ads" --demo
-node bin/want2view.js export --for codex
+node bin/want2view.js start codex "ai video ads"
 node bin/want2view.js doctor --json
 ```
 
@@ -414,4 +453,5 @@ node bin/want2view.js doctor --json
 - Launch ideas: [docs/LAUNCH_PLAYBOOK.md](./docs/LAUNCH_PLAYBOOK.md)
 - Launch posts: [docs/LAUNCH_POSTS.md](./docs/LAUNCH_POSTS.md)
 - Launch checklist: [docs/LAUNCH_CHECKLIST.md](./docs/LAUNCH_CHECKLIST.md)
+- vidIQ-style UX audit: [docs/VIDIQ_STYLE_AUDIT.md](./docs/VIDIQ_STYLE_AUDIT.md)
 - NPM publish checklist: [docs/NPM_PUBLISH.md](./docs/NPM_PUBLISH.md)

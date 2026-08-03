@@ -9,8 +9,7 @@ They do not imply that every paid workflow is fully local. The open-source CLI c
 Use this when someone wants to search by keyword, create an evidence pack, and hand it to Codex.
 
 ```bash
-npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli export --for codex
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
 ```
 
 Give Codex:
@@ -32,8 +31,7 @@ Next WANT2VIEW step:
 Use this when someone sends a channel URL or creator handle and wants a Claude-ready audit.
 
 ```bash
-npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
-npx github:kirbudilov01/want2view-cli export --for claude
+npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
 ```
 
 Give Claude:

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WANT2VIEW CLI - Open-source AI content research packs</title>
-    <meta name="description" content="Run WANT2VIEW from your terminal. Build AI-ready social content research packs for Codex, Claude, and content teams. Upgrade to managed WANT2VIEW Cloud connectors when you need scale." />
+    <title>WANT2VIEW CLI - One command for Codex and Claude</title>
+    <meta name="description" content="Run WANT2VIEW from your terminal. One command creates evidence packs for Codex, Claude, Cursor, OpenClaw, and terminal agents." />
     <style>
       :root {
         color-scheme: dark;
@@ -26,17 +26,18 @@
           radial-gradient(circle at 90% 40%, rgba(124, 92, 255, 0.2), transparent 30%),
           var(--bg);
       }
-      main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 72px; }
-      nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 76px; }
+      main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 38px 0 72px; }
+      nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 58px; }
       .brand { font-weight: 900; letter-spacing: 0.06em; }
-      .links { display: flex; gap: 10px; flex-wrap: wrap; }
+      .links, .actions, .tabs { display: flex; gap: 10px; flex-wrap: wrap; }
       a { color: var(--ink); text-decoration: none; }
       .pill { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 9px 13px; font-size: 13px; font-weight: 800; }
-      .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr); gap: 54px; align-items: center; }
-      h1 { font-size: clamp(42px, 8vw, 84px); line-height: 0.96; letter-spacing: -0.04em; margin: 0 0 22px; }
-      .sub { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 720px; }
-      .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
       .primary { color: #05030c; background: linear-gradient(135deg, var(--cyan), var(--violet)); border: 0; }
+      .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 0.9fr); gap: 42px; align-items: center; }
+      h1 { font-size: clamp(42px, 7.5vw, 82px); line-height: 0.95; letter-spacing: -0.04em; margin: 0 0 20px; }
+      h2 { font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.03em; margin: 0 0 16px; }
+      .sub { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 720px; }
+      .kicker { color: var(--cyan); font-size: 13px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
       .terminal {
         border: 1px solid var(--line);
         border-radius: 18px;
@@ -49,15 +50,17 @@
       .dot:nth-child(2) { background: #ffd166; }
       .dot:nth-child(3) { background: var(--cyan); }
       pre { margin: 0; padding: 24px; overflow-x: auto; color: #fff; line-height: 1.8; font-size: 14px; }
-      section { margin-top: 86px; }
-      h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.03em; margin: 0 0 16px; }
+      code { font-family: "SFMono-Regular", Consolas, monospace; }
+      section { margin-top: 82px; }
       .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-      .card { border: 1px solid var(--line); background: var(--panel); border-radius: 16px; padding: 18px; }
+      .card { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 18px; }
       .card strong { display: block; margin-bottom: 8px; }
       .card p { margin: 0; color: var(--muted); line-height: 1.55; }
+      .step { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start; }
+      .num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #05030c; background: var(--cyan); font-weight: 900; }
       @media (max-width: 860px) {
         .hero, .grid { grid-template-columns: 1fr; }
-        nav { align-items: flex-start; flex-direction: column; margin-bottom: 48px; }
+        nav { align-items: flex-start; flex-direction: column; margin-bottom: 44px; }
       }
     </style>
   </head>
@@ -66,47 +69,59 @@
       <nav>
         <div class="brand">WANT2VIEW CLI</div>
         <div class="links">
-          <a class="pill" href="https://want2view.com">Website</a>
-          <a class="pill" href="https://app.want2view.com/register">Get API token</a>
           <a class="pill" href="https://github.com/kirbudilov01/want2view-cli">GitHub</a>
+          <a class="pill" href="https://app.want2view.com/api-access">API Access</a>
+          <a class="pill" href="https://want2view.com/developers">Developers</a>
         </div>
       </nav>
 
       <div class="hero">
         <div>
-          <h1>AI content research from your terminal.</h1>
-          <p class="sub">Build source-of-truth packs for Codex, Claude, and human content teams. Start open source with local files and demos. Upgrade to WANT2VIEW Cloud for managed social connectors, scheduled refreshes, and team workflows.</p>
+          <div class="kicker">Free for local packs</div>
+          <h1>One command gives agents real content evidence.</h1>
+          <p class="sub">Connect WANT2VIEW-style keyword, channel, catalog, and project context to Codex, Claude, Cursor, OpenClaw, and terminal agents. Start open source. Upgrade when you need real social connectors and private data.</p>
           <div class="actions">
-            <a class="pill primary" href="https://app.want2view.com/register">Create cloud token</a>
-            <a class="pill" href="https://github.com/kirbudilov01/want2view-cli">View on GitHub</a>
+            <a class="pill primary" href="https://github.com/kirbudilov01/want2view-cli">Open GitHub</a>
+            <a class="pill" href="https://app.want2view.com/api-access">Get API access</a>
           </div>
         </div>
         <div class="terminal">
-          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:auto">terminal</span></div>
-          <pre><code>npx github:kirbudilov01/want2view-cli login --token w2v_...
-npx github:kirbudilov01/want2view-cli doctor --json
-npx github:kirbudilov01/want2view-cli auth status
-npx github:kirbudilov01/want2view-cli cloud research "ai video ads" \
-  --sources youtube,tiktok,instagram,x --mode cloud
-npx github:kirbudilov01/want2view-cli cloud status w2v_run_abc123
-npx github:kirbudilov01/want2view-cli cloud export w2v_run_abc123 --for codex</code></pre>
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:auto">60 second setup</span></div>
+          <pre><code>npx github:kirbudilov01/want2view-cli \
+  start codex "ai video ads"
+
+# Also:
+npx github:kirbudilov01/want2view-cli \
+  start claude https://youtube.com/@example --channel</code></pre>
         </div>
       </div>
 
       <section>
-        <h2>Why teams use it</h2>
+        <h2>Set Up In 60 Seconds</h2>
         <div class="grid">
-          <div class="card"><strong>Agent-ready</strong><p>Exports Markdown, JSONL, CSV, and manifests that coding and writing agents can inspect directly.</p></div>
-          <div class="card"><strong>Open core</strong><p>Local imports, demo research, scoring, and Codex/Claude packs work without a paid account.</p></div>
-          <div class="card"><strong>Cloud upgrade</strong><p>Managed social connectors, quota controls, source warnings, schedules, and team workspaces live in WANT2VIEW Cloud.</p></div>
+          <div class="card step"><div class="num">1</div><div><strong>Pick agent</strong><p>Codex, Claude, Cursor, OpenClaw, or any terminal agent that can read local files.</p></div></div>
+          <div class="card step"><div class="num">2</div><div><strong>Run command</strong><p>Use `start codex` for keyword evidence or `start claude --channel` for a channel-shaped pack.</p></div></div>
+          <div class="card step"><div class="num">3</div><div><strong>Paste prompt</strong><p>The CLI prints the exact instruction telling your agent which files to read.</p></div></div>
         </div>
       </section>
+
       <section>
-        <h2>What teams buy next</h2>
+        <h2>Same Prompt. Different Intelligence.</h2>
         <div class="grid">
-          <div class="card"><strong>API access</strong><p>Run WANT2VIEW from agents, automations, CI, and internal research workflows.</p></div>
-          <div class="card"><strong>Custom research</strong><p>Done-for-you category reports, competitor maps, briefs, scripts, and client-ready insights.</p></div>
-          <div class="card"><strong>Managed connectors</strong><p>Use real social data without maintaining every provider key, bridge, retry, and quota rule yourself.</p></div>
+          <div class="card"><strong>Without WANT2VIEW</strong><p>The agent guesses from a vague prompt and has no source rows to cite.</p></div>
+          <div class="card"><strong>With WANT2VIEW CLI</strong><p>The agent reads `manifest.json`, `summary.md`, `evidence.jsonl`, `scored.csv`, and a Codex or Claude brief.</p></div>
+          <div class="card"><strong>With WANT2VIEW Cloud</strong><p>Teams unlock real connectors, private projects, deeper catalog access, schedules, API tokens, and custom research.</p></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Prompt Library</h2>
+        <div class="terminal">
+          <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:auto">copy into agent</span></div>
+          <pre><code>Use the newest .want2view/exports folder as the source of truth.
+Read manifest.json, summary.md, evidence.jsonl, scored.csv,
+and codex_tasks.md or claude_brief.md.
+Base recommendations only on evidence rows.</code></pre>
         </div>
       </section>
     </main>

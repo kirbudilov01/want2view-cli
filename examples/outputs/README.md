@@ -11,6 +11,12 @@ npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
 npx github:kirbudilov01/want2view-cli export --for codex
 ```
 
+One-command version:
+
+```bash
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+```
+
 Output:
 
 - `keyword-search/pack/manifest.json`
@@ -26,6 +32,12 @@ Command:
 ```bash
 npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
 npx github:kirbudilov01/want2view-cli export --for claude
+```
+
+One-command version:
+
+```bash
+npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
 ```
 
 Output:
