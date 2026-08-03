@@ -1,6 +1,6 @@
 {
   "name": "want2view",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "One-command WANT2VIEW connector for Codex, Claude, and terminal agents.",
   "type": "module",
   "homepage": "https://want2view.com/developers",

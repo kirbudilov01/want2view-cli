@@ -1,5 +1,17 @@
 # Release Notes
 
+## v0.2.2
+
+WANT2VIEW CLI now supports more one-command agent entrypoints:
+
+- `npx want2view codex "ai video ads"`
+- `npx want2view claude https://youtube.com/@example --channel`
+- `npx want2view cursor "b2b saas launch"`
+- `npx want2view openclaw "ugc ads"`
+- `npx want2view agent "content monitoring"`
+
+Codex, Cursor, OpenClaw, and generic terminal agents receive the Codex-style task pack. Claude receives the Claude-style brief. Every path uses the same WANT2VIEW evidence folder and the same upgrade path into Cloud/API/private projects.
+
 ## v0.2.1
 
 WANT2VIEW CLI now has shorter npm-ready one-command aliases:

@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.2.1";
+const VERSION = "0.2.2";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -15,6 +15,13 @@ const DEVELOPERS_URL = "https://want2view.com/developers";
 const REPO_URL = "https://github.com/kirbudilov01/want2view-cli";
 const DEFAULT_API_BASE_URL = "https://api.want2view.com";
 const TRUSTED_API_HOSTS = new Set(["api.want2view.com", "app.want2view.com"]);
+const AGENT_TARGETS = {
+  codex: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "Codex" },
+  claude: { exportTarget: "claude", handoffFile: "claude_brief.md", label: "Claude" },
+  cursor: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "Cursor" },
+  openclaw: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "OpenClaw" },
+  agent: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "terminal agent" },
+};
 const DEMO_RECORDS = [
   {
     platform: "youtube",
@@ -106,7 +113,10 @@ Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
 Usage:
   want2view codex "<keyword>" [--channel] [--out .want2view]
   want2view claude "<keyword>" [--channel] [--out .want2view]
-  want2view start codex|claude "<keyword>" [--channel] [--out .want2view]
+  want2view cursor "<keyword>" [--channel] [--out .want2view]
+  want2view openclaw "<keyword>" [--channel] [--out .want2view]
+  want2view agent "<keyword>" [--channel] [--out .want2view]
+  want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
   want2view channel <channel_url_or_handle> --demo [--out .want2view]
@@ -132,8 +142,8 @@ Usage:
 Examples:
   npx want2view codex "ai video ads"
   npx want2view claude https://youtube.com/@example --channel
-  npx want2view start codex "ai video ads"
-  npx want2view start claude https://youtube.com/@example --channel
+  npx want2view cursor "b2b saas launch"
+  npx want2view openclaw "ugc ads"
   npx want2view search "ai video ads" --demo
   npx want2view channel https://youtube.com/@example --demo
   npx want2view export --for codex
@@ -145,7 +155,7 @@ Examples:
 }
 
 function printConversionNextSteps() {
-  console.log("Next: Give the export folder to Codex or Claude as the source of truth.");
+  console.log("Next: Give the export folder to your AI agent as the source of truth.");
   console.log(`Next: See workflows: want2view workflows`);
   console.log(`Star: If this helped your agent stop guessing, star the repo: ${REPO_URL}`);
   console.log(`Upgrade: Free demo uses sample/public data. For real connectors, private projects, and deeper catalog access: ${API_ACCESS_URL}`);
@@ -628,26 +638,27 @@ function commandChannel(args) {
 function commandStart(args) {
   const target = String(args._[1] || "").toLowerCase();
   const query = args._[2];
-  if (!["codex", "claude"].includes(target)) {
-    throw new Error("Missing agent target. Use: want2view start codex|claude \"keyword\" [--channel]");
+  const agent = AGENT_TARGETS[target];
+  if (!agent) {
+    throw new Error("Missing agent target. Use: want2view start codex|claude|cursor|openclaw|agent \"keyword\" [--channel]");
   }
   if (!query) {
-    throw new Error("Missing keyword or channel. Example: want2view start codex \"ai video ads\"");
+    throw new Error(`Missing keyword or channel. Example: want2view ${target || "codex"} "ai video ads"`);
   }
   const root = workspacePath(args);
   const mode = args.channel ? "channel" : "keyword";
   const topic = mode === "channel" ? `channel:${query}` : `keyword:${query}`;
-  console.log(`WANT2VIEW one-command setup for ${target}`);
+  console.log(`WANT2VIEW one-command setup for ${agent.label}`);
   console.log(`Mode: ${mode}`);
   if (mode === "channel") {
     commandChannel({ ...args, _: ["channel", query], demo: true, quiet: true, workspace: root });
   } else {
     commandSearch({ ...args, _: ["search", query], demo: true, quiet: true, workspace: root });
   }
-  const exportDir = commandExport({ ...args, _: ["export"], for: target, workspace: root, topic });
+  const exportDir = commandExport({ ...args, _: ["export"], for: agent.exportTarget, workspace: root, topic });
   console.log("");
   console.log("Copy this into your agent:");
-  console.log(`Use ${exportDir} as the source of truth. Read manifest.json, summary.md, evidence.jsonl, scored.csv, and ${target === "codex" ? "codex_tasks.md" : "claude_brief.md"}. Base recommendations only on evidence rows.`);
+  console.log(`Use ${exportDir} as the source of truth. Read manifest.json, summary.md, evidence.jsonl, scored.csv, and ${agent.handoffFile}. Base recommendations only on evidence rows.`);
 }
 
 function commandNormalize(args) {
@@ -1144,7 +1155,7 @@ async function main() {
   try {
     if (!command || command === "help" || args.help) return printHelp();
     if (command === "version" || args.version) return console.log(VERSION);
-    if (command === "codex" || command === "claude") return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
+    if (AGENT_TARGETS[command]) return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
     if (command === "start") return commandStart(args);
     if (command === "init") return commandInit(args);
     if (command === "import") return commandImport(args);
