@@ -7,7 +7,7 @@ WANT2VIEW has two auth surfaces for CLI users.
 Use this for managed cloud connector runs:
 
 ```bash
-npx github:kirbudilov01/want2view-cli login
+npx want2view login
 ```
 
 The CLI token is stored locally or passed through:
@@ -19,7 +19,7 @@ export WANT2VIEW_API_TOKEN="w2v_your_token"
 Then:
 
 ```bash
-npx github:kirbudilov01/want2view-cli cloud research "ai video ads" \
+npx want2view cloud research "ai video ads" \
   --sources youtube,tiktok,instagram,x --mode cloud
 ```
 
@@ -29,8 +29,8 @@ Use this for your private WANT2VIEW projects and reports:
 
 ```bash
 export WANT2VIEW_PUBLIC_API_KEY="your_dashboard_api_key"
-npx github:kirbudilov01/want2view-cli projects list
-npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
+npx want2view projects list
+npx want2view project export <project_id> --for codex
 ```
 
 ## Visual Guide

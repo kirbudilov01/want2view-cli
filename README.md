@@ -70,10 +70,10 @@ Pick your agent and run one command.
 | Claude channel audit | `npx want2view claude https://youtube.com/@example --channel` |
 | Any terminal agent | `npx want2view codex "your keyword"` |
 
-Before npm is published, use the GitHub fallback:
+Npm is live. If the npm registry is unavailable, use the GitHub fallback:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx github:kirbudilov01/want2view-cli codex "ai video ads"
 ```
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
@@ -196,7 +196,7 @@ WANT2VIEW Cloud adds the paid product:
 
 ## One-Command Demo
 
-After npm publish:
+Npm command:
 
 ```bash
 npx want2view codex "ai video ads"
@@ -204,14 +204,14 @@ npx want2view claude https://youtube.com/@example --channel
 npx want2view workflows keyword
 ```
 
-Before npm publish, use the GitHub fallback:
+GitHub fallback:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
-npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
+npx github:kirbudilov01/want2view-cli codex "ai video ads"
+npx github:kirbudilov01/want2view-cli claude https://youtube.com/@example --channel
 ```
 
-Package status: the `want2view` npm name is available and prepared for publishing.
+Package status: `want2view@0.2.1` is published on npm.
 
 If the demo helps your agent stop guessing, star the repo. If you need real social connectors, private projects, deeper catalog access, API tokens, or scheduled refreshes, continue in [WANT2VIEW API Access](https://app.want2view.com/api-access).
 
@@ -261,7 +261,7 @@ There are two keys because there are two product surfaces:
 Cloud mode needs a WANT2VIEW Developer CLI token. The login wizard gives users three paths:
 
 ```bash
-npx github:kirbudilov01/want2view-cli login
+npx want2view login
 ```
 
 ```text
@@ -275,7 +275,7 @@ Choose authentication method:
 Fast paths:
 
 ```bash
-npx github:kirbudilov01/want2view-cli login --token w2v_your_token
+npx want2view login --token w2v_your_token
 export WANT2VIEW_API_TOKEN="w2v_your_token"
 ```
 
@@ -284,15 +284,15 @@ Credential safety: token-bearing commands ignore project-level API base override
 Agent diagnostics:
 
 ```bash
-npx github:kirbudilov01/want2view-cli doctor --json
+npx want2view doctor --json
 ```
 
 Project API:
 
 ```bash
 export WANT2VIEW_PUBLIC_API_KEY="your_dashboard_api_key"
-npx github:kirbudilov01/want2view-cli projects list
-npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
+npx want2view projects list
+npx want2view project export <project_id> --for codex
 ```
 
 ## WANT2VIEW Catalog
@@ -300,9 +300,9 @@ npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
 Use catalog commands to discover a limited public sample of what WANT2VIEW already tracks:
 
 ```bash
-npx github:kirbudilov01/want2view-cli catalog categories
-npx github:kirbudilov01/want2view-cli catalog videos ai --limit 20
-npx github:kirbudilov01/want2view-cli catalog export ai --for claude
+npx want2view catalog categories
+npx want2view catalog videos ai --limit 20
+npx want2view catalog export ai --for claude
 ```
 
 This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export private projects, run cloud research, and unlock deeper social intelligence.
@@ -312,11 +312,11 @@ This is the bridge from GitHub discovery into the real WANT2VIEW product: the CL
 Once authenticated, the CLI can ask WANT2VIEW Cloud to run managed social collection:
 
 ```bash
-npx github:kirbudilov01/want2view-cli cloud research "fitness reels" \
+npx want2view cloud research "fitness reels" \
   --sources youtube,tiktok,instagram,x --mode cloud
 
-npx github:kirbudilov01/want2view-cli cloud status w2v_run_abc123
-npx github:kirbudilov01/want2view-cli cloud export w2v_run_abc123 --for codex
+npx want2view cloud status w2v_run_abc123
+npx want2view cloud export w2v_run_abc123 --for codex
 ```
 
 The CLI stores exported packs locally under:
@@ -355,9 +355,9 @@ Start here:
 ## Bring Your Own Data
 
 ```bash
-npx github:kirbudilov01/want2view-cli import examples/competitors.csv
-npx github:kirbudilov01/want2view-cli score
-npx github:kirbudilov01/want2view-cli export --for claude
+npx want2view import examples/competitors.csv
+npx want2view score
+npx want2view export --for claude
 ```
 
 Supported local inputs:

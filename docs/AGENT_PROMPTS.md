@@ -3,7 +3,7 @@
 Use these prompts after running:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 ## Codex

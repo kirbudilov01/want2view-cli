@@ -4,7 +4,7 @@ Use this when turning the repository into a public acquisition push.
 
 ## Before Posting
 
-- Publish npm package so the main command becomes `npx want2view`.
+- Npm package published so the main command is `npx want2view`.
 - Upload `assets/github-social-preview.png` in GitHub repository settings.
 - Pin the repository on the founder GitHub profile.
 - Open the README in an incognito browser and verify the first screen explains:

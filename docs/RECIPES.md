@@ -9,7 +9,7 @@ They do not imply that every paid workflow is fully local. The open-source CLI c
 Use this when someone wants to search by keyword, create an evidence pack, and hand it to Codex.
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 Give Codex:
@@ -31,7 +31,7 @@ Next WANT2VIEW step:
 Use this when someone sends a channel URL or creator handle and wants a Claude-ready audit.
 
 ```bash
-npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
+npx want2view claude https://youtube.com/@example --channel
 ```
 
 Give Claude:
@@ -53,9 +53,9 @@ Next WANT2VIEW step:
 Use this when the user already has a WANT2VIEW account and wants Codex or Claude to work from an internal project.
 
 ```bash
-npx github:kirbudilov01/want2view-cli login
-npx github:kirbudilov01/want2view-cli projects list
-npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
+npx want2view login
+npx want2view projects list
+npx want2view project export <project_id> --for codex
 ```
 
 Give the agent:
@@ -77,11 +77,11 @@ Next WANT2VIEW step:
 Use this when a team already knows the category and wants repeated updates.
 
 ```bash
-npx github:kirbudilov01/want2view-cli login
-npx github:kirbudilov01/want2view-cli cloud research "fitness reels" \
+npx want2view login
+npx want2view cloud research "fitness reels" \
   --sources youtube,tiktok,instagram,x --mode cloud
-npx github:kirbudilov01/want2view-cli cloud status w2v_run_abc123
-npx github:kirbudilov01/want2view-cli cloud export w2v_run_abc123 --for codex
+npx want2view cloud status w2v_run_abc123
+npx want2view cloud export w2v_run_abc123 --for codex
 ```
 
 Give the agent:

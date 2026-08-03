@@ -18,16 +18,10 @@ PATH=/Users/kirill/.nvm/versions/node/v24.14.1/bin:$PATH npm login
 PATH=/Users/kirill/.nvm/versions/node/v24.14.1/bin:$PATH npm publish
 ```
 
-## After Publish
+## Published
 
-Update launch copy from:
-
-```bash
-npx github:kirbudilov01/want2view-cli start codex "ugc ads"
-```
-
-to:
+The package is live on npm:
 
 ```bash
-npx want2view start codex "ugc ads"
+npx want2view codex "ugc ads"
 ```

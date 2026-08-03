@@ -15,7 +15,7 @@ Short version:
 ## Demo Script
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 Then open:

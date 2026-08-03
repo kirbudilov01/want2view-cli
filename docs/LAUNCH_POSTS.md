@@ -7,7 +7,7 @@ Use these as starting copy for the public launch.
 I built an open-source CLI that gives Codex and Claude real content evidence instead of vague prompts.
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ugc ads"
+npx want2view codex "ugc ads"
 ```
 
 It creates `manifest.json`, `summary.md`, `evidence.jsonl`, `scored.csv`, and agent-ready briefs.
@@ -25,7 +25,7 @@ Repo: https://github.com/kirbudilov01/want2view-cli
 3. Try it:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ugc ads"
+npx want2view codex "ugc ads"
 ```
 
 4. You get local files your agent can inspect:
@@ -54,7 +54,7 @@ The goal is simple: give Codex, Claude, and terminal agents real content evidenc
 With one command, users can generate a local research pack:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start claude "ai video ads"
+npx want2view claude "ai video ads"
 ```
 
 The pack includes source rows, scoring, summaries, and agent-specific briefs. It works with demo data, your own CSV/JSON exports, limited public catalog samples, and authenticated WANT2VIEW Cloud/project exports.
@@ -80,7 +80,7 @@ It creates local source-of-truth packs from keyword demos, channel demos, CSV/JS
 
 Try:
 
-npx github:kirbudilov01/want2view-cli start codex "ugc ads"
+npx want2view codex "ugc ads"
 
 The output is a folder with manifest.json, summary.md, evidence.jsonl, scored.csv, and Codex/Claude briefs.
 

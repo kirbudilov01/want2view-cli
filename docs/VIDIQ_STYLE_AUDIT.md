@@ -46,6 +46,6 @@ WANT2VIEW CLI is not a separate product. It is the terminal and agent entrypoint
 
 ## Remaining Manual Steps
 
-- Publish npm so the command becomes `npx want2view start codex "ai video ads"`.
+- Publish npm so the command becomes `npx want2view codex "ai video ads"`.
 - Upload `assets/github-social-preview.png` to GitHub repository settings.
 - Add a short demo video/GIF that shows terminal -> pack -> Codex/Claude brief.
