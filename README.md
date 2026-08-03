@@ -244,8 +244,8 @@ Workflows are not separate hidden features. They are practical paths that combin
 
 | Workflow | Start with CLI | Continue in WANT2VIEW |
 | --- | --- | --- |
-| Keyword search to Codex | `start codex "ai video ads"` | Unlock deeper catalog, saved searches, and API access |
-| Channel audit to Claude | `start claude https://youtube.com/@example --channel` | Connect real channels or order a deeper audit |
+| Keyword search to Codex | `npx want2view codex "ai video ads"` | Unlock deeper catalog, saved searches, and API access |
+| Channel audit to Claude | `npx want2view claude https://youtube.com/@example --channel` | Connect real channels or order a deeper audit |
 | WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
 | Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
 
