@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.2.1
+
+WANT2VIEW CLI now has shorter npm-ready one-command aliases:
+
+- `npx want2view codex "ai video ads"`
+- `npx want2view claude https://youtube.com/@example --channel`
+
+The longer `start codex|claude` form still works. These aliases make the public npm package easier to explain on the landing page, GitHub README, launch posts, and short videos.
+
 ## v0.2.0
 
 WANT2VIEW CLI is now packaged as a production-ready one-command agent setup for Codex, Claude, and terminal agents.

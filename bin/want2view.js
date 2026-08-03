@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -104,6 +104,8 @@ function printHelp() {
 Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
 
 Usage:
+  want2view codex "<keyword>" [--channel] [--out .want2view]
+  want2view claude "<keyword>" [--channel] [--out .want2view]
   want2view start codex|claude "<keyword>" [--channel] [--out .want2view]
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
@@ -128,6 +130,8 @@ Usage:
   want2view cloud export <run_id> --for codex|claude
 
 Examples:
+  npx want2view codex "ai video ads"
+  npx want2view claude https://youtube.com/@example --channel
   npx want2view start codex "ai video ads"
   npx want2view start claude https://youtube.com/@example --channel
   npx want2view search "ai video ads" --demo
@@ -1140,6 +1144,7 @@ async function main() {
   try {
     if (!command || command === "help" || args.help) return printHelp();
     if (command === "version" || args.version) return console.log(VERSION);
+    if (command === "codex" || command === "claude") return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
     if (command === "start") return commandStart(args);
     if (command === "init") return commandInit(args);
     if (command === "import") return commandImport(args);

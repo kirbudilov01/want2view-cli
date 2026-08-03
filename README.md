@@ -19,13 +19,13 @@ WANT2VIEW CLI is an open-source connector for terminal agents. It turns keyword 
 Start free in 60 seconds. Upgrade to the same WANT2VIEW Cloud product when you need real social connectors, private projects, deeper catalog access, scheduled refreshes, API tokens, team workspaces, or custom research.
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 Also works with Claude:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
+npx want2view claude https://youtube.com/@example --channel
 ```
 
 <p align="center">
@@ -65,15 +65,15 @@ Pick your agent and run one command.
 
 | Agent | One command |
 | --- | --- |
-| Codex | `npx github:kirbudilov01/want2view-cli start codex "ai video ads"` |
-| Claude | `npx github:kirbudilov01/want2view-cli start claude "ugc ads"` |
-| Claude channel audit | `npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel` |
-| Any terminal agent | `npx github:kirbudilov01/want2view-cli start codex "your keyword"` |
+| Codex | `npx want2view codex "ai video ads"` |
+| Claude | `npx want2view claude "ugc ads"` |
+| Claude channel audit | `npx want2view claude https://youtube.com/@example --channel` |
+| Any terminal agent | `npx want2view codex "your keyword"` |
 
-Once npm is published, the same flow becomes:
+Before npm is published, use the GitHub fallback:
 
 ```bash
-npx want2view start codex "ai video ads"
+npx github:kirbudilov01/want2view-cli start codex "ai video ads"
 ```
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
@@ -98,7 +98,7 @@ WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
 ## What The Command Creates
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 Output:
@@ -196,21 +196,22 @@ WANT2VIEW Cloud adds the paid product:
 
 ## One-Command Demo
 
-Run directly from GitHub before the npm package is published:
+After npm publish:
+
+```bash
+npx want2view codex "ai video ads"
+npx want2view claude https://youtube.com/@example --channel
+npx want2view workflows keyword
+```
+
+Before npm publish, use the GitHub fallback:
 
 ```bash
 npx github:kirbudilov01/want2view-cli start codex "ai video ads"
 npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
-npx github:kirbudilov01/want2view-cli workflows keyword
 ```
 
-After npm publish, the same workflow becomes:
-
-```bash
-npx want2view start codex "ai video ads"
-```
-
-Package status: the `want2view` npm name is prepared for publishing, but this repository can already run through GitHub with `npx github:kirbudilov01/want2view-cli`.
+Package status: the `want2view` npm name is available and prepared for publishing.
 
 If the demo helps your agent stop guessing, star the repo. If you need real social connectors, private projects, deeper catalog access, API tokens, or scheduled refreshes, continue in [WANT2VIEW API Access](https://app.want2view.com/api-access).
 
