@@ -26,8 +26,8 @@ Pick any agent:
 
 ```bash
 npx want2view claude https://youtube.com/@example --channel
-npx want2view cursor "b2b saas launch"
-npx want2view openclaw "ugc ads"
+npx want2view codex "b2b saas launch" # Cursor
+npx want2view codex "ugc ads" # OpenClaw
 ```
 
 <p align="center">
@@ -69,10 +69,10 @@ Pick your agent and run one command.
 | --- | --- |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |
-| Cursor | `npx want2view cursor "b2b saas launch"` |
-| OpenClaw | `npx want2view openclaw "ugc ads"` |
+| Cursor | `npx want2view codex "b2b saas launch"` |
+| OpenClaw | `npx want2view codex "ugc ads"` |
 | Claude channel audit | `npx want2view claude https://youtube.com/@example --channel` |
-| Any terminal agent | `npx want2view agent "your keyword"` |
+| Any terminal agent | `npx want2view codex "your keyword"` |
 
 Npm is live. If the npm registry is unavailable, use the GitHub fallback:
 
@@ -84,7 +84,7 @@ The command creates a local `.want2view/exports/<pack_id>/` folder and prints th
 
 Why do agents have different commands? They all read the same WANT2VIEW evidence folder. The command only chooses the most useful handoff file:
 
-- Codex, Cursor, OpenClaw, and generic terminal agents get `codex_tasks.md`.
+- Codex, Cursor, OpenClaw, and generic terminal agents can use the Codex-style task pack: `codex_tasks.md`.
 - Claude gets `claude_brief.md`.
 - Every pack still includes `manifest.json`, `summary.md`, `evidence.jsonl`, and `scored.csv`.
 
@@ -256,8 +256,8 @@ Workflows are not separate hidden features. They are practical paths that combin
 | --- | --- | --- |
 | Keyword search to Codex | `npx want2view codex "ai video ads"` | Unlock deeper catalog, saved searches, and API access |
 | Channel audit to Claude | `npx want2view claude https://youtube.com/@example --channel` | Connect real channels or order a deeper audit |
-| Keyword research to Cursor | `npx want2view cursor "creator economy"` | Turn evidence into product, SEO, or content tasks |
-| Research pack to OpenClaw | `npx want2view openclaw "ugc ads"` | Work from the same source-of-truth files |
+| Keyword research to Cursor | `npx want2view codex "creator economy"` | Turn evidence into product, SEO, or content tasks |
+| Research pack to OpenClaw | `npx want2view codex "ugc ads"` | Work from the same source-of-truth files |
 | WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
 | Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
 
