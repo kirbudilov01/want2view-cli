@@ -1,5 +1,21 @@
 # Release Notes
 
+## v0.2.0
+
+WANT2VIEW CLI is now packaged as a production-ready one-command agent setup for Codex, Claude, and terminal agents.
+
+Highlights:
+
+- `want2view start codex|claude ...` creates a pack and prints the exact agent prompt.
+- GitHub-first setup flow modeled around a 60-second onboarding path.
+- Clear Codex, Claude, channel audit, project export, and cloud upgrade paths.
+- Prompt library, workflow recipes, launch posts, npm publish guide, and GitHub polish checklist.
+- Updated hero, terminal demo, product preview, GIF, and social preview assets.
+- Credential safety: auth commands only use trusted WANT2VIEW hosts unless explicitly overridden.
+- Stable example outputs for people who want to inspect the value before running commands.
+
+The open-source CLI remains free. WANT2VIEW Cloud unlocks managed social connectors, private projects, deeper catalog access, API tokens, scheduled refreshes, team workflows, and custom research.
+
 ## v0.1.0
 
 WANT2VIEW CLI is now a public open-source entrypoint into WANT2VIEW.

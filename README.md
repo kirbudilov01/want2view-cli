@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/kirbudilov01/want2view-cli"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-open--source-111827?style=for-the-badge&logo=github" /></a>
-  <a href="https://github.com/kirbudilov01/want2view-cli/releases/tag/v0.1.0"><img alt="Release v0.1.0" src="https://img.shields.io/github/v/release/kirbudilov01/want2view-cli?style=for-the-badge&label=release" /></a>
+  <a href="https://github.com/kirbudilov01/want2view-cli/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/kirbudilov01/want2view-cli?style=for-the-badge&label=release" /></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-28D7C7?style=for-the-badge" />
   <img alt="Node 18+" src="https://img.shields.io/badge/node-18%2B-7C5CFF?style=for-the-badge&logo=node.js" />
   <img alt="Agent ready" src="https://img.shields.io/badge/Codex%20%2B%20Claude-ready-0B0A14?style=for-the-badge" />

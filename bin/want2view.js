@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
