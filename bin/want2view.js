@@ -96,11 +96,9 @@ const RECIPES = {
     goal: "Create repeatable weekly research packs from managed social sources.",
     commands: [
       "want2view login",
-      "want2view cloud research \"fitness reels\" --sources youtube,tiktok,telegram --mode cloud",
-      "want2view cloud status w2v_run_abc123",
-      "want2view cloud export w2v_run_abc123 --for codex",
+      "want2view account research \"fitness reels weekly content strategy\" --sources youtube,tiktok,telegram --limit 30 --wait 180",
     ],
-    agent_prompt: "Read the exported WANT2VIEW account run. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
+    agent_prompt: "Read the merged WANT2VIEW account pack. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
     paid_next_step: "Upgrade the WANT2VIEW account plan when you need scheduled refreshes and team project packs.",
   },
 };
@@ -131,6 +129,9 @@ Usage:
   want2view login [--api https://api.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
+  want2view account research "<goal>" [--sources youtube,tiktok,telegram] [--limit 30] [--queries "q1,q2"]
+  want2view account status <run_id>
+  want2view account export <run_id> --for codex|claude
   want2view workflows [keyword|channel|project|monitoring] [--json]
   want2view recipes [keyword|channel|project|monitoring] [--json]
   want2view catalog categories [--limit 20]
@@ -144,7 +145,7 @@ Usage:
 
 Examples:
   npx want2view codex "ai video ads"
-  npx want2view codex-cloud "digital avatar AI services" --token w2v_...
+  npx want2view account research "AI avatar tools for SaaS content" --sources youtube,tiktok,telegram --limit 30
   codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
   npx want2view install codex
   npx want2view claude https://youtube.com/@example --channel
@@ -156,7 +157,7 @@ Examples:
   npx want2view workflows keyword
   npx want2view catalog categories
   WANT2VIEW_PUBLIC_API_KEY=... npx want2view projects list
-  WANT2VIEW_API_TOKEN=... npx want2view cloud research "fitness reels" --sources youtube,tiktok,telegram
+  WANT2VIEW_API_TOKEN=... npx want2view account research "fitness reels" --sources youtube,tiktok,telegram
 `);
 }
 
@@ -528,8 +529,8 @@ function buildAgentContract(topic, rows, manifest = {}) {
 If this is an account research pack and status is \`pending\`, run:
 
 \`\`\`bash
-want2view cloud status ${packId}
-want2view cloud export ${packId} --for codex
+want2view account status ${packId}
+want2view account export ${packId} --for codex
 \`\`\`
 
 ## Deepening Path
@@ -665,7 +666,7 @@ function commandResearch(args) {
   initWorkspace(root);
   if (!args.demo) {
     console.log("Local live connectors are intentionally limited in the OSS skeleton.");
-    console.log("Use --demo, import your own data, or run `want2view cloud research` with your WANT2VIEW account.");
+    console.log("Use --demo, import your own data, or run `want2view account research` with your WANT2VIEW account.");
     return;
   }
   const rows = DEMO_RECORDS.map((row) => normalizeRecord({ ...row, topic }, row.platform)).map(scoreRecord);
@@ -1063,10 +1064,11 @@ Start a WANT2VIEW account research run:
 
 \`\`\`bash
 npx want2view login
-npx want2view cloud research "digital avatar AI services" --sources youtube,tiktok,telegram --mode cloud --limit 30 --goal "hooks, themes, visual patterns, scripts"
-npx want2view cloud status <run_id>
-npx want2view cloud export <run_id> --for codex
+npx want2view account research "digital avatar AI services" --sources youtube,tiktok,telegram --limit 30 --goal "hooks, themes, visual patterns, scripts"
 \`\`\`
+
+For focused single-keyword runs, the lower-level commands are also available:
+\`want2view cloud research\`, \`want2view cloud status\`, and \`want2view cloud export\`.
 
 Export a WANT2VIEW project:
 
@@ -1111,7 +1113,7 @@ function commandInstall(args) {
   fs.writeFileSync(skillPath, codexSkillContent());
   console.log(`Installed Codex skill: ${skillPath}`);
   console.log("Next: open a new Codex session and ask it to use WANT2VIEW for your research.");
-  console.log("Account data: run `want2view login` and then `want2view cloud research \"your topic\" --mode cloud`.");
+  console.log("Account data: run `want2view login` and then `want2view account research \"your goal\"`.");
 }
 
 function sleep(ms) {
@@ -1189,6 +1191,257 @@ function writeCloudExport(root, payload) {
   return exportDir;
 }
 
+function parseList(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap(parseList);
+  return String(value)
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function buildAccountQueryPlan(topic, args = {}) {
+  const explicit = parseList(args.queries || args.query);
+  if (explicit.length) return [...new Set(explicit)].slice(0, parseLimit({ limit: args.query_count || args["query-count"] || explicit.length }, explicit.length, 12));
+
+  const text = String(topic || "").toLowerCase();
+  const candidates = [];
+  const add = (...items) => items.forEach((item) => candidates.push(item));
+
+  if (/(avatar|аватар|digital human|heygen|synthesia)/i.test(text)) {
+    add("AI avatar tools", "digital avatar AI services", "AI avatar method");
+  }
+  if (/(saas|tool|сервис|нейрокни|нейро|ai service|software)/i.test(text)) {
+    add("SaaS AI tools review", "AI tools for business", "нейросети сервисы обзор");
+  }
+  if (/(codex|claude|agent|агент|automation|автоматизац|mcp)/i.test(text)) {
+    add("Claude Code agents", "Codex Claude agents", "AI agent tools");
+  }
+  if (/(content|контент|factory|завод|ugc|youtube|tiktok|shorts|reels)/i.test(text)) {
+    add("AI content factory", "content factory AI", "faceless YouTube AI tools");
+  }
+
+  add(String(topic).trim());
+  return [...new Set(candidates.filter(Boolean))].slice(0, parseLimit({ limit: args.query_count || args["query-count"] }, 10, 12));
+}
+
+function evidenceRowsFromExportPayload(payload) {
+  const text = String(payload.files?.["evidence.jsonl"] || "");
+  return text.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+}
+
+function accountRelevance(row, topic, queries) {
+  const rowText = [row.title, row.text, row.account, row.platform].join(" ").toLowerCase();
+  const wanted = [
+    "ai", "claude", "codex", "agent", "avatar", "saas", "tool", "automation", "content",
+    "neural", "нейро", "ии", "сервис", "аватар", "контент", "автоматизац", "агент",
+  ];
+  const title = String(row.title || "");
+  const excludedPhysicalFactory = /(ice cream|smartwatch|manufacturing|factory tour|assembly line|mining factory|roblox|rare avatar)/i.test(title);
+  const hasAiSignal = wanted.some((token) => rowText.includes(token));
+  return hasAiSignal && !excludedPhysicalFactory;
+}
+
+function dedupeAccountRows(rows, topic, queries) {
+  const seen = new Set();
+  const filtered = [];
+  for (const row of rows) {
+    if (!accountRelevance(row, topic, queries)) continue;
+    const key = String(row.url || row.id || row.title || "").toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    filtered.push(row);
+  }
+  return filtered.sort((a, b) => Number(b.score || b.views || 0) - Number(a.score || a.views || 0));
+}
+
+function accountCatalogCategories(topic, queries) {
+  const text = [topic, ...(queries || [])].join(" ").toLowerCase();
+  const categories = [];
+  if (/(ai|claude|codex|agent|avatar|saas|tool|automation|content|neural|нейро|ии|аватар|контент)/i.test(text)) {
+    categories.push("ai");
+  }
+  return [...new Set(categories)];
+}
+
+async function fetchAccountCatalogRows(base, topic, queries, limit) {
+  const categories = accountCatalogCategories(topic, queries);
+  const rows = [];
+  for (const category of categories) {
+    const data = await requestJson(`${base}/public/api/v1/catalog/categories/${encodeURIComponent(category)}/videos?language=en&limit=${Math.min(50, Math.max(20, limit))}`);
+    for (const item of data.items || []) {
+      rows.push(scoreRecord(normalizeRecord({
+        id: item.video_id,
+        platform: "youtube",
+        account: item.channel_title,
+        title: item.title,
+        url: item.url,
+        views: item.views,
+        likes: item.likes,
+        comments: item.comments,
+        published_at: item.published_at,
+        text: item.description,
+        thumbnail: item.thumbnail,
+        topic: `catalog:${category}`,
+      }, "catalog")));
+    }
+  }
+  return rows;
+}
+
+async function startAccountRun(base, token, topic, args = {}, perQueryLimit = 10) {
+  const payload = {
+    topic,
+    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"],
+    mode: args.mode === "demo" ? "demo" : "cloud",
+    kind: "outliers",
+    language: args.language || "en",
+    region_code: args.region || args.region_code || "US",
+    lookback_hours: Number(args.lookback || args.lookback_hours || 72),
+    limit: Number(perQueryLimit || args.limit || 30),
+    content_type: args.content_type || "all",
+    agent_goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
+  };
+  return await requestJson(`${base}/api/v1/developer/cloud/research`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+async function getAccountRunStatus(base, token, runId) {
+  return await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(runId)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+async function exportAccountRun(base, token, runId, target = "codex") {
+  return await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(runId)}/export?target=${target}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+async function runAccountResearchPlan({ base, token, root, topic, target = "codex", args = {}, quiet = false }) {
+  initWorkspace(root);
+  const limit = parseLimit(args, 30, 200);
+  const queries = buildAccountQueryPlan(topic, args);
+  const perQueryLimit = Math.max(10, Number(args["per-query-limit"] || args.per_query_limit || 0), Math.ceil(limit / Math.max(1, queries.length)));
+  const waitSeconds = Number(args.wait ?? args["wait-seconds"] ?? 180);
+  const deadline = Date.now() + Math.max(0, waitSeconds) * 1000;
+  const runs = [];
+
+  for (const [index, query] of queries.entries()) {
+    const start = await startAccountRun(base, token, query, args, perQueryLimit);
+    runs.push({ query, run_id: start.run_id, status: start.status, records: start.records || 0, warnings: start.warnings || [] });
+    if (!quiet) console.log(`Started ${index + 1}/${queries.length}: ${query} -> ${start.run_id} (${start.status})`);
+  }
+
+  while (Date.now() < deadline) {
+    let allTerminal = true;
+    for (const run of runs) {
+      if (["completed", "partial", "failed"].includes(String(run.status))) continue;
+      const latest = await getAccountRunStatus(base, token, run.run_id);
+      run.status = latest.status;
+      run.records = latest.records || 0;
+      run.warnings = latest.warnings || [];
+      run.source_statuses = latest.source_statuses || {};
+      if (!["completed", "partial", "failed"].includes(String(run.status))) allTerminal = false;
+    }
+    if (allTerminal) break;
+    await sleep(5000);
+  }
+
+  const exports = [];
+  for (const run of runs) {
+    try {
+      const payload = await exportAccountRun(base, token, run.run_id, target);
+      exports.push(payload);
+      run.exported = true;
+      run.records = payload.manifest?.records ?? run.records;
+      run.status = payload.manifest?.status || run.status;
+      run.source_statuses = payload.manifest?.source_statuses || run.source_statuses || {};
+      run.warnings = payload.manifest?.warnings || run.warnings || [];
+    } catch (error) {
+      run.exported = false;
+      run.export_error = error.message;
+    }
+  }
+
+  const allRows = exports.flatMap(evidenceRowsFromExportPayload);
+  let rows = dedupeAccountRows(allRows, topic, queries);
+  const sourceStatuses = {};
+  const warnings = [];
+  for (const run of runs) {
+    Object.entries(run.source_statuses || {}).forEach(([source, status]) => {
+      sourceStatuses[source] = sourceStatuses[source] === "completed" ? sourceStatuses[source] : status;
+    });
+    (run.warnings || []).forEach((warning) => warnings.push(`[${run.query}] ${warning}`));
+    if (run.export_error) warnings.push(`[${run.query}] Export failed: ${run.export_error}`);
+  }
+  if (rows.length < Number(args["min-records"] || args.min_records || 8)) {
+    try {
+      const catalogRows = await fetchAccountCatalogRows(base, topic, queries, limit);
+      const before = rows.length;
+      rows = dedupeAccountRows([...rows, ...catalogRows], topic, queries);
+      if (rows.length > before) {
+        warnings.push(`Free public catalog fallback added ${rows.length - before} AI records because live account runs returned thin evidence.`);
+      }
+    } catch (error) {
+      warnings.push(`Public catalog fallback failed: ${error.message}`);
+    }
+  }
+  if (!rows.length) {
+    warnings.push("No relevant records were found after query planning. Try --queries with shorter buyer-language keywords.");
+  }
+  rows = rows.slice(0, limit);
+
+  const packId = `account-${slugify(topic)}-${Date.now()}`;
+  const status = rows.length ? (runs.some((run) => run.status === "partial" || run.status === "failed") ? "partial" : "completed") : "failed";
+  const manifest = {
+    pack_id: packId,
+    target,
+    topic,
+    status,
+    records: rows.length,
+    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"],
+    query_plan: queries,
+    runs,
+    source_statuses: sourceStatuses,
+    warnings: [...new Set(warnings)],
+    agent_goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
+    next_commands: [
+      `want2view account research ${JSON.stringify(topic)} --sources ${(parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"]).join(",")} --limit ${limit}`,
+    ],
+    generated_at: new Date().toISOString(),
+  };
+  const summary = `# WANT2VIEW Account Research Pack: ${topic}
+
+## Coverage
+
+- Records: ${rows.length}
+- Queries: ${queries.join(", ")}
+- Status: ${status}
+
+## Top Signals
+
+${rows.slice(0, 10).map((row, index) => `${index + 1}. ${row.title} (${row.platform || "unknown"}, score ${row.score ?? "n/a"}) ${row.url || ""}`).join("\n")}
+
+## Source Notes
+
+${manifest.warnings.length ? manifest.warnings.map((warning) => `- ${warning}`).join("\n") : "- No warnings."}
+`;
+  const files = {
+    "manifest.json": JSON.stringify(manifest, null, 2),
+    "query_plan.json": JSON.stringify({ topic, queries, runs }, null, 2),
+    "summary.md": summary,
+    "evidence.jsonl": recordsToEvidence(rows),
+    "scored.csv": toCsv(rows),
+    [target === "codex" ? "codex_tasks.md" : "claude_brief.md"]: target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows),
+  };
+  const exportDir = writePack(root, packId, target, files, { quiet });
+  return { export_dir: exportDir, manifest, rows };
+}
+
 function mcpText(text, structuredContent = {}, meta = {}) {
   return {
     structuredContent,
@@ -1246,7 +1499,7 @@ async function commandMcp(args) {
     { name: "want2view", version: VERSION },
     {
       instructions:
-        "WANT2VIEW is the evidence layer for content research. Use create_research, get_status, export_pack, get_subtitles, and search_telegram to collect source rows, then synthesize hooks, themes, visual patterns, scripts, and market briefs. Do not invent metrics; cite evidence IDs/URLs. Report partial/pending source status before recommendations.",
+        "WANT2VIEW is the evidence layer for content research. For broad user goals, use create_research_plan so WANT2VIEW can split the goal into short platform queries, wait, export, and merge one evidence pack. For focused keywords, use create_research, get_status, export_pack, get_subtitles, and search_telegram. Then synthesize hooks, themes, visual patterns, scripts, and market briefs. Do not invent metrics; cite evidence IDs/URLs. Report partial/pending source status before recommendations.",
     }
   );
 
@@ -1260,20 +1513,90 @@ async function commandMcp(args) {
         version: z.string(),
         api_base_url: z.string(),
         workspace: z.string(),
-        auth: z.object({ developer_token: z.boolean(), public_api_key: z.boolean() }),
+        auth: z.object({
+          developer_token: z.boolean(),
+          developer_token_verified: z.boolean(),
+          public_api_key: z.boolean(),
+          username: z.string().nullable().optional(),
+          user_id: z.number().nullable().optional(),
+          error: z.string().nullable().optional(),
+        }),
       },
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     },
     async () => {
       const { root, base, token, publicKey } = mcpAuthContext(args);
-      return mcpText("WANT2VIEW MCP connector is available.", {
+      const auth = {
+        developer_token: Boolean(token),
+        developer_token_verified: false,
+        public_api_key: Boolean(publicKey),
+        username: null,
+        user_id: null,
+        error: null,
+      };
+      if (token) {
+        try {
+          const me = await verifyToken(base, token);
+          auth.developer_token_verified = true;
+          auth.username = me.username || null;
+          auth.user_id = me.user_id || null;
+        } catch (error) {
+          auth.error = error.message;
+        }
+      }
+      return mcpText(auth.developer_token_verified ? "WANT2VIEW MCP connector is ready." : "WANT2VIEW MCP connector needs a valid developer token.", {
         version: VERSION,
         api_base_url: base,
         workspace: root,
-        auth: {
-          developer_token: Boolean(token),
-          public_api_key: Boolean(publicKey),
+        auth,
+      });
+    }
+  );
+
+  server.registerTool(
+    "create_research_plan",
+    {
+      title: "Create account research plan",
+      description: "Run a broad WANT2VIEW account research goal end-to-end: split into short queries, wait for source jobs, export runs, merge one evidence pack, and return the local path.",
+      inputSchema: {
+        topic: z.string().min(1).describe("Broad research goal or market question."),
+        sources: z.array(z.enum(["youtube", "tiktok", "telegram"])).optional(),
+        goal: z.string().optional().describe("What the agent should synthesize from the merged pack."),
+        queries: z.array(z.string()).optional().describe("Optional exact short queries to run instead of auto-planning."),
+        limit: z.number().int().min(1).max(200).optional(),
+        wait_seconds: z.number().int().min(0).max(600).optional(),
+        workspace: z.string().optional(),
+        language: z.string().optional(),
+        region_code: z.string().optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ topic, sources, goal, queries, limit, wait_seconds, workspace, language, region_code }) => {
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const root = workspace ? path.resolve(workspace) : workspacePath(args);
+      const result = await runAccountResearchPlan({
+        base,
+        token,
+        root,
+        topic,
+        target: "codex",
+        quiet: true,
+        args: {
+          sources: sources?.join(","),
+          queries: queries?.join(","),
+          limit,
+          wait: wait_seconds ?? 180,
+          goal,
+          language,
+          region_code,
+          mode: "cloud",
         },
+      });
+      return mcpText(`Created merged WANT2VIEW account pack at ${result.export_dir}.`, {
+        export_dir: result.export_dir,
+        manifest: result.manifest,
+        rows: result.rows.length,
       });
     }
   );
@@ -1449,7 +1772,7 @@ async function commandMcp(args) {
   await server.connect(transport);
 }
 
-function writePack(root, packId, target, files) {
+function writePack(root, packId, target, files, options = {}) {
   const exportDir = path.join(root, "exports", packId);
   ensureDir(exportDir);
   const manifest = files["manifest.json"] ? JSON.parse(String(files["manifest.json"])) : { pack_id: packId, target, topic: packId, status: "completed" };
@@ -1462,7 +1785,7 @@ function writePack(root, packId, target, files) {
   for (const [fileName, content] of Object.entries(files)) {
     fs.writeFileSync(path.join(exportDir, fileName), String(content));
   }
-  console.log(`Exported ${target} context pack: ${exportDir}`);
+  if (!options.quiet) console.log(`Exported ${target} context pack: ${exportDir}`);
   return exportDir;
 }
 
@@ -1691,6 +2014,51 @@ async function commandCloud(args) {
   throw new Error("Unknown cloud command. Use `cloud research`, `cloud status`, or `cloud export`.");
 }
 
+async function commandAccount(args) {
+  const action = args._[1] || "research";
+  if (action === "status") return await commandCloud({ ...args, _: ["cloud", "status", ...args._.slice(2)] });
+  if (action === "export") return await commandCloud({ ...args, _: ["cloud", "export", ...args._.slice(2)] });
+  if (action !== "research") {
+    throw new Error("Unknown account command. Use `account research`, `account status`, or `account export`.");
+  }
+
+  const topic = args._[2] || "";
+  if (!topic) {
+    throw new Error("Missing goal. Example: want2view account research \"AI avatar tools for SaaS content\"");
+  }
+  const base = credentialApiBaseUrl(args);
+  const passedToken = String(args.token || "").trim();
+  if (passedToken) {
+    saveUserToken(base, passedToken);
+    console.log(`Saved WANT2VIEW API token to ${userConfigPath()}`);
+  }
+  const token = passedToken || apiToken();
+  if (!token) {
+    console.log("Account research needs WANT2VIEW_API_TOKEN.");
+    console.log("Open WANT2VIEW API Access, copy the one-command setup, or run `want2view login --token w2v_...`.");
+    process.exitCode = 2;
+    return;
+  }
+
+  const root = workspacePath(args);
+  const target = String(args.for || "codex").toLowerCase();
+  if (!["codex", "claude"].includes(target)) throw new Error("Use --for codex|claude");
+
+  const plan = buildAccountQueryPlan(topic, args);
+  console.log(`Account research goal: ${topic}`);
+  console.log(`Query plan: ${plan.join(" | ")}`);
+  console.log(`Sources: ${(parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"]).join(", ")}`);
+  const result = await runAccountResearchPlan({ base, token, root, topic, target, args });
+  console.log(`Merged account pack: ${result.export_dir}`);
+  console.log(`Records: ${result.rows.length}`);
+  if (result.manifest.warnings?.length) {
+    result.manifest.warnings.slice(0, 8).forEach((warning) => console.log(`Warning: ${warning}`));
+  }
+  console.log("");
+  console.log("Open Codex and say:");
+  console.log(`Use the WANT2VIEW pack at ${result.export_dir} as source of truth. Analyze hooks, themes, visual patterns, concepts, competitors, and scripts. Cite evidence rows.`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const command = args._[0];
@@ -1700,6 +2068,7 @@ async function main() {
     if (AGENT_TARGETS[command]) return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
     if (command === "codex-cloud") return await commandCodexCloud(args);
     if (command === "mcp") return await commandMcp(args);
+    if (command === "account") return await commandAccount(args);
     if (command === "start") return commandStart(args);
     if (command === "install") return commandInstall(args);
     if (command === "init") return commandInit(args);

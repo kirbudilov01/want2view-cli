@@ -19,9 +19,11 @@ export WANT2VIEW_API_TOKEN="w2v_your_token"
 Then:
 
 ```bash
-npx want2view cloud research "ai video ads" \
-  --sources youtube,tiktok,telegram --mode cloud
+npx want2view account research "ai video ads" \
+  --sources youtube,tiktok,telegram --limit 30 --wait 180
 ```
+
+For broad goals, `account research` creates a short query plan, waits for the underlying runs, exports them, and merges one pack for Codex/Claude. The lower-level `cloud research/status/export` commands remain available for exact keywords.
 
 ## Public API Key
 

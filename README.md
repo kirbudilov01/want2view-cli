@@ -188,7 +188,7 @@ Copy these after running `start`.
 | Export public catalog evidence | `catalog export ai --for codex` | Gives an agent-readable sample pack from public catalog data |
 | Use your own WANT2VIEW projects | `projects list` | Requires `WANT2VIEW_PUBLIC_API_KEY` from API Access |
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
-| Run account research | `login` then `cloud research --mode cloud` | Uses the same sources and limits as your WANT2VIEW account |
+| Run account research | `login` then `account research "goal"` | Splits broad goals into short queries, waits, exports, and merges one pack inside your account limits |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
 | Pick a ready workflow | `workflows keyword` | Shows commands, agent prompt, and WANT2VIEW next step |
 
@@ -287,7 +287,7 @@ Workflows are not separate hidden features. They are practical paths that combin
 | Keyword research to Cursor | `npx want2view codex "creator economy"` | Turn evidence into product, SEO, or content tasks |
 | Research pack to OpenClaw | `npx want2view codex "ugc ads"` | Work from the same source-of-truth files |
 | WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
-| Content team monitoring | `cloud research "category" --mode cloud` | Run inside account limits; paid plans add refreshes and team packs |
+| Content team monitoring | `account research "category"` | Run inside account limits; paid plans add refreshes and team packs |
 
 Full copy-paste workflows live in [docs/RECIPES.md](./docs/RECIPES.md).
 
@@ -349,12 +349,18 @@ This is the bridge from GitHub discovery into the real WANT2VIEW product: the CL
 
 ## Account Research
 
-Once authenticated, the CLI can ask your WANT2VIEW account to run managed social collection:
+Once authenticated, the CLI can ask your WANT2VIEW account to run managed social collection. Use this for broad Codex/Claude tasks:
 
 ```bash
-npx want2view cloud research "fitness reels" \
-  --sources youtube,tiktok,telegram --mode cloud
+npx want2view account research "fitness reels content strategy" \
+  --sources youtube,tiktok,telegram --limit 30 --wait 180
+```
 
+The account command creates a short query plan, starts several focused WANT2VIEW runs, waits for source jobs, exports the finished runs, and merges one evidence pack for the agent.
+
+Low-level run commands remain available when you already know the exact keyword:
+
+```bash
 npx want2view cloud status w2v_run_abc123
 npx want2view cloud export w2v_run_abc123 --for codex
 ```
@@ -438,14 +444,17 @@ Recommended columns:
 | `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
 | `want2view project export <id> --for codex` | Export your internal project to Codex/Claude |
 | `want2view install codex` | Install the WANT2VIEW research skill into local Codex |
+| `want2view account research "goal"` | Plan, run, wait, export, and merge account research for an agent |
+| `want2view account status <run_id>` | Poll an underlying account research run |
+| `want2view account export <run_id> --for codex` | Download an underlying account context pack |
 | `want2view research "topic" --demo` | Backward-compatible alias for local demo research |
 | `want2view import ./file.csv` | Bring your own data |
 | `want2view score` | Score local records |
 | `want2view export --for codex` | Create Codex pack |
 | `want2view export --for claude` | Create Claude brief |
-| `want2view cloud research "topic" --mode cloud` | Start managed WANT2VIEW account research |
-| `want2view cloud status <run_id>` | Poll account research run |
-| `want2view cloud export <run_id> --for codex` | Download account context pack |
+| `want2view cloud research "topic" --mode cloud` | Low-level focused run used by `account research` |
+| `want2view cloud status <run_id>` | Backward-compatible status alias |
+| `want2view cloud export <run_id> --for codex` | Backward-compatible export alias |
 
 ## Account Plan Boundary
 
