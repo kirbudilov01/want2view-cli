@@ -1284,7 +1284,7 @@ async function commandMcp(args) {
       description: "Start a WANT2VIEW cloud research run for a topic. Use this before analysis when the user gives a research goal.",
       inputSchema: {
         topic: z.string().min(1).describe("Research topic, keyword, category, or market."),
-        sources: z.array(z.enum(["youtube", "tiktok", "instagram", "x", "reddit", "threads", "telegram"])).optional(),
+        sources: z.array(z.enum(["youtube", "tiktok", "telegram"])).optional(),
         goal: z.string().optional().describe("What the agent should synthesize from the pack."),
         mode: z.enum(["demo", "cloud"]).optional(),
         limit: z.number().int().min(1).max(200).optional(),
@@ -1299,7 +1299,7 @@ async function commandMcp(args) {
       const token = requireMcpToken();
       const payload = {
         topic,
-        sources: sources?.length ? sources : ["youtube"],
+        sources: sources?.length ? sources : ["youtube", "tiktok", "telegram"],
         mode: mode || "cloud",
         kind: "outliers",
         language: language || "en",
