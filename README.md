@@ -19,14 +19,14 @@ WANT2VIEW CLI is the open-source agent interface for your WANT2VIEW account. It 
 Start from your WANT2VIEW account in 60 seconds. CLI and MCP do not create a separate pricing model: they are the agent interface to the same dashboard limits, sources, projects, and API access.
 
 ```bash
-npx want2view codex "ai video ads"
+npx -y github:kirbudilov01/want2view-cli account research "AI SaaS avatar content factory" --sources youtube,tiktok,telegram --limit 30
 ```
 
 Connect live tools to Codex:
 
 ```bash
-npx want2view install codex
-codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
+npx -y github:kirbudilov01/want2view-cli install codex
+codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y github:kirbudilov01/want2view-cli mcp
 ```
 
 Pick any agent:
@@ -73,15 +73,15 @@ npx want2view codex "ugc ads" # OpenClaw
 For Codex, install the skill once, connect MCP from API Access, then let Codex run research through your WANT2VIEW account.
 
 ```bash
-npx want2view install codex
+npx -y github:kirbudilov01/want2view-cli install codex
 ```
 
 Then pick your agent and run one command.
 
 | Agent | One command |
 | --- | --- |
-| Codex MCP tools | `codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp` |
-| Codex setup | `npx want2view install codex` |
+| Codex MCP tools | `codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y github:kirbudilov01/want2view-cli mcp` |
+| Codex setup | `npx -y github:kirbudilov01/want2view-cli install codex` |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |
 | Cursor | `npx want2view codex "b2b saas launch"` |
@@ -92,7 +92,7 @@ Then pick your agent and run one command.
 If npm lags behind the GitHub repo, use the GitHub fallback:
 
 ```bash
-npx want2view codex "ai video ads"
+npx -y github:kirbudilov01/want2view-cli account research "AI SaaS avatar content factory" --sources youtube,tiktok,telegram --limit 30 --wait 180
 ```
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
@@ -100,7 +100,8 @@ The command creates a local `.want2view/exports/<pack_id>/` folder and prints th
 MCP mode exposes WANT2VIEW as live tools:
 
 - `doctor` checks auth and connector state.
-- `create_research` starts a WANT2VIEW account research run.
+- `create_research_plan` turns a business goal into short source queries, waits, exports, and merges one evidence pack.
+- `create_research` starts a focused WANT2VIEW account research run.
 - `get_status` checks source status and record counts.
 - `export_pack` downloads an agent-ready evidence pack.
 - `get_subtitles` queues/reads the subtitles + scenario pipeline for selected videos.
