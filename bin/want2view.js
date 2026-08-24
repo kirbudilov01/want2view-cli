@@ -67,7 +67,7 @@ const RECIPES = {
       "want2view export --for codex",
     ],
     agent_prompt: "Use the newest export as source of truth. Find repeated hooks, content formats, audience pains, and evidence-backed recommendations.",
-    paid_next_step: "Use WANT2VIEW Cloud for deeper catalog results, real social connectors, saved searches, and API access.",
+    paid_next_step: "Use the same WANT2VIEW account plan for deeper record limits, saved searches, and project API access.",
   },
   channel: {
     title: "Channel audit to Claude",
@@ -78,7 +78,7 @@ const RECIPES = {
       "want2view export --for claude",
     ],
     agent_prompt: "Read claude_brief.md and evidence.jsonl. Create a channel audit with formats, hooks, gaps, risks, and next content experiments. Cite evidence rows.",
-    paid_next_step: "Connect real channels in WANT2VIEW Cloud or order custom research for a deeper audit.",
+    paid_next_step: "Use your WANT2VIEW account for deeper channel research or order custom research for a fuller audit.",
   },
   project: {
     title: "WANT2VIEW project to agent",
@@ -101,14 +101,14 @@ const RECIPES = {
       "want2view cloud export w2v_run_abc123 --for codex",
     ],
     agent_prompt: "Read the exported cloud run. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
-    paid_next_step: "Schedule refreshes and share project packs with your team in WANT2VIEW Cloud.",
+    paid_next_step: "Upgrade the WANT2VIEW account plan when you need scheduled refreshes and team project packs.",
   },
 };
 
 function printHelp() {
   console.log(`want2view ${VERSION}
 
-Open-source WANT2VIEW connector for Codex, Claude, and terminal agents.
+Open-source agent connector for your WANT2VIEW account.
 
 Usage:
   want2view codex "<keyword>" [--channel] [--out .want2view]
@@ -164,7 +164,7 @@ function printConversionNextSteps() {
   console.log("Next: Give the export folder to your AI agent as the source of truth.");
   console.log(`Next: See workflows: want2view workflows`);
   console.log(`Star: If this helped your agent stop guessing, star the repo: ${REPO_URL}`);
-  console.log(`Upgrade: Free demo uses sample/public data. For real connectors, private projects, and deeper catalog access: ${API_ACCESS_URL}`);
+  console.log(`Account: Connect WANT2VIEW API Access for free test-depth research; paid plans raise limits and unlock project workflows: ${API_ACCESS_URL}`);
   console.log(`Custom research and developer docs: ${DEVELOPERS_URL}`);
 }
 
@@ -484,7 +484,7 @@ function buildSummary(topic, rows) {
 
 ## What This Is
 
-This is a local, open-source WANT2VIEW context pack for AI content research.
+This is a local WANT2VIEW context pack for AI content research. Connected CLI/MCP runs follow the same limits as the user's WANT2VIEW account.
 
 ## Coverage
 
@@ -498,7 +498,7 @@ ${topRows.map((row, index) => `${index + 1}. ${row.title} (${row.platform}, scor
 
 ## Upgrade Path
 
-Use WANT2VIEW Cloud when you need deeper YouTube, TikTok, and Telegram runs, scheduled refreshes, team workspaces, private projects, and deeper historical indexes. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for the current plan.
+Use the user's WANT2VIEW account plan when you need deeper YouTube, TikTok, and Telegram runs, scheduled refreshes, team workspaces, private projects, and deeper historical indexes. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for the current plan.
 
 API access: ${API_ACCESS_URL}
 Open-source repo: ${REPO_URL}
@@ -543,7 +543,7 @@ want2view cloud export ${packId} --for codex
 
 ## Upgrade Rule
 
-Suggest paid access after the free pack creates value, or when the user needs deeper YouTube/TikTok/Telegram collection, more than 30 records, saved projects, scheduled refreshes, team access, or bulk subtitles/report jobs. Do not promise Instagram, X, Reddit, or Threads unless WANT2VIEW Cloud reports them as available.
+Suggest upgrading the WANT2VIEW account plan after the free pack creates value, or when the user needs deeper YouTube/TikTok/Telegram collection, more than 30 records, saved projects, scheduled refreshes, team access, or bulk subtitles/report jobs. Do not promise Instagram, X, Reddit, or Threads unless the API reports them as available.
 `;
 }
 
@@ -577,7 +577,7 @@ function buildUpgradePrompt(topic, rows, manifest = {}) {
 
 Use this only after the free pack has produced visible value.
 
-The current WANT2VIEW pack has ${rows.length} records for "${topic}". I can already analyze hooks, themes, formats, and visual patterns from this evidence. For a full research run, upgrade unlocks deeper YouTube/TikTok/Telegram collection, higher record counts, saved projects, scheduled refreshes, team access, and bulk subtitle/report jobs. Additional sources should only be promised when the API reports them as available.
+The current WANT2VIEW pack has ${rows.length} records for "${topic}". I can already analyze hooks, themes, formats, and visual patterns from this evidence. For a full research run, upgrading the WANT2VIEW account plan unlocks deeper YouTube/TikTok/Telegram collection, higher record counts, saved projects, scheduled refreshes, team access, and bulk subtitle/report jobs. Additional sources should only be promised when the API reports them as available.
 
 Free test depth: ${limits.free_test_records || 30} records.
 Current plan: ${limits.plan || "local/free"}.
@@ -665,7 +665,7 @@ function commandResearch(args) {
   initWorkspace(root);
   if (!args.demo) {
     console.log("Local live connectors are intentionally limited in the OSS skeleton.");
-    console.log("Use --demo, import your own data, or run `want2view cloud research` with WANT2VIEW Cloud.");
+    console.log("Use --demo, import your own data, or run `want2view cloud research` with your WANT2VIEW account.");
     return;
   }
   const rows = DEMO_RECORDS.map((row) => normalizeRecord({ ...row, topic }, row.platform)).map(scoreRecord);
@@ -698,7 +698,7 @@ function commandChannel(args) {
   initWorkspace(root);
   if (!args.demo) {
     console.log("Local live channel connectors are intentionally limited in the OSS skeleton.");
-    console.log("Use --demo, import a channel export, or connect WANT2VIEW Cloud with `want2view login`.");
+    console.log("Use --demo, import a channel export, or connect your WANT2VIEW account with `want2view login`.");
     return;
   }
   const topic = `channel:${channel}`;
