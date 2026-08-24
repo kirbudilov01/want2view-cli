@@ -439,6 +439,9 @@ function normalizeRecord(row, source = "import") {
     likes: Number(row.likes || row.like_count || 0) || 0,
     comments: Number(row.comments || row.comment_count || 0) || 0,
     published_at: row.published_at || row.date || "",
+    thumbnail: row.thumbnail || row.thumbnail_url || "",
+    duration_seconds: safeInt(row.duration_seconds || row.duration),
+    subtitle_available: Boolean(row.subtitle_available || row.has_subtitles || false),
     imported_at: new Date().toISOString(),
   };
   return normalized;
@@ -452,6 +455,88 @@ function scoreRecord(row) {
     ...row,
     score: Math.round(Math.min(100, reach + density)),
     score_reason: "Weighted reach plus engagement density.",
+  };
+}
+
+function safeInt(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? Math.trunc(number) : 0;
+}
+
+function inferHookType(title = "") {
+  const text = String(title || "").toLowerCase();
+  if (/( vs |versus|compared|comparison|battle|сравнил|против)/i.test(text)) return "versus";
+  if (/(i let|we let|i tested|tested|experiment|я протест|эксперимент)/i.test(text)) return "experiment";
+  if (/(new #1|#1|breakthrough|just dropped|released|новый|релиз)/i.test(text)) return "breakthrough";
+  if (/(danger|war|takeover|experts warned|опасн|угроз|захват)/i.test(text)) return "future_risk";
+  if (/(how to|guide|course|tutorial|from scratch|гайд|курс|с нуля)/i.test(text)) return "tutorial";
+  if (/(best|top|tools|лучшие|топ)/i.test(text)) return "ranked_list";
+  return "observation";
+}
+
+function inferFormatType(title = "", text = "") {
+  const combined = `${title} ${text}`.toLowerCase();
+  if (/(review|honest breakdown|обзор|разбор)/i.test(combined)) return "review";
+  if (/( vs |versus|comparison|battle|сравнил)/i.test(combined)) return "battle";
+  if (/(i let|we let|i tested|experiment|я протест)/i.test(combined)) return "experiment";
+  if (/(course|guide|tutorial|how to|гайд|курс)/i.test(combined)) return "tutorial";
+  if (/(news|released|drops|breakthrough|новости|релиз)/i.test(combined)) return "news";
+  if (/(case study|earned|built|создал|кейс)/i.test(combined)) return "case";
+  return "signal";
+}
+
+function inferTitlePattern(title = "") {
+  const hookType = inferHookType(title);
+  if (hookType === "versus") return "X vs Y comparison with a clear winner or tradeoff";
+  if (hookType === "experiment") return "First-person experiment with a surprising outcome";
+  if (hookType === "breakthrough") return "New tool/model breakthrough framed as urgent news";
+  if (hookType === "future_risk") return "Future scenario or risk story that creates curiosity";
+  if (hookType === "tutorial") return "Complete guide promising a usable skill or workflow";
+  if (hookType === "ranked_list") return "Ranked list of tools, methods, or opportunities";
+  return "Curiosity-led AI market observation";
+}
+
+function channelAuthority(views = 0, likes = 0, comments = 0) {
+  if (views >= 500000 || likes >= 20000) return "high";
+  if (views >= 100000 || likes >= 5000 || comments >= 500) return "medium";
+  if (views >= 25000) return "emerging";
+  return "low";
+}
+
+function contentLengthType(row = {}) {
+  const duration = safeInt(row.duration_seconds || row.duration);
+  if (duration <= 0) return "unknown";
+  if (duration <= 90) return "short";
+  if (duration >= 480) return "long";
+  return "mid";
+}
+
+function enrichAgentRecord(record = {}) {
+  const title = String(record.title || "");
+  const text = String(record.text || record.description || "");
+  const views = safeInt(record.views);
+  const likes = safeInt(record.likes);
+  const comments = safeInt(record.comments);
+  const score = Number(record.score || 0);
+  const hookType = inferHookType(title);
+  const formatType = inferFormatType(title, text);
+  const relevanceScore = Math.min(100, Math.round(score * 0.55 + Math.min(40, title.length * 0.8) + (hookType !== "observation" ? 10 : 0)));
+  const confidence = relevanceScore >= 75 && views >= 100000 ? "high" : relevanceScore >= 45 ? "medium" : "low";
+  return {
+    ...record,
+    thumbnail: record.thumbnail || record.thumbnail_url || "",
+    duration_seconds: safeInt(record.duration_seconds || record.duration),
+    content_length_type: contentLengthType(record),
+    transcript_status: record.transcript_status || "unknown",
+    subtitle_available: Boolean(record.subtitle_available || record.has_subtitles || false),
+    hook_type: hookType,
+    format_type: formatType,
+    title_pattern: inferTitlePattern(title),
+    channel_authority: channelAuthority(views, likes, comments),
+    relevance_score: relevanceScore,
+    confidence,
+    why_selected: `${hookType} / ${formatType}; ${views} views; score ${score}.`,
+    agent_usefulness: "Use this row to infer hooks, title framing, topic demand, competitor positioning, and script angles. Do not treat it as transcript-level proof unless subtitles are available.",
   };
 }
 
@@ -470,7 +555,11 @@ function loadRows(root) {
 }
 
 function toCsv(rows) {
-  const headers = ["id", "platform", "account", "title", "url", "views", "likes", "comments", "score", "score_reason"];
+  const headers = [
+    "id", "platform", "account", "title", "url", "thumbnail", "views", "likes", "comments",
+    "score", "relevance_score", "confidence", "hook_type", "format_type", "title_pattern",
+    "content_length_type", "channel_authority", "subtitle_available", "why_selected", "score_reason",
+  ];
   const escape = (value) => {
     const text = String(value ?? "");
     return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
@@ -572,6 +661,113 @@ ${commands}
 `;
 }
 
+function countBy(rows, field) {
+  return rows.reduce((acc, row) => {
+    const key = row[field] || "unknown";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function buildSourceDiagnostics(manifest = {}, rows = []) {
+  const sources = Array.isArray(manifest.sources) ? manifest.sources : [];
+  const byPlatform = countBy(rows, "platform");
+  const warnings = Array.isArray(manifest.warnings) ? manifest.warnings : [];
+  return {
+    status: manifest.status || "completed",
+    job_state: manifest.job_state || {
+      queued: false,
+      collecting: false,
+      partial: manifest.status === "partial",
+      fallback_used: warnings.some((warning) => /fallback|catalog/i.test(String(warning))),
+      ready: ["completed", "partial"].includes(String(manifest.status || "completed")),
+    },
+    sources: sources.map((source) => ({
+      source,
+      status: manifest.source_statuses?.[source] || (byPlatform[source] ? "completed" : "empty_or_not_returned"),
+      records: byPlatform[source] || 0,
+    })),
+    rows_by_platform: byPlatform,
+    warnings,
+    quality_gates: {
+      records: rows.length,
+      has_thumbnails: rows.some((row) => row.thumbnail),
+      has_subtitles: rows.some((row) => row.subtitle_available),
+      has_hook_types: rows.some((row) => row.hook_type),
+      has_format_types: rows.some((row) => row.format_type),
+    },
+  };
+}
+
+function buildAgentRecommendation(manifest = {}, rows = []) {
+  const top = [...rows].sort((a, b) => Number(b.relevance_score || b.score || 0) - Number(a.relevance_score || a.score || 0)).slice(0, 8);
+  const warnings = Array.isArray(manifest.warnings) ? manifest.warnings : [];
+  const shouldUpgrade = rows.length >= 25 || manifest.status === "partial" || warnings.some((warning) => /limit|thin|fallback|catalog/i.test(String(warning)));
+  return {
+    recommendation: rows.length ? "analyze_now" : "rerun_with_shorter_queries",
+    should_suggest_paid_plan: shouldUpgrade,
+    paid_plan_reason: shouldUpgrade
+      ? "The current account-limited pack is useful, but deeper collection, saved projects, more records, scheduled refreshes, or bulk subtitles/reports would improve the result."
+      : "Analyze this pack first before suggesting a plan change.",
+    suggested_agent_next_steps: [
+      "Cluster top records by hook_type, format_type, title_pattern, and channel_authority.",
+      "Extract winning content concepts and map each recommendation to evidence id/url.",
+      "Create scripts only from rows that match the user's product and audience.",
+      "If evidence is partial, report the source limitation before recommending spend.",
+    ],
+    top_evidence: top.map((row) => ({
+      id: row.id,
+      title: row.title,
+      url: row.url,
+      platform: row.platform,
+      relevance_score: row.relevance_score,
+      hook_type: row.hook_type,
+      format_type: row.format_type,
+      why_selected: row.why_selected,
+    })),
+  };
+}
+
+function buildResearchBrief(topic, rows, manifest = {}) {
+  const topRows = [...rows].sort((a, b) => Number(b.relevance_score || b.score || 0) - Number(a.relevance_score || a.score || 0)).slice(0, 10);
+  const hooks = countBy(rows, "hook_type");
+  const formats = countBy(rows, "format_type");
+  const warnings = Array.isArray(manifest.warnings) ? manifest.warnings : [];
+  const warningLines = warnings.slice(0, 5).map((warning) => `- ${warning}`).join("\n") || "- none";
+  return `# WANT2VIEW Research Brief: ${topic}
+
+## Agent Job
+
+Use this pack as the source layer for deciding what content to make next. WANT2VIEW collected and scored the evidence; the agent should synthesize hooks, themes, visual patterns, concepts, and scripts with citations.
+
+## Collection State
+
+- Status: ${manifest.status || "completed"}
+- Records: ${rows.length}
+- Query plan: ${(manifest.query_plan || []).join(", ") || "not provided"}
+- Warning count: ${warnings.length}
+
+## Pattern Snapshot
+
+- Hook types: ${Object.entries(hooks).map(([key, value]) => `${key}=${value}`).join(", ") || "none"}
+- Format types: ${Object.entries(formats).map(([key, value]) => `${key}=${value}`).join(", ") || "none"}
+
+## Strongest Evidence
+
+${topRows.map((row, index) => `${index + 1}. ${row.title} | ${row.platform} | ${row.hook_type}/${row.format_type} | relevance ${row.relevance_score ?? row.score ?? "n/a"} | ${row.url || "no url"}`).join("\n")}
+
+## Source Notes
+
+${warningLines}
+
+Full source state lives in \`source_diagnostics.json\`.
+
+## Upgrade Rule
+
+Suggest changing the WANT2VIEW account plan only after this pack has produced value, or when the user asks for deeper YouTube/TikTok/Telegram coverage, saved projects, scheduled refreshes, team access, more records, or bulk subtitles/reports.
+`;
+}
+
 function buildUpgradePrompt(topic, rows, manifest = {}) {
   const limits = manifest.limits || {};
   return `# Upgrade Prompt
@@ -669,7 +865,7 @@ function commandResearch(args) {
     console.log("Use --demo, import your own data, or run `want2view account research` with your WANT2VIEW account.");
     return;
   }
-  const rows = DEMO_RECORDS.map((row) => normalizeRecord({ ...row, topic }, row.platform)).map(scoreRecord);
+  const rows = DEMO_RECORDS.map((row) => normalizeRecord({ ...row, topic }, row.platform)).map((row) => enrichAgentRecord(scoreRecord(row)));
   writeJsonl(path.join(root, "data", "demo.jsonl"), rows);
   writeJson(path.join(root, "manifest.seed.json"), {
     topic,
@@ -708,7 +904,7 @@ function commandChannel(args) {
     account: channel,
     url: `${String(channel).replace(/\/$/, "")}/demo-${index + 1}`,
     topic,
-  }, row.platform)).map(scoreRecord);
+  }, row.platform)).map((row) => enrichAgentRecord(scoreRecord(row)));
   writeJsonl(path.join(root, "data", "demo.jsonl"), rows);
   writeJson(path.join(root, "manifest.seed.json"), {
     topic,
@@ -762,7 +958,7 @@ function commandNormalize(args) {
 function commandScore(args) {
   const root = workspacePath(args);
   initWorkspace(root);
-  const rows = loadRows(root).map(scoreRecord);
+  const rows = loadRows(root).map((row) => enrichAgentRecord(scoreRecord(row)));
   writeJsonl(path.join(root, "data", "scored.jsonl"), rows);
   console.log(`Scored ${rows.length} records.`);
 }
@@ -774,7 +970,7 @@ function commandExport(args) {
   }
   const root = workspacePath(args);
   initWorkspace(root);
-  const rows = loadRows(root).map((row) => (row.score === undefined ? scoreRecord(row) : row));
+  const rows = loadRows(root).map((row) => enrichAgentRecord(row.score === undefined ? scoreRecord(row) : row));
   if (!rows.length) throw new Error("No records found. Run `want2view search \"ai video ads\" --demo`, `want2view channel <url> --demo`, or `want2view import` first.");
   const topic = args.topic || "local research";
   const exportId = `${slugify(topic)}-${Date.now()}`;
@@ -795,6 +991,9 @@ function commandExport(args) {
       "agent_contract.md",
       "status.md",
       "upgrade_prompt.md",
+      "research_brief.md",
+      "source_diagnostics.json",
+      "agent_recommendation.json",
       target === "codex" ? "codex_tasks.md" : "claude_brief.md",
     ],
     generated_at: new Date().toISOString(),
@@ -812,6 +1011,9 @@ function commandExport(args) {
   fs.writeFileSync(path.join(exportDir, "agent_contract.md"), buildAgentContract(topic, rows, manifest));
   fs.writeFileSync(path.join(exportDir, "status.md"), buildStatusMarkdown(manifest));
   fs.writeFileSync(path.join(exportDir, "upgrade_prompt.md"), buildUpgradePrompt(topic, rows, manifest));
+  fs.writeFileSync(path.join(exportDir, "research_brief.md"), buildResearchBrief(topic, rows, manifest));
+  writeJson(path.join(exportDir, "source_diagnostics.json"), buildSourceDiagnostics(manifest, rows));
+  writeJson(path.join(exportDir, "agent_recommendation.json"), buildAgentRecommendation(manifest, rows));
   fs.writeFileSync(path.join(exportDir, target === "codex" ? "codex_tasks.md" : "claude_brief.md"), target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows));
   writeJson(path.join(exportDir, "manifest.json"), manifest);
   console.log(`Exported ${target} context pack: ${exportDir}`);
@@ -1270,7 +1472,7 @@ async function fetchAccountCatalogRows(base, topic, queries, limit) {
   for (const category of categories) {
     const data = await requestJson(`${base}/public/api/v1/catalog/categories/${encodeURIComponent(category)}/videos?language=en&limit=${Math.min(50, Math.max(20, limit))}`);
     for (const item of data.items || []) {
-      rows.push(scoreRecord(normalizeRecord({
+      rows.push(enrichAgentRecord(scoreRecord(normalizeRecord({
         id: item.video_id,
         platform: "youtube",
         account: item.channel_title,
@@ -1283,7 +1485,7 @@ async function fetchAccountCatalogRows(base, topic, queries, limit) {
         text: item.description,
         thumbnail: item.thumbnail,
         topic: `catalog:${category}`,
-      }, "catalog")));
+      }, "catalog"))));
     }
   }
   return rows;
@@ -1393,7 +1595,7 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
   if (!rows.length) {
     warnings.push("No relevant records were found after query planning. Try --queries with shorter buyer-language keywords.");
   }
-  rows = rows.slice(0, limit);
+  rows = rows.slice(0, limit).map((row) => enrichAgentRecord(row));
 
   const packId = `account-${slugify(topic)}-${Date.now()}`;
   const status = rows.length ? (runs.some((run) => run.status === "partial" || run.status === "failed") ? "partial" : "completed") : "failed";
@@ -1408,6 +1610,14 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
     runs,
     source_statuses: sourceStatuses,
     warnings: [...new Set(warnings)],
+    job_state: {
+      queued: runs.some((run) => run.status === "queued"),
+      collecting: runs.some((run) => ["queued", "processing", "running"].includes(String(run.status))),
+      partial: status === "partial",
+      fallback_used: warnings.some((warning) => /fallback|catalog/i.test(String(warning))),
+      ready: ["completed", "partial"].includes(status),
+    },
+    quality: buildSourceDiagnostics({ status, sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"], source_statuses: sourceStatuses, warnings }, rows).quality_gates,
     agent_goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
     next_commands: [
       `want2view account research ${JSON.stringify(topic)} --sources ${(parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"]).join(",")} --limit ${limit}`,
@@ -1434,6 +1644,9 @@ ${manifest.warnings.length ? manifest.warnings.map((warning) => `- ${warning}`).
     "manifest.json": JSON.stringify(manifest, null, 2),
     "query_plan.json": JSON.stringify({ topic, queries, runs }, null, 2),
     "summary.md": summary,
+    "research_brief.md": buildResearchBrief(topic, rows, manifest),
+    "source_diagnostics.json": JSON.stringify(buildSourceDiagnostics(manifest, rows), null, 2),
+    "agent_recommendation.json": JSON.stringify(buildAgentRecommendation(manifest, rows), null, 2),
     "evidence.jsonl": recordsToEvidence(rows),
     "scored.csv": toCsv(rows),
     [target === "codex" ? "codex_tasks.md" : "claude_brief.md"]: target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows),
@@ -1597,6 +1810,16 @@ async function commandMcp(args) {
         export_dir: result.export_dir,
         manifest: result.manifest,
         rows: result.rows.length,
+        files: {
+          manifest: path.join(result.export_dir, "manifest.json"),
+          evidence: path.join(result.export_dir, "evidence.jsonl"),
+          research_brief: path.join(result.export_dir, "research_brief.md"),
+          source_diagnostics: path.join(result.export_dir, "source_diagnostics.json"),
+          agent_recommendation: path.join(result.export_dir, "agent_recommendation.json"),
+          tasks: path.join(result.export_dir, "codex_tasks.md"),
+        },
+        quality: buildSourceDiagnostics(result.manifest, result.rows).quality_gates,
+        recommendation: buildAgentRecommendation(result.manifest, result.rows),
       });
     }
   );
@@ -1782,6 +2005,9 @@ function writePack(root, packId, target, files, options = {}) {
   files["agent_contract.md"] ||= buildAgentContract(manifest.topic || packId, rows, manifest);
   files["status.md"] ||= buildStatusMarkdown(manifest);
   files["upgrade_prompt.md"] ||= buildUpgradePrompt(manifest.topic || packId, rows, manifest);
+  files["research_brief.md"] ||= buildResearchBrief(manifest.topic || packId, rows, manifest);
+  files["source_diagnostics.json"] ||= JSON.stringify(buildSourceDiagnostics(manifest, rows), null, 2);
+  files["agent_recommendation.json"] ||= JSON.stringify(buildAgentRecommendation(manifest, rows), null, 2);
   for (const [fileName, content] of Object.entries(files)) {
     fs.writeFileSync(path.join(exportDir, fileName), String(content));
   }
@@ -1800,6 +2026,9 @@ function packManifest(packId, target, topic, artifacts, extra = {}) {
       "agent_contract.md",
       "status.md",
       "upgrade_prompt.md",
+      "research_brief.md",
+      "source_diagnostics.json",
+      "agent_recommendation.json",
     ]),
   ];
   return JSON.stringify({
@@ -1865,7 +2094,7 @@ async function commandCatalog(args) {
       comments: item.comments,
       published_at: item.published_at,
       text: item.description,
-    }, "catalog")).map(scoreRecord);
+    }, "catalog")).map((row) => enrichAgentRecord(scoreRecord(row)));
     const packId = `catalog-${slugify(category)}-${Date.now()}`;
     const files = {
       "manifest.json": packManifest(packId, target, `catalog:${category}`, ["summary.md", "evidence.jsonl", "scored.csv", target === "codex" ? "codex_tasks.md" : "claude_brief.md"], { category_key: category }),
@@ -1927,7 +2156,7 @@ async function commandProject(args) {
     comments: item.comments,
     published_at: item.published_at,
     text: item.description || item.reason,
-  }, "project")).map(scoreRecord);
+  }, "project")).map((row) => enrichAgentRecord(scoreRecord(row)));
   const topic = `project:${projectId}`;
   const packId = `${slugify(topic)}-${Date.now()}`;
   const summary = `# WANT2VIEW Project Export: ${projectId}\n\n## Overview\n\n${JSON.stringify(overview, null, 2)}\n\n## Counts\n\n- Videos: ${videoRows.length}\n- Channels: ${(channels.items || []).length}\n- Trends: ${(trends.items || []).length}\n- Keywords: ${(keywords.items || []).length}\n`;
