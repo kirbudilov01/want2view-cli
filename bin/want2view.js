@@ -35,10 +35,10 @@ const DEMO_RECORDS = [
     text: "Pattern: quantified experiment, fast proof, hook teardown, before and after examples.",
   },
   {
-    platform: "reddit",
-    account: "r/Entrepreneur",
+    platform: "tiktok",
+    account: "@aiads.operator",
     title: "Which AI ad tools are actually worth paying for?",
-    url: "https://example.com/reddit/ai-ad-tools-worth-it",
+    url: "https://example.com/tiktok/ai-ad-tools-worth-it",
     views: 46000,
     likes: 812,
     comments: 231,
@@ -46,10 +46,10 @@ const DEMO_RECORDS = [
     text: "Audience pain: people want fewer tools, clearer ROI, and examples from real campaigns.",
   },
   {
-    platform: "x",
-    account: "@creativeops",
+    platform: "telegram",
+    account: "AI Creative Ops",
     title: "The best performing AI ads show the workflow, not the prompt.",
-    url: "https://example.com/x/workflow-not-prompt",
+    url: "https://example.com/telegram/workflow-not-prompt",
     views: 91000,
     likes: 3100,
     comments: 98,
@@ -1637,7 +1637,7 @@ async function commandCloud(args) {
     if (!topic) throw new Error("Missing topic. Example: want2view cloud research \"ai video ads\"");
     const payload = {
       topic,
-      sources: String(args.sources || "youtube,reddit").split(",").map((item) => item.trim()).filter(Boolean),
+      sources: String(args.sources || "youtube,tiktok,telegram").split(",").map((item) => item.trim()).filter(Boolean),
       mode: args.mode === "cloud" ? "cloud" : "demo",
       kind: "outliers",
       language: args.language || "en",
