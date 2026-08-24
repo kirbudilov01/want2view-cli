@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -118,6 +118,7 @@ Usage:
   want2view agent "<keyword>" [--channel] [--out .want2view]
   want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
   want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok] [--goal "hooks, themes, visuals"]
+  want2view mcp
   want2view install codex
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
@@ -144,6 +145,7 @@ Usage:
 Examples:
   npx want2view codex "ai video ads"
   npx want2view codex-cloud "digital avatar AI services" --token w2v_...
+  codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
   npx want2view install codex
   npx want2view claude https://youtube.com/@example --channel
   npx want2view cursor "b2b saas launch"
@@ -1185,6 +1187,266 @@ function writeCloudExport(root, payload) {
   return exportDir;
 }
 
+function mcpText(text, structuredContent = {}, meta = {}) {
+  return {
+    structuredContent,
+    content: [{ type: "text", text }],
+    _meta: meta,
+  };
+}
+
+function mcpAuthContext(args = {}) {
+  const root = workspacePath(args);
+  initWorkspace(root);
+  const base = credentialApiBaseUrl(args);
+  const token = apiToken();
+  const publicKey = publicApiKey();
+  return { root, base, token, publicKey };
+}
+
+function requireMcpToken() {
+  const token = apiToken();
+  if (!token) {
+    throw new Error("Missing WANT2VIEW_API_TOKEN. Connect from WANT2VIEW API Access or run `want2view login` first.");
+  }
+  return token;
+}
+
+function requireMcpPublicKey() {
+  const key = publicApiKey();
+  if (!key) {
+    throw new Error("Missing WANT2VIEW_PUBLIC_API_KEY. Create an API key in WANT2VIEW API Access for public project/video tools.");
+  }
+  return key;
+}
+
+async function pollVideoReport(base, publicKeyValue, reportId, waitSeconds) {
+  const deadline = Date.now() + Math.max(0, Number(waitSeconds || 0)) * 1000;
+  let latest = await requestJson(`${base}/public/video-reports/${encodeURIComponent(reportId)}`, {
+    headers: { "X-API-Key": publicKeyValue },
+  });
+  while (waitSeconds > 0 && Date.now() < deadline && !latest.is_ready && latest.status !== "failed") {
+    await sleep(2000);
+    latest = await requestJson(`${base}/public/video-reports/${encodeURIComponent(reportId)}`, {
+      headers: { "X-API-Key": publicKeyValue },
+    });
+  }
+  return latest;
+}
+
+async function commandMcp(args) {
+  const [{ McpServer }, { StdioServerTransport }, { z }] = await Promise.all([
+    import("@modelcontextprotocol/sdk/server/mcp.js"),
+    import("@modelcontextprotocol/sdk/server/stdio.js"),
+    import("zod"),
+  ]);
+  const server = new McpServer(
+    { name: "want2view", version: VERSION },
+    {
+      instructions:
+        "WANT2VIEW is the evidence layer for content research. Use create_research, get_status, export_pack, get_subtitles, and search_telegram to collect source rows, then synthesize hooks, themes, visual patterns, scripts, and market briefs. Do not invent metrics; cite evidence IDs/URLs. Report partial/pending source status before recommendations.",
+    }
+  );
+
+  server.registerTool(
+    "doctor",
+    {
+      title: "Check WANT2VIEW connector",
+      description: "Verify WANT2VIEW MCP auth, API base, local workspace, and available key types.",
+      inputSchema: {},
+      outputSchema: {
+        version: z.string(),
+        api_base_url: z.string(),
+        workspace: z.string(),
+        auth: z.object({ developer_token: z.boolean(), public_api_key: z.boolean() }),
+      },
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    },
+    async () => {
+      const { root, base, token, publicKey } = mcpAuthContext(args);
+      return mcpText("WANT2VIEW MCP connector is available.", {
+        version: VERSION,
+        api_base_url: base,
+        workspace: root,
+        auth: {
+          developer_token: Boolean(token),
+          public_api_key: Boolean(publicKey),
+        },
+      });
+    }
+  );
+
+  server.registerTool(
+    "create_research",
+    {
+      title: "Create research",
+      description: "Start a WANT2VIEW cloud research run for a topic. Use this before analysis when the user gives a research goal.",
+      inputSchema: {
+        topic: z.string().min(1).describe("Research topic, keyword, category, or market."),
+        sources: z.array(z.enum(["youtube", "tiktok", "instagram", "x", "reddit", "threads", "telegram"])).optional(),
+        goal: z.string().optional().describe("What the agent should synthesize from the pack."),
+        mode: z.enum(["demo", "cloud"]).optional(),
+        limit: z.number().int().min(1).max(200).optional(),
+        language: z.string().optional(),
+        region_code: z.string().optional(),
+        lookback_hours: z.number().int().min(1).max(2160).optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ topic, sources, goal, mode, limit, language, region_code, lookback_hours }) => {
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const payload = {
+        topic,
+        sources: sources?.length ? sources : ["youtube"],
+        mode: mode || "cloud",
+        kind: "outliers",
+        language: language || "en",
+        region_code: region_code || "US",
+        lookback_hours: lookback_hours || 72,
+        limit: limit || 30,
+        content_type: "all",
+        agent_goal: goal || "hooks, themes, visual patterns, scripts",
+      };
+      const result = await requestJson(`${base}/api/v1/developer/cloud/research`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      return mcpText(`Started WANT2VIEW research ${result.run_id}: ${result.status}.`, result);
+    }
+  );
+
+  server.registerTool(
+    "get_status",
+    {
+      title: "Get research status",
+      description: "Check a WANT2VIEW cloud research run and source status before synthesizing.",
+      inputSchema: {
+        run_id: z.string().min(1),
+      },
+      annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ run_id }) => {
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const result = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(run_id)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return mcpText(`WANT2VIEW run ${result.run_id}: ${result.status}; records=${result.records}.`, result);
+    }
+  );
+
+  server.registerTool(
+    "export_pack",
+    {
+      title: "Export agent pack",
+      description: "Download a WANT2VIEW run as an evidence pack for Codex or Claude and return the local path.",
+      inputSchema: {
+        run_id: z.string().min(1),
+        target: z.enum(["codex", "claude"]).optional(),
+        workspace: z.string().optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ run_id, target, workspace }) => {
+      const root = workspace ? path.resolve(workspace) : workspacePath(args);
+      initWorkspace(root);
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const exportTarget = target || "codex";
+      const result = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(run_id)}/export?target=${exportTarget}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const exportDir = writeCloudExport(root, result);
+      return mcpText(`Downloaded WANT2VIEW ${exportTarget} pack to ${exportDir}.`, {
+        run_id,
+        target: exportTarget,
+        export_dir: exportDir,
+        files: Object.keys(result.files || {}),
+      });
+    }
+  );
+
+  server.registerTool(
+    "get_subtitles",
+    {
+      title: "Get video subtitles",
+      description: "Queue or read the WANT2VIEW subtitles/scenario pipeline for a selected video. Requires WANT2VIEW_PUBLIC_API_KEY.",
+      inputSchema: {
+        video_id: z.string().optional(),
+        report_id: z.string().optional(),
+        wait_seconds: z.number().int().min(0).max(180).optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ video_id, report_id, wait_seconds }) => {
+      const { base } = mcpAuthContext(args);
+      const key = requireMcpPublicKey();
+      let activeReportId = report_id || "";
+      let queued = null;
+      if (!activeReportId) {
+        if (!video_id) throw new Error("Provide video_id or report_id.");
+        queued = await requestJson(`${base}/public/videos/${encodeURIComponent(video_id)}/order-scenario`, {
+          method: "POST",
+          headers: { "X-API-Key": key },
+        });
+        activeReportId = queued.report_id || queued.id || "";
+      }
+      if (!activeReportId) {
+        throw new Error("WANT2VIEW did not return a report_id for this video.");
+      }
+      const report = await pollVideoReport(base, key, activeReportId, wait_seconds || 0);
+      return mcpText(`Video report ${activeReportId}: ${report.status || (report.is_ready ? "ready" : "pending")}.`, {
+        queued,
+        report_id: activeReportId,
+        report,
+      });
+    }
+  );
+
+  server.registerTool(
+    "search_telegram",
+    {
+      title: "Search Telegram",
+      description: "Start a Telegram-only WANT2VIEW research run. If the current plan cannot access Telegram, return the plan warning instead of guessing.",
+      inputSchema: {
+        query: z.string().min(1),
+        goal: z.string().optional(),
+        limit: z.number().int().min(1).max(100).optional(),
+        language: z.string().optional(),
+        region_code: z.string().optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ query, goal, limit, language, region_code }) => {
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const payload = {
+        topic: query,
+        sources: ["telegram"],
+        mode: "cloud",
+        kind: "outliers",
+        language: language || "en",
+        region_code: region_code || "US",
+        lookback_hours: 168,
+        limit: limit || 30,
+        content_type: "all",
+        agent_goal: goal || "Telegram channels, posts, hooks, audience pains, and source gaps",
+      };
+      const result = await requestJson(`${base}/api/v1/developer/cloud/research`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      return mcpText(`Started WANT2VIEW Telegram run ${result.run_id}: ${result.status}.`, result);
+    }
+  );
+
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+}
+
 function writePack(root, packId, target, files) {
   const exportDir = path.join(root, "exports", packId);
   ensureDir(exportDir);
@@ -1435,6 +1697,7 @@ async function main() {
     if (command === "version" || args.version) return console.log(VERSION);
     if (AGENT_TARGETS[command]) return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
     if (command === "codex-cloud") return await commandCodexCloud(args);
+    if (command === "mcp") return await commandMcp(args);
     if (command === "start") return commandStart(args);
     if (command === "install") return commandInstall(args);
     if (command === "init") return commandInit(args);

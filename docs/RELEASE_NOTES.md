@@ -1,5 +1,15 @@
 # Release Notes
 
+## v0.4.0
+
+WANT2VIEW CLI now includes a Codex-compatible MCP server:
+
+- `want2view mcp` starts a stdio MCP server.
+- Codex can connect with `codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp`.
+- MCP tools include `doctor`, `create_research`, `get_status`, `export_pack`, `get_subtitles`, and `search_telegram`.
+- API Access can generate the MCP connection command alongside the fast `codex-cloud` CLI pack command.
+- CLI packs remain available for one-shot research; MCP is the live tool layer for agents that should poll, export, and deepen research themselves.
+
 ## v0.3.0
 
 WANT2VIEW CLI now includes the Codex install path and a stronger evidence-pack contract:

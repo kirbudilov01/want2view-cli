@@ -10,9 +10,9 @@
   <img alt="Agent ready" src="https://img.shields.io/badge/Codex%20%2B%20Claude-ready-0B0A14?style=for-the-badge" />
 </p>
 
-# WANT2VIEW CLI
+# WANT2VIEW CLI + MCP
 
-One command gives Codex, Claude, Cursor, OpenClaw, and terminal agents real WANT2VIEW evidence.
+One command gives Codex, Claude, Cursor, OpenClaw, and terminal agents real WANT2VIEW evidence. MCP mode gives Codex live WANT2VIEW tools.
 
 WANT2VIEW CLI is an open-source connector for terminal agents. It turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs your agents can read directly.
 
@@ -20,6 +20,12 @@ Start free in 60 seconds. Upgrade to the same WANT2VIEW Cloud product when you n
 
 ```bash
 npx want2view codex "ai video ads"
+```
+
+Connect live tools to Codex:
+
+```bash
+codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
 ```
 
 Pick any agent:
@@ -73,6 +79,7 @@ Then pick your agent and run one command.
 
 | Agent | One command |
 | --- | --- |
+| Codex MCP tools | `codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp` |
 | Codex setup | `npx want2view install codex` |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |
@@ -88,6 +95,15 @@ npx github:kirbudilov01/want2view-cli codex "ai video ads"
 ```
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
+
+MCP mode exposes live tools:
+
+- `doctor` checks auth and connector state.
+- `create_research` starts a WANT2VIEW cloud run.
+- `get_status` checks source status and record counts.
+- `export_pack` downloads an agent-ready evidence pack.
+- `get_subtitles` queues/reads the subtitles + scenario pipeline for selected videos.
+- `search_telegram` starts a Telegram-only research run and reports plan/source limits honestly.
 
 Why do agents have different commands? They all read the same WANT2VIEW evidence folder. The command only chooses the most useful handoff file:
 
@@ -109,7 +125,7 @@ Why do agents have different commands? They all read the same WANT2VIEW evidence
 WANT2VIEW CLI is the open-source doorway into WANT2VIEW.
 
 - **Free:** local demo packs, channel/keyword examples, your own CSV/JSON imports, limited public catalog samples, Codex/Claude exports.
-- **Paid/account:** the same WANT2VIEW monetization layer: deeper catalog, private projects, Developer CLI tokens, managed social connectors, scheduled refreshes, custom research.
+- **Paid/account:** the same WANT2VIEW monetization layer: deeper catalog, private projects, Developer CLI/MCP tokens, managed social connectors, scheduled refreshes, custom research.
 - **Best use:** give Codex, Claude, and terminal agents real WANT2VIEW evidence folders instead of vague prompts.
 
 ## What The Command Creates
@@ -159,6 +175,7 @@ Copy these after running `start`.
 | You want to... | Run this | What happens |
 | --- | --- | --- |
 | Install Codex workflow | `install codex` | Adds the WANT2VIEW research skill to local Codex |
+| Connect Codex live tools | `mcp` through `codex mcp add` | Lets Codex call WANT2VIEW research/status/export/subtitle/Telegram tools |
 | Start with Codex in one command | `start codex "ai video ads"` | Creates a pack and prints the Codex prompt |
 | Start with Claude in one command | `start claude https://youtube.com/@example --channel` | Creates a channel pack and prints the Claude prompt |
 | Try keyword search manually | `search "ai video ads" --demo` | Creates a free local AI context pack |
