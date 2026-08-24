@@ -63,10 +63,17 @@ npx want2view codex "ugc ads" # OpenClaw
 
 ## Setup In 60 Seconds
 
-Pick your agent and run one command.
+For Codex, install the skill once, then run research packs from the terminal.
+
+```bash
+npx want2view install codex
+```
+
+Then pick your agent and run one command.
 
 | Agent | One command |
 | --- | --- |
+| Codex setup | `npx want2view install codex` |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |
 | Cursor | `npx want2view codex "b2b saas launch"` |
@@ -86,7 +93,7 @@ Why do agents have different commands? They all read the same WANT2VIEW evidence
 
 - Codex, Cursor, OpenClaw, and generic terminal agents can use the Codex-style task pack: `codex_tasks.md`.
 - Claude gets `claude_brief.md`.
-- Every pack still includes `manifest.json`, `summary.md`, `evidence.jsonl`, and `scored.csv`.
+- Every pack still includes `manifest.json`, `agent_contract.md`, `status.md`, `summary.md`, `evidence.jsonl`, and `scored.csv`.
 
 ## Same Prompt. Different Intelligence.
 
@@ -116,11 +123,14 @@ Output:
 ```text
 .want2view/exports/<pack_id>/
   manifest.json
+  agent_contract.md
+  status.md
   summary.md
   evidence.jsonl
   scored.csv
   codex_tasks.md
   claude_brief.md
+  upgrade_prompt.md
 ```
 
 Then tell your agent:
@@ -148,6 +158,7 @@ Copy these after running `start`.
 
 | You want to... | Run this | What happens |
 | --- | --- | --- |
+| Install Codex workflow | `install codex` | Adds the WANT2VIEW research skill to local Codex |
 | Start with Codex in one command | `start codex "ai video ads"` | Creates a pack and prints the Codex prompt |
 | Start with Claude in one command | `start claude https://youtube.com/@example --channel` | Creates a channel pack and prints the Claude prompt |
 | Try keyword search manually | `search "ai video ads" --demo` | Creates a free local AI context pack |
@@ -408,6 +419,7 @@ Recommended columns:
 | `want2view catalog export ai --for codex` | Export catalog evidence for an agent |
 | `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
 | `want2view project export <id> --for codex` | Export your internal project to Codex/Claude |
+| `want2view install codex` | Install the WANT2VIEW research skill into local Codex |
 | `want2view research "topic" --demo` | Backward-compatible alias for local demo research |
 | `want2view import ./file.csv` | Bring your own data |
 | `want2view score` | Score local records |

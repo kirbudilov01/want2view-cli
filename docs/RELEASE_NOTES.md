@@ -1,5 +1,15 @@
 # Release Notes
 
+## v0.3.0
+
+WANT2VIEW CLI now includes the Codex install path and a stronger evidence-pack contract:
+
+- `npx want2view install codex` installs a local `want2view-research` Codex skill.
+- Every export includes `agent_contract.md`, `status.md`, and `upgrade_prompt.md`.
+- Cloud exports can be downloaded while a run is still pending, so agents know what to poll instead of failing on a 202 response.
+- The agent contract separates WANT2VIEW as the data layer from Codex as the synthesis layer for hooks, themes, visual patterns, scripts, SEO/content ideas, and research briefs.
+- Free/developer packs stay useful while upgrade prompts are reserved for cross-platform sources, deeper record counts, scheduled refreshes, team access, and bulk subtitle/report jobs.
+
 ## v0.2.2
 
 WANT2VIEW CLI now supports more one-command agent entrypoints:

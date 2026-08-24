@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.2.2";
+const VERSION = "0.3.0";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -117,6 +117,8 @@ Usage:
   want2view openclaw "<keyword>" [--channel] [--out .want2view]
   want2view agent "<keyword>" [--channel] [--out .want2view]
   want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
+  want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok] [--goal "hooks, themes, visuals"]
+  want2view install codex
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
   want2view channel <channel_url_or_handle> --demo [--out .want2view]
@@ -135,12 +137,14 @@ Usage:
   want2view catalog export <category_key> --for codex|claude
   want2view projects list
   want2view project export <project_id> --for codex|claude
-  want2view cloud research "<topic>" --sources youtube,tiktok,instagram,x [--mode demo|cloud]
+  want2view cloud research "<topic>" --sources youtube,tiktok,instagram,x [--mode demo|cloud] [--goal "hooks, themes, visuals"]
   want2view cloud status <run_id>
   want2view cloud export <run_id> --for codex|claude
 
 Examples:
   npx want2view codex "ai video ads"
+  npx want2view codex-cloud "digital avatar AI services" --token w2v_...
+  npx want2view install codex
   npx want2view claude https://youtube.com/@example --channel
   npx want2view cursor "b2b saas launch"
   npx want2view openclaw "ugc ads"
@@ -499,13 +503,94 @@ Open-source repo: ${REPO_URL}
 `;
 }
 
-function buildCodexTasks(topic, rows) {
+function buildAgentContract(topic, rows, manifest = {}) {
+  const status = manifest.status || "completed";
+  const packId = manifest.pack_id || "<pack_id>";
+  const sources = Array.isArray(manifest.sources) ? manifest.sources.join(", ") : "local";
+  return `# WANT2VIEW Agent Contract: ${topic}
+
+## Role Split
+
+- WANT2VIEW supplies evidence: source rows, metrics, source statuses, warnings, project/report endpoints, and export files.
+- The AI agent performs synthesis: hooks, themes, visual patterns, offer angles, market brief, scripts, SEO/content ideas, and implementation tasks.
+- Do not invent performance claims. Cite \`id\` or \`url\` from \`evidence.jsonl\`.
+
+## Current Pack State
+
+- Status: ${status}
+- Agent goal: ${manifest.agent_goal || "not specified"}
+- Pack: ${packId}
+- Records in this export: ${rows.length}
+- Sources: ${sources || "local"}
+
+If this is a cloud pack and status is \`pending\`, run:
+
+\`\`\`bash
+want2view cloud status ${packId}
+want2view cloud export ${packId} --for codex
+\`\`\`
+
+## Deepening Path
+
+1. Analyze the available evidence first.
+2. Pick only the videos that matter for the user's goal.
+3. For project exports, order subtitles/scenarios only for selected videos through WANT2VIEW Public API:
+   - \`POST /public/videos/{video_id}/order-scenario\`
+   - \`GET /public/video-reports/{report_id}\`
+4. Stay inside project balances and report partial sources before recommendations.
+
+## Upgrade Rule
+
+Suggest paid access after the free pack creates value, or when the user needs cross-platform sources, Telegram/X/Threads, more than 30 records, saved projects, scheduled refreshes, team access, or bulk subtitles/report jobs.
+`;
+}
+
+function buildStatusMarkdown(manifest = {}) {
+  const statuses = Object.entries(manifest.source_statuses || {})
+    .map(([source, status]) => `- ${source}: ${status}`)
+    .join("\n") || "- Local or not started.";
+  const commands = (manifest.next_commands || [])
+    .map((command) => `- \`${command}\``)
+    .join("\n") || "- No follow-up command.";
+  return `# WANT2VIEW Pack Status
+
+- Pack: ${manifest.pack_id || ""}
+- Topic: ${manifest.topic || ""}
+- Status: ${manifest.status || "completed"}
+- Records: ${manifest.records ?? 0}
+
+## Sources
+
+${statuses}
+
+## Next Commands
+
+${commands}
+`;
+}
+
+function buildUpgradePrompt(topic, rows, manifest = {}) {
+  const limits = manifest.limits || {};
+  return `# Upgrade Prompt
+
+Use this only after the free pack has produced visible value.
+
+The current WANT2VIEW pack has ${rows.length} records for "${topic}". I can already analyze hooks, themes, formats, and visual patterns from this evidence. For a full research run, upgrade unlocks deeper record counts, cross-platform sources such as Telegram/X/Threads/TikTok/Instagram, saved projects, scheduled refreshes, team access, and bulk subtitle/report jobs.
+
+Free test depth: ${limits.free_test_records || 30} records.
+Current plan: ${limits.plan || "local/free"}.
+`;
+}
+
+function buildCodexTasks(topic, rows, manifest = {}) {
   return `# Codex Tasks: ${topic}
 
 1. Inspect \`manifest.json\`, \`summary.md\`, \`evidence.jsonl\`, and \`scored.csv\`.
-2. Identify the top repeated hooks, formats, pains, and creator patterns.
-3. Turn the strongest findings into product copy, landing sections, scripts, or content briefs.
-4. Keep every recommendation linked to evidence rows by \`id\`.
+2. Read \`agent_contract.md\` to understand what WANT2VIEW provides and what the agent should synthesize.
+3. Identify repeated hooks, formats, themes, audience pains, proof styles, and visual patterns.
+4. Turn the strongest findings into market research, product copy, landing sections, scripts, SEO/content ideas, or content briefs.
+5. Keep every recommendation linked to evidence rows by \`id\` or \`url\`.
+6. If the pack is pending or partial, poll/status-check or report the source limitation instead of guessing.
 
 ## Suggested Implementation Prompts
 
@@ -516,6 +601,8 @@ function buildCodexTasks(topic, rows) {
 ## Evidence Count
 
 ${rows.length} records.
+
+Pack status: ${manifest.status || "completed"}.
 `;
 }
 
@@ -690,21 +777,40 @@ function commandExport(args) {
   const exportId = `${slugify(topic)}-${Date.now()}`;
   const exportDir = path.join(root, "exports", exportId);
   ensureDir(exportDir);
-  fs.writeFileSync(path.join(exportDir, "summary.md"), buildSummary(topic, rows));
-  fs.writeFileSync(path.join(exportDir, "scored.csv"), toCsv(rows));
-  writeJsonl(path.join(exportDir, "evidence.jsonl"), rows);
-  fs.writeFileSync(path.join(exportDir, target === "codex" ? "codex_tasks.md" : "claude_brief.md"), target === "codex" ? buildCodexTasks(topic, rows) : buildClaudeBrief(topic, rows));
-  writeJson(path.join(exportDir, "manifest.json"), {
+  const manifest = {
     pack_id: exportId,
     target,
     topic,
+    status: "completed",
+    sources: ["local"],
     records: rows.length,
-    artifacts: ["summary.md", "evidence.jsonl", "scored.csv", target === "codex" ? "codex_tasks.md" : "claude_brief.md"],
+    artifacts: [
+      "manifest.json",
+      "summary.md",
+      "evidence.jsonl",
+      "scored.csv",
+      "agent_contract.md",
+      "status.md",
+      "upgrade_prompt.md",
+      target === "codex" ? "codex_tasks.md" : "claude_brief.md",
+    ],
     generated_at: new Date().toISOString(),
     upgrade_url: APP_URL,
     developer_url: DEVELOPERS_URL,
     api_access_url: API_ACCESS_URL,
-  });
+    limits: {
+      plan: "local/free",
+      free_test_records: 30,
+    },
+  };
+  fs.writeFileSync(path.join(exportDir, "summary.md"), buildSummary(topic, rows));
+  fs.writeFileSync(path.join(exportDir, "scored.csv"), toCsv(rows));
+  writeJsonl(path.join(exportDir, "evidence.jsonl"), rows);
+  fs.writeFileSync(path.join(exportDir, "agent_contract.md"), buildAgentContract(topic, rows, manifest));
+  fs.writeFileSync(path.join(exportDir, "status.md"), buildStatusMarkdown(manifest));
+  fs.writeFileSync(path.join(exportDir, "upgrade_prompt.md"), buildUpgradePrompt(topic, rows, manifest));
+  fs.writeFileSync(path.join(exportDir, target === "codex" ? "codex_tasks.md" : "claude_brief.md"), target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows));
+  writeJson(path.join(exportDir, "manifest.json"), manifest);
   console.log(`Exported ${target} context pack: ${exportDir}`);
   printConversionNextSteps();
   return exportDir;
@@ -915,6 +1021,161 @@ async function commandDoctor(args) {
   payload.next_steps.forEach((step) => console.log(`Next: ${step}`));
 }
 
+function codexSkillContent() {
+  return `---
+name: want2view-research
+description: Use WANT2VIEW evidence packs for content, trend, competitor, hook, visual, and script research in Codex.
+---
+
+# WANT2VIEW Research Skill
+
+Use this skill when the user asks Codex to analyze videos, competitors, hooks, visual patterns, AI tools/services, digital avatars, vertical videos, long-form videos, trend research, or content strategy with WANT2VIEW data.
+
+## Operating Contract
+
+- WANT2VIEW is the data layer: it collects/searches sources, scores records, tracks source statuses, and exports files.
+- Codex is the synthesis layer: it reads evidence and produces hooks, themes, visual analysis, market research, briefs, scripts, SEO/content ideas, or implementation tasks.
+- Never invent source performance. Cite \`id\` or \`url\` from \`evidence.jsonl\`.
+- If a pack is pending or partial, poll or state the limitation before analysis.
+- Do not ask for or print API tokens. Use \`WANT2VIEW_API_TOKEN\` or the CLI's private config.
+
+## Quick Commands
+
+Start a free/local pack:
+
+\`\`\`bash
+npx want2view codex "ai video tools"
+\`\`\`
+
+Use the user's own CSV/JSON/JSONL:
+
+\`\`\`bash
+npx want2view import ./sources.csv
+npx want2view score
+npx want2view export --for codex
+\`\`\`
+
+Start a cloud run:
+
+\`\`\`bash
+npx want2view login
+npx want2view cloud research "digital avatar AI services" --sources youtube,tiktok,instagram,x,telegram --mode cloud --limit 30 --goal "hooks, themes, visual patterns, scripts"
+npx want2view cloud status <run_id>
+npx want2view cloud export <run_id> --for codex
+\`\`\`
+
+Export a WANT2VIEW project:
+
+\`\`\`bash
+WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for codex
+\`\`\`
+
+## Analysis Workflow
+
+1. Open the newest \`.want2view/exports/<pack_id>\` folder unless the user provides another path.
+2. Read \`manifest.json\`, \`agent_contract.md\`, \`status.md\`, \`summary.md\`, \`evidence.jsonl\`, and \`scored.csv\`.
+3. If \`manifest.status\` is \`pending\`, run the listed status/export commands and wait for a ready/partial pack.
+4. For a free pack, analyze the available evidence first. Suggest upgrade only when the user needs cross-platform/deeper collection.
+5. For project exports, order subtitles/scenarios only for selected videos and only when the user has project balance:
+   - \`POST /public/videos/{video_id}/order-scenario\`
+   - \`GET /public/video-reports/{report_id}\`
+6. Final outputs should separate observed evidence, Codex interpretation, assumptions, and next data gaps.
+
+## Expected Output Sections
+
+- Source status and data limits.
+- Hook patterns.
+- Topic/theme clusters.
+- Visual and format patterns.
+- Audience pains and promises.
+- Competitor/channel opportunities.
+- Script or content recommendations.
+- Evidence table with row IDs/URLs.
+- Upgrade rationale only when needed.
+`;
+}
+
+function commandInstall(args) {
+  const target = String(args._[1] || "codex").toLowerCase();
+  if (target !== "codex") {
+    throw new Error("Only `want2view install codex` is supported right now.");
+  }
+  const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
+  const skillDir = path.join(codexHome, "skills", "want2view-research");
+  ensureDir(skillDir);
+  const skillPath = path.join(skillDir, "SKILL.md");
+  fs.writeFileSync(skillPath, codexSkillContent());
+  console.log(`Installed Codex skill: ${skillPath}`);
+  console.log("Next: open a new Codex session and ask it to use WANT2VIEW for your research.");
+  console.log("Cloud data: run `want2view login` and then `want2view cloud research \"your topic\" --mode cloud`.");
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function commandCodexCloud(args) {
+  const topic = args._[1] || "";
+  if (!topic) {
+    throw new Error("Missing topic. Example: want2view codex-cloud \"digital avatar AI services\" --token w2v_...");
+  }
+  const root = workspacePath(args);
+  initWorkspace(root);
+  commandInstall({ ...args, _: ["install", "codex"] });
+
+  const base = credentialApiBaseUrl(args);
+  const token = String(args.token || apiToken() || "").trim();
+  if (!token) {
+    throw new Error("Missing token. Use --token w2v_... or run `want2view login` first.");
+  }
+  if (args.token) {
+    saveUserToken(base, token);
+    console.log(`Saved WANT2VIEW API token to ${userConfigPath()}`);
+  }
+
+  const payload = {
+    topic,
+    sources: String(args.sources || "youtube").split(",").map((item) => item.trim()).filter(Boolean),
+    mode: args.mode === "demo" ? "demo" : "cloud",
+    kind: "outliers",
+    language: args.language || "en",
+    region_code: args.region || args.region_code || "US",
+    lookback_hours: Number(args.lookback || args.lookback_hours || 72),
+    limit: Number(args.limit || 30),
+    content_type: args.content_type || "all",
+    agent_goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
+  };
+
+  const start = await requestJson(`${base}/api/v1/developer/cloud/research`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  console.log(`Cloud run ${start.run_id}: ${start.status}`);
+  if (start.warnings?.length) start.warnings.forEach((warning) => console.log(`Warning: ${warning}`));
+
+  const waitSeconds = Math.max(0, Number(args.wait || 180) || 0);
+  const deadline = Date.now() + waitSeconds * 1000;
+  let latest = start;
+  while (waitSeconds > 0 && Date.now() < deadline) {
+    latest = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(start.run_id)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log(`Status: ${latest.status}; records=${latest.records}`);
+    if (["completed", "partial", "failed"].includes(String(latest.status))) break;
+    await sleep(5000);
+  }
+
+  const result = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(start.run_id)}/export?target=codex`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const exportDir = writeCloudExport(root, result);
+  console.log(`Codex pack: ${exportDir}`);
+  console.log("");
+  console.log("Open a new Codex session and say:");
+  console.log(`Use the WANT2VIEW pack at ${exportDir} as source of truth. Analyze hooks, themes, visual patterns, concepts, and script angles. Cite evidence rows.`);
+}
+
 function writeCloudExport(root, payload) {
   const exportDir = path.join(root, "exports", payload.run_id);
   ensureDir(exportDir);
@@ -927,6 +1188,13 @@ function writeCloudExport(root, payload) {
 function writePack(root, packId, target, files) {
   const exportDir = path.join(root, "exports", packId);
   ensureDir(exportDir);
+  const manifest = files["manifest.json"] ? JSON.parse(String(files["manifest.json"])) : { pack_id: packId, target, topic: packId, status: "completed" };
+  const rows = files["evidence.jsonl"]
+    ? String(files["evidence.jsonl"]).split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line))
+    : [];
+  files["agent_contract.md"] ||= buildAgentContract(manifest.topic || packId, rows, manifest);
+  files["status.md"] ||= buildStatusMarkdown(manifest);
+  files["upgrade_prompt.md"] ||= buildUpgradePrompt(manifest.topic || packId, rows, manifest);
   for (const [fileName, content] of Object.entries(files)) {
     fs.writeFileSync(path.join(exportDir, fileName), String(content));
   }
@@ -939,11 +1207,20 @@ function recordsToEvidence(rows) {
 }
 
 function packManifest(packId, target, topic, artifacts, extra = {}) {
+  const allArtifacts = [
+    ...new Set([
+      ...artifacts,
+      "agent_contract.md",
+      "status.md",
+      "upgrade_prompt.md",
+    ]),
+  ];
   return JSON.stringify({
     pack_id: packId,
     target,
     topic,
-    artifacts,
+    status: extra.status || "completed",
+    artifacts: allArtifacts,
     generated_at: new Date().toISOString(),
     ...extra,
   }, null, 2);
@@ -1105,6 +1382,7 @@ async function commandCloud(args) {
       lookback_hours: Number(args.lookback || args.lookback_hours || 72),
       limit: Number(args.limit || 25),
       content_type: args.content_type || "all",
+      agent_goal: args.goal || args.agent_goal || null,
     };
     const result = await requestJson(`${base}/api/v1/developer/cloud/research`, {
       method: "POST",
@@ -1156,7 +1434,9 @@ async function main() {
     if (!command || command === "help" || args.help) return printHelp();
     if (command === "version" || args.version) return console.log(VERSION);
     if (AGENT_TARGETS[command]) return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
+    if (command === "codex-cloud") return await commandCodexCloud(args);
     if (command === "start") return commandStart(args);
+    if (command === "install") return commandInstall(args);
     if (command === "init") return commandInit(args);
     if (command === "import") return commandImport(args);
     if (command === "search") return commandSearch(args);
