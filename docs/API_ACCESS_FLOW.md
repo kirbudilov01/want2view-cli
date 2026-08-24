@@ -4,7 +4,7 @@ WANT2VIEW has two auth surfaces for CLI users.
 
 ## Developer CLI Token
 
-Use this for managed cloud connector runs:
+Use this for managed account research runs:
 
 ```bash
 npx want2view login

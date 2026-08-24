@@ -16,7 +16,7 @@ One command gives Codex, Claude, Cursor, OpenClaw, and terminal agents the same 
 
 WANT2VIEW CLI is the open-source agent interface for your WANT2VIEW account. It turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs your agents can read directly.
 
-Start with the free WANT2VIEW plan in 60 seconds. CLI and MCP do not create a separate pricing model: they follow the same account limits as the dashboard.
+Start from your WANT2VIEW account in 60 seconds. CLI and MCP do not create a separate pricing model: they are the agent interface to the same dashboard limits, sources, projects, and API access.
 
 ```bash
 npx want2view codex "ai video ads"
@@ -97,10 +97,10 @@ npx want2view codex "ai video ads"
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
 
-MCP mode exposes live tools:
+MCP mode exposes WANT2VIEW as live tools:
 
 - `doctor` checks auth and connector state.
-- `create_research` starts a WANT2VIEW cloud run.
+- `create_research` starts a WANT2VIEW account research run.
 - `get_status` checks source status and record counts.
 - `export_pack` downloads an agent-ready evidence pack.
 - `get_subtitles` queues/reads the subtitles + scenario pipeline for selected videos.
@@ -119,14 +119,14 @@ Why do agents have different commands? They all read the same WANT2VIEW evidence
 | Agent guesses from a vague prompt | Agent reads `evidence.jsonl`, `scored.csv`, and `summary.md` |
 | No source rows | Every recommendation can cite evidence |
 | Manual copy-paste research | One local pack for Codex, Claude, Cursor, OpenClaw, and other terminal agents |
-| Separate tool limits | Same WANT2VIEW account plan across dashboard, CLI, MCP, and API |
+| Separate tool limits | One WANT2VIEW account plan across dashboard, CLI, MCP, and API |
 
 ## TL;DR
 
-WANT2VIEW CLI is not a separate product tier. It is the open-source agent interface for WANT2VIEW.
+WANT2VIEW CLI is not a separate product tier. It is the open-source agent interface for your WANT2VIEW account.
 
-- **Free WANT2VIEW account:** connect Codex, create a Developer token, run test-depth YouTube/TikTok/Telegram research, and export evidence packs.
-- **Paid WANT2VIEW account:** the same CLI/MCP commands unlock higher record limits, saved projects, scheduled refreshes, project API, team workflows, bulk reports, and custom research.
+- **Free WANT2VIEW account:** create a Developer token, connect Codex/Claude, run test-depth YouTube/TikTok/Telegram research, and export evidence packs.
+- **Paid WANT2VIEW account:** the same CLI/MCP commands run with higher record limits, saved projects, scheduled refreshes, project API, team workflows, bulk reports, and custom research.
 - **Best use:** give Codex, Claude, and terminal agents real WANT2VIEW evidence folders instead of vague prompts.
 
 ## What The Command Creates
@@ -179,8 +179,8 @@ Copy these after running `start`.
 | Connect Codex live tools | `mcp` through `codex mcp add` | Lets Codex call WANT2VIEW research/status/export/subtitle/Telegram tools |
 | Start with Codex in one command | `start codex "ai video ads"` | Creates a pack and prints the Codex prompt |
 | Start with Claude in one command | `start claude https://youtube.com/@example --channel` | Creates a channel pack and prints the Claude prompt |
-| Try keyword search manually | `search "ai video ads" --demo` | Creates a free local AI context pack |
-| Try a channel audit manually | `channel https://youtube.com/@example --demo` | Creates a channel-shaped evidence pack |
+| Try without a token | `search "ai video ads" --demo` | Creates a local sample pack so an agent can inspect the file format |
+| Try a channel-shaped pack | `channel https://youtube.com/@example --demo` | Creates a local channel-shaped sample pack |
 | Use your own data | `import ./competitors.csv` | Converts CSV/JSON/JSONL into an evidence pack |
 | Give Codex better context | `export --for codex` | Writes `codex_tasks.md`, `summary.md`, `evidence.jsonl` |
 | Give Claude a strategy brief | `export --for claude` | Writes `claude_brief.md` with evidence references |
@@ -188,7 +188,7 @@ Copy these after running `start`.
 | Export public catalog evidence | `catalog export ai --for codex` | Gives an agent-readable sample pack from public catalog data |
 | Use your own WANT2VIEW projects | `projects list` | Requires `WANT2VIEW_PUBLIC_API_KEY` from API Access |
 | Export a project to an agent | `project export <id> --for codex` | Turns your internal project into an AI-readable pack |
-| Run account research | `login` then `cloud research --mode cloud` | Uses the same limits as your WANT2VIEW account |
+| Run account research | `login` then `cloud research --mode cloud` | Uses the same sources and limits as your WANT2VIEW account |
 | Order custom research | Open WANT2VIEW | Get a human/product-ready category research package |
 | Pick a ready workflow | `workflows keyword` | Shows commands, agent prompt, and WANT2VIEW next step |
 
@@ -196,9 +196,9 @@ Copy these after running `start`.
 
 | Surface | Free WANT2VIEW account | Paid WANT2VIEW account |
 | --- | --- | --- |
-| Dashboard | Free catalog and onboarding surfaces | Saved projects, reports, history, team workflows |
+| Dashboard | Free catalog, onboarding, API Access, Developer token | Saved projects, reports, history, team workflows |
 | CLI | Local packs, CSV/JSON imports, test-depth account research | Higher record limits and project exports through the same commands |
-| MCP | Codex can call research/status/export tools | Codex can run deeper repeated research inside paid limits |
+| MCP | Codex can call WANT2VIEW research/status/export/subtitle/Telegram tools | Codex can run deeper repeated research inside paid limits |
 | Sources | YouTube, TikTok, Telegram test depth | Deeper YouTube/TikTok/Telegram collection and roadmap sources when enabled |
 | Upgrade reason | When the first pack proves value | More records, scheduled refresh, project API, bulk reports, team access |
 
@@ -206,18 +206,18 @@ Copy these after running `start`.
 
 Most AI agents are only as good as the context you give them. WANT2VIEW CLI turns social content evidence into clean, inspectable files that agents can use as a source of truth.
 
-Without an account token, the CLI still gives immediate local value:
+Without an account token, the CLI still gives immediate local value for format testing:
 
-- demo research;
+- sample research packs;
 - CSV / JSON / JSONL imports;
 - basic normalization and scoring;
 - Codex-ready task packs;
 - Claude-ready research briefs.
 
-Your WANT2VIEW account plan unlocks the connected product:
+Your WANT2VIEW account plan controls the connected product:
 
-- free test-depth YouTube/TikTok/Telegram research through Developer tokens;
-- deeper catalog data beyond the public sample on paid plans;
+- test-depth YouTube/TikTok/Telegram research through Developer tokens on free accounts;
+- deeper catalog data and higher record limits on paid plans;
 - private project exports from the WANT2VIEW dashboard;
 - managed YouTube, TikTok, and Telegram connectors;
 - roadmap source expansion only when enabled by plan/API;
@@ -232,7 +232,7 @@ Your WANT2VIEW account plan unlocks the connected product:
   <img src="./assets/architecture.svg" alt="Terminal to WANT2VIEW account to AI context pack architecture" />
 </p>
 
-## One-Command Demo
+## One-Command Agent Interface
 
 Npm command:
 
@@ -251,7 +251,7 @@ npx want2view claude https://youtube.com/@example --channel
 
 Package status: use npm for stable installs; use the GitHub fallback when the repository has newer connector fixes before the next npm publish.
 
-If the demo helps your agent stop guessing, star the repo. To use your real account limits, continue in [WANT2VIEW API Access](https://app.want2view.com/api-access), create a Developer token, and connect Codex.
+The fastest real path is account-first: open [WANT2VIEW API Access](https://app.want2view.com/api-access), create a Developer token, connect MCP once, then let Codex run inside your WANT2VIEW limits. Local sample packs are only there so an agent can inspect the format before login.
 
 ## Agent Handoff
 
@@ -278,16 +278,16 @@ More copy-paste prompts live in [docs/AGENT_PROMPTS.md](./docs/AGENT_PROMPTS.md)
 
 ## Workflows
 
-Workflows are not separate hidden features. They are practical paths that combine the same WANT2VIEW product surfaces: keyword search, channel analysis, project export, catalog access, and cloud connectors.
+Workflows are not separate hidden features. They are practical paths that combine the same WANT2VIEW product surfaces: keyword search, channel analysis, project export, catalog access, and account connectors.
 
 | Workflow | Start with CLI | Continue in WANT2VIEW |
 | --- | --- | --- |
-| Keyword search to Codex | `npx want2view codex "ai video ads"` | Unlock deeper catalog, saved searches, and API access |
-| Channel audit to Claude | `npx want2view claude https://youtube.com/@example --channel` | Connect real channels or order a deeper audit |
+| Keyword search to Codex | `npx want2view codex "ai video ads"` | Connect API Access when you want live account data |
+| Channel audit to Claude | `npx want2view claude https://youtube.com/@example --channel` | Connect your account for real collection or order a deeper audit |
 | Keyword research to Cursor | `npx want2view codex "creator economy"` | Turn evidence into product, SEO, or content tasks |
 | Research pack to OpenClaw | `npx want2view codex "ugc ads"` | Work from the same source-of-truth files |
 | WANT2VIEW project export | `projects list` then `project export <id> --for codex` | Work from private projects and team workspaces |
-| Content team monitoring | `cloud research "category" --mode cloud` | Schedule refreshes and share project packs with the team |
+| Content team monitoring | `cloud research "category" --mode cloud` | Run inside account limits; paid plans add refreshes and team packs |
 
 Full copy-paste workflows live in [docs/RECIPES.md](./docs/RECIPES.md).
 
@@ -295,10 +295,10 @@ Full copy-paste workflows live in [docs/RECIPES.md](./docs/RECIPES.md).
 
 There are two keys because there are two product surfaces:
 
-- `WANT2VIEW_API_TOKEN`: Developer CLI token for cloud connector runs.
+- `WANT2VIEW_API_TOKEN`: Developer CLI token for account research runs.
 - `WANT2VIEW_PUBLIC_API_KEY`: Public API key for your WANT2VIEW projects and reports.
 
-Cloud mode needs a WANT2VIEW Developer CLI token. The login wizard gives users three paths:
+Account research needs a WANT2VIEW Developer CLI token. The login wizard gives users three paths:
 
 ```bash
 npx want2view login
@@ -345,7 +345,7 @@ npx want2view catalog videos ai --limit 20
 npx want2view catalog export ai --for claude
 ```
 
-This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export private projects, run cloud research, and unlock deeper social intelligence.
+This is the bridge from GitHub discovery into the real WANT2VIEW product: the CLI can show public catalog surfaces, while authenticated users can export private projects, run account research, and unlock deeper social intelligence.
 
 ## Account Research
 
@@ -365,14 +365,14 @@ The CLI stores exported packs locally under:
 .want2view/exports/<run_id>/
 ```
 
-## What You Can Buy From WANT2VIEW
+## Account Capabilities
 
 The CLI/MCP connector follows your WANT2VIEW account plan:
 
 | Plan capability | Best for |
 | --- | --- |
-| Free account connector | First Codex research run, up to the current free record limit, using YouTube/TikTok/Telegram |
-| Paid project API | Agencies, AI agents, automations, and internal tools that need project data |
+| Account connector | First Codex research run, up to the current account record limit, using YouTube/TikTok/Telegram |
+| Project API | Agencies, AI agents, automations, and internal tools that need project data when included by the account plan |
 | Managed connectors | Teams that need deeper YouTube, TikTok, and Telegram without maintaining provider access |
 | Scheduled refreshes | Weekly monitoring of keywords, channels, creator markets, product categories, or competitor sets |
 | Custom research | Done-for-you category reports, competitor maps, content briefs, scripts, and client-ready insights |
@@ -431,8 +431,8 @@ Recommended columns:
 | `want2view doctor --json` | Agent-readable setup diagnostics |
 | `want2view workflows` | Show keyword, channel, project, and monitoring workflows |
 | `want2view workflows keyword` | Print a copy-pasteable keyword-to-agent workflow |
-| `want2view search "topic" --demo` | Free local keyword demo pack |
-| `want2view channel <url> --demo` | Free local channel-shaped demo pack |
+| `want2view search "topic" --demo` | Local sample keyword pack |
+| `want2view channel <url> --demo` | Local sample channel-shaped pack |
 | `want2view catalog categories` | Browse WANT2VIEW catalog categories |
 | `want2view catalog export ai --for codex` | Export catalog evidence for an agent |
 | `want2view projects list` | List your WANT2VIEW projects with `WANT2VIEW_PUBLIC_API_KEY` |
@@ -444,8 +444,8 @@ Recommended columns:
 | `want2view export --for codex` | Create Codex pack |
 | `want2view export --for claude` | Create Claude brief |
 | `want2view cloud research "topic" --mode cloud` | Start managed WANT2VIEW account research |
-| `want2view cloud status <run_id>` | Poll cloud run |
-| `want2view cloud export <run_id> --for codex` | Download cloud context pack |
+| `want2view cloud status <run_id>` | Poll account research run |
+| `want2view cloud export <run_id> --for codex` | Download account context pack |
 
 ## Account Plan Boundary
 
@@ -453,7 +453,7 @@ Open-source:
 
 - CLI runner;
 - local imports;
-- demo data;
+- sample data;
 - limited public catalog access;
 - normalization;
 - basic scoring;

@@ -12,7 +12,7 @@ npx want2view codex "ugc ads"
 
 It creates `manifest.json`, `summary.md`, `evidence.jsonl`, `scored.csv`, and agent-ready briefs.
 
-Free local packs. WANT2VIEW Cloud when you need real YouTube/TikTok/Instagram/X/Reddit/Threads connectors, private projects, API access, and scheduled refreshes.
+CLI and MCP are the agent interface for your WANT2VIEW account. Free accounts can test YouTube/TikTok/Telegram depth; paid plans expand the same commands with more records, projects, API access, and scheduled refreshes.
 
 Repo: https://github.com/kirbudilov01/want2view-cli
 
@@ -39,7 +39,7 @@ codex_tasks.md
 claude_brief.md
 ```
 
-5. The free repo is useful immediately. WANT2VIEW Cloud unlocks the real product layer: private projects, deeper catalog access, managed social connectors, scheduled refreshes, API access, and custom research.
+5. The repo is useful immediately, and the real power is account-connected: API Access gives agents the same WANT2VIEW sources and limits as the dashboard.
 
 6. If your agents are tired of guessing from prompts, try it and star the repo:
 
@@ -57,9 +57,9 @@ With one command, users can generate a local research pack:
 npx want2view claude "ai video ads"
 ```
 
-The pack includes source rows, scoring, summaries, and agent-specific briefs. It works with demo data, your own CSV/JSON exports, limited public catalog samples, and authenticated WANT2VIEW Cloud/project exports.
+The pack includes source rows, scoring, summaries, and agent-specific briefs. It works with sample data, your own CSV/JSON exports, limited public catalog samples, and authenticated WANT2VIEW account/project exports.
 
-Open source gets people started. WANT2VIEW Cloud adds managed social connectors, private projects, deeper catalog access, API tokens, scheduled refreshes, and custom research.
+Open source gets people started. API Access connects the same CLI/MCP commands to the user's WANT2VIEW account plan: managed sources, private projects, deeper catalog access, API tokens, scheduled refreshes, and custom research when included.
 
 Repo: https://github.com/kirbudilov01/want2view-cli
 
@@ -84,7 +84,7 @@ npx want2view codex "ugc ads"
 
 The output is a folder with manifest.json, summary.md, evidence.jsonl, scored.csv, and Codex/Claude briefs.
 
-The free repo is intentionally useful on its own. WANT2VIEW Cloud is the paid layer for real social connectors, private projects, scheduled refreshes, API access, and custom research.
+The repo is intentionally useful on its own. API Access turns it into the agent interface for a WANT2VIEW account, with the same free or paid limits as the dashboard.
 
 Repo:
 https://github.com/kirbudilov01/want2view-cli
@@ -101,5 +101,5 @@ Open-source WANT2VIEW connector for Codex, Claude, and terminal agents
 Description:
 
 ```text
-WANT2VIEW CLI turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs for AI agents. Start free from the terminal. Upgrade to WANT2VIEW Cloud for real social connectors, private projects, scheduled refreshes, API access, and custom research.
+WANT2VIEW CLI turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs for AI agents. Connect API Access once, then CLI/MCP run inside the same WANT2VIEW account limits as the dashboard.
 ```

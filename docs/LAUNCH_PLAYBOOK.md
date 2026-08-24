@@ -10,7 +10,7 @@ One-line:
 
 Short version:
 
-> WANT2VIEW CLI turns demo data, CSV/JSON imports, public catalog samples, and WANT2VIEW Cloud runs into agent-ready research packs. The free repo is useful immediately; the paid product unlocks deeper catalog data, private projects, managed social connectors, scheduled refreshes, and custom research.
+> WANT2VIEW CLI turns demo data, CSV/JSON imports, public catalog samples, and WANT2VIEW account runs into agent-ready research packs. The repo is useful immediately; the paid product unlocks deeper catalog data, private projects, managed social connectors, scheduled refreshes, and custom research.
 
 ## Demo Script
 
@@ -36,7 +36,7 @@ Then open:
 
 ## Conversion Path
 
-1. User runs the free CLI.
+1. User runs the CLI.
 2. User sees limited public catalog data.
 3. User needs their own projects or deeper catalog data.
 4. User creates a WANT2VIEW account.

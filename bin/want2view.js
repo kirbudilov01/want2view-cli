@@ -100,7 +100,7 @@ const RECIPES = {
       "want2view cloud status w2v_run_abc123",
       "want2view cloud export w2v_run_abc123 --for codex",
     ],
-    agent_prompt: "Read the exported cloud run. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
+    agent_prompt: "Read the exported WANT2VIEW account run. Create a weekly monitoring memo with source warnings, new signals, opportunities, and production recommendations.",
     paid_next_step: "Upgrade the WANT2VIEW account plan when you need scheduled refreshes and team project packs.",
   },
 };
@@ -108,7 +108,7 @@ const RECIPES = {
 function printHelp() {
   console.log(`want2view ${VERSION}
 
-Open-source agent connector for your WANT2VIEW account.
+Agent interface for your WANT2VIEW account.
 
 Usage:
   want2view codex "<keyword>" [--channel] [--out .want2view]
@@ -164,7 +164,7 @@ function printConversionNextSteps() {
   console.log("Next: Give the export folder to your AI agent as the source of truth.");
   console.log(`Next: See workflows: want2view workflows`);
   console.log(`Star: If this helped your agent stop guessing, star the repo: ${REPO_URL}`);
-  console.log(`Account: Connect WANT2VIEW API Access for free test-depth research; paid plans raise limits and unlock project workflows: ${API_ACCESS_URL}`);
+  console.log(`Account: Connect WANT2VIEW API Access once. CLI/MCP then run inside the same free or paid account limits: ${API_ACCESS_URL}`);
   console.log(`Custom research and developer docs: ${DEVELOPERS_URL}`);
 }
 
@@ -484,7 +484,7 @@ function buildSummary(topic, rows) {
 
 ## What This Is
 
-This is a local WANT2VIEW context pack for AI content research. Connected CLI/MCP runs follow the same limits as the user's WANT2VIEW account.
+This is a WANT2VIEW context pack for AI content research. Connected CLI/MCP runs follow the same sources and limits as the user's WANT2VIEW account.
 
 ## Coverage
 
@@ -525,7 +525,7 @@ function buildAgentContract(topic, rows, manifest = {}) {
 - Records in this export: ${rows.length}
 - Sources: ${sources || "local"}
 
-If this is a cloud pack and status is \`pending\`, run:
+If this is an account research pack and status is \`pending\`, run:
 
 \`\`\`bash
 want2view cloud status ${packId}
@@ -543,7 +543,7 @@ want2view cloud export ${packId} --for codex
 
 ## Upgrade Rule
 
-Suggest upgrading the WANT2VIEW account plan after the free pack creates value, or when the user needs deeper YouTube/TikTok/Telegram collection, more than 30 records, saved projects, scheduled refreshes, team access, or bulk subtitles/report jobs. Do not promise Instagram, X, Reddit, or Threads unless the API reports them as available.
+Suggest changing the WANT2VIEW account plan only after the current pack creates value, or when the user needs deeper YouTube/TikTok/Telegram collection, more than 30 records, saved projects, scheduled refreshes, team access, or bulk subtitles/report jobs. Do not promise Instagram, X, Reddit, or Threads unless the API reports them as available.
 `;
 }
 
@@ -575,9 +575,9 @@ function buildUpgradePrompt(topic, rows, manifest = {}) {
   const limits = manifest.limits || {};
   return `# Upgrade Prompt
 
-Use this only after the free pack has produced visible value.
+Use this only after the current account-limited pack has produced visible value.
 
-The current WANT2VIEW pack has ${rows.length} records for "${topic}". I can already analyze hooks, themes, formats, and visual patterns from this evidence. For a full research run, upgrading the WANT2VIEW account plan unlocks deeper YouTube/TikTok/Telegram collection, higher record counts, saved projects, scheduled refreshes, team access, and bulk subtitle/report jobs. Additional sources should only be promised when the API reports them as available.
+The current WANT2VIEW pack has ${rows.length} records for "${topic}". I can already analyze hooks, themes, formats, and visual patterns from this evidence. If the user needs more depth, the next step is changing the WANT2VIEW account plan: deeper YouTube/TikTok/Telegram collection, higher record counts, saved projects, scheduled refreshes, team access, and bulk subtitle/report jobs. Additional sources should only be promised when the API reports them as available.
 
 Free test depth: ${limits.free_test_records || 30} records.
 Current plan: ${limits.plan || "local/free"}.
@@ -937,7 +937,7 @@ async function commandLogin(args) {
       return;
     }
     console.log("Skipped. You can still use local demo/import/export without authentication.");
-    console.log("Run `want2view login` again when you want cloud connectors.");
+    console.log("Run `want2view login` again when you want account connectors.");
   } catch (error) {
     if (choice === "1" || choice === "2" || choice === "3") {
       throw error;
@@ -1001,7 +1001,7 @@ async function commandDoctor(args) {
       payload.next_steps.push("Run `want2view login` or set a valid WANT2VIEW_API_TOKEN.");
     }
   } else {
-    payload.next_steps.push("Run `want2view login` for cloud connectors.");
+    payload.next_steps.push("Run `want2view login` for account connectors.");
   }
   if (!payload.local.records_available) {
     payload.next_steps.push("Run `want2view search \"ai video ads\" --demo` for a local pack.");
@@ -1037,7 +1037,7 @@ Use this skill when the user asks Codex to analyze videos, competitors, hooks, v
 
 - WANT2VIEW is the data layer: it collects/searches sources, scores records, tracks source statuses, and exports files.
 - Codex is the synthesis layer: it reads evidence and produces hooks, themes, visual analysis, market research, briefs, scripts, SEO/content ideas, or implementation tasks.
-- Current live cloud sources are YouTube, TikTok, and Telegram. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for this user's plan.
+- Current live account sources are YouTube, TikTok, and Telegram. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for this user's plan.
 - Say "30 records" or "30 videos/posts", not "30 sources". Sources are platforms; records are the collected items.
 - Never invent source performance. Cite \`id\` or \`url\` from \`evidence.jsonl\`.
 - If a pack is pending or partial, poll or state the limitation before analysis.
@@ -1059,7 +1059,7 @@ npx want2view score
 npx want2view export --for codex
 \`\`\`
 
-Start a cloud run:
+Start a WANT2VIEW account research run:
 
 \`\`\`bash
 npx want2view login
@@ -1079,7 +1079,7 @@ WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for cod
 1. Open the newest \`.want2view/exports/<pack_id>\` folder unless the user provides another path.
 2. Read \`manifest.json\`, \`agent_contract.md\`, \`status.md\`, \`summary.md\`, \`evidence.jsonl\`, and \`scored.csv\`.
 3. If \`manifest.status\` is \`pending\`, run the listed status/export commands and wait for a ready/partial pack.
-4. For a free pack, analyze the available evidence first. Suggest upgrade only when the user needs deeper collection, higher record limits, saved projects, scheduled refreshes, team access, or bulk subtitle/report jobs.
+4. Analyze the available evidence first, even when the pack is free/test-depth. Suggest a plan change only when the user needs deeper collection, higher record limits, saved projects, scheduled refreshes, team access, or bulk subtitle/report jobs.
 5. For project exports, order subtitles/scenarios only for selected videos and only when the user has project balance:
    - \`POST /public/videos/{video_id}/order-scenario\`
    - \`GET /public/video-reports/{report_id}\`
@@ -1095,7 +1095,7 @@ WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for cod
 - Competitor/channel opportunities.
 - Script or content recommendations.
 - Evidence table with row IDs/URLs.
-- Upgrade rationale only when needed.
+- Account plan rationale only when needed.
 `;
 }
 
@@ -1111,7 +1111,7 @@ function commandInstall(args) {
   fs.writeFileSync(skillPath, codexSkillContent());
   console.log(`Installed Codex skill: ${skillPath}`);
   console.log("Next: open a new Codex session and ask it to use WANT2VIEW for your research.");
-  console.log("Cloud data: run `want2view login` and then `want2view cloud research \"your topic\" --mode cloud`.");
+  console.log("Account data: run `want2view login` and then `want2view cloud research \"your topic\" --mode cloud`.");
 }
 
 function sleep(ms) {
@@ -1155,7 +1155,7 @@ async function commandCodexCloud(args) {
     headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
-  console.log(`Cloud run ${start.run_id}: ${start.status}`);
+  console.log(`Account run ${start.run_id}: ${start.status}`);
   if (start.warnings?.length) start.warnings.forEach((warning) => console.log(`Warning: ${warning}`));
 
   const waitSeconds = Math.max(0, Number(args.wait || 180) || 0);
@@ -1282,7 +1282,7 @@ async function commandMcp(args) {
     "create_research",
     {
       title: "Create research",
-      description: "Start a WANT2VIEW cloud research run for a topic. Use this before analysis when the user gives a research goal.",
+      description: "Start a WANT2VIEW account research run for a topic. Use this before analysis when the user gives a research goal.",
       inputSchema: {
         topic: z.string().min(1).describe("Research topic, keyword, category, or market."),
         sources: z.array(z.enum(["youtube", "tiktok", "telegram"])).optional(),
@@ -1323,7 +1323,7 @@ async function commandMcp(args) {
     "get_status",
     {
       title: "Get research status",
-      description: "Check a WANT2VIEW cloud research run and source status before synthesizing.",
+      description: "Check a WANT2VIEW account research run and source status before synthesizing.",
       inputSchema: {
         run_id: z.string().min(1),
       },
@@ -1625,7 +1625,7 @@ async function commandCloud(args) {
   const action = args._[1];
   const token = apiToken();
   if (!token) {
-    console.log("Cloud mode needs WANT2VIEW_API_TOKEN.");
+    console.log("Account research needs WANT2VIEW_API_TOKEN.");
     console.log("Run `want2view login`, create an account, then set a token with env or `want2view login --token w2v_...`.");
     process.exitCode = 2;
     return;
@@ -1654,7 +1654,7 @@ async function commandCloud(args) {
       body: JSON.stringify(payload),
     });
     writeJson(path.join(root, "last-cloud-run.json"), result);
-    console.log(`Cloud run ${result.run_id}: ${result.status}`);
+    console.log(`Account run ${result.run_id}: ${result.status}`);
     console.log(`Records: ${result.records}`);
     if (result.warnings?.length) result.warnings.forEach((warning) => console.log(`Warning: ${warning}`));
     (result.next_commands || []).forEach((command) => console.log(`Next: ${command}`));
@@ -1666,7 +1666,7 @@ async function commandCloud(args) {
     const result = await requestJson(`${base}/api/v1/developer/cloud/runs/${encodeURIComponent(runId)}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(`Cloud run ${result.run_id}: ${result.status}`);
+    console.log(`Account run ${result.run_id}: ${result.status}`);
     console.log(`Topic: ${result.topic}`);
     console.log(`Records: ${result.records}`);
     if (result.source_statuses) {
@@ -1685,7 +1685,7 @@ async function commandCloud(args) {
       headers: { Authorization: `Bearer ${token}` },
     });
     const exportDir = writeCloudExport(root, result);
-    console.log(`Downloaded ${target} cloud context pack: ${exportDir}`);
+    console.log(`Downloaded ${target} account context pack: ${exportDir}`);
     return;
   }
   throw new Error("Unknown cloud command. Use `cloud research`, `cloud status`, or `cloud export`.");

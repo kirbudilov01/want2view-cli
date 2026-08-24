@@ -10,7 +10,7 @@ Use GitHub issues for:
 - connector requests
 - documentation improvements
 
-## WANT2VIEW Cloud
+## WANT2VIEW Account / API Access
 
 Use WANT2VIEW for:
 

@@ -2,7 +2,7 @@
 
 Workflows are practical onboarding paths built from existing WANT2VIEW CLI commands and WANT2VIEW product surfaces.
 
-They do not imply that every paid workflow is fully local. The open-source CLI creates useful context packs; WANT2VIEW Cloud provides deeper catalog data, private projects, managed social connectors, scheduled refreshes, API access, and custom research.
+They do not imply a separate CLI product line. The CLI and MCP are the agent interface for the same WANT2VIEW account: local packs work without auth, and authenticated runs use the account's current sources, projects, limits, scheduled refreshes, API access, and custom research options.
 
 ## Keyword Search To Codex
 
@@ -44,7 +44,7 @@ Separate evidence from assumptions and cite evidence rows.
 
 Next WANT2VIEW step:
 
-- Connect the real channel in WANT2VIEW Cloud.
+- Connect the real channel through WANT2VIEW API Access.
 - Compare it against competitors.
 - Order custom research when the team needs a polished report.
 
@@ -87,7 +87,7 @@ npx want2view cloud export w2v_run_abc123 --for codex
 Give the agent:
 
 ```text
-Read the exported cloud run folder.
+Read the exported WANT2VIEW account run folder.
 Create a weekly content monitoring memo with new signals, source warnings, opportunity themes, and production recommendations.
 If a platform failed or was rate-limited, state that before recommendations.
 ```

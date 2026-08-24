@@ -34,10 +34,10 @@ Use the content patterns, audience pains, and proof points from the evidence.
 Separate observed evidence from creative recommendations.
 ```
 
-## When Using WANT2VIEW Cloud
+## When Using WANT2VIEW Account Research
 
 ```text
-Use the exported cloud run folder as the source of truth.
+Use the exported WANT2VIEW account run folder as the source of truth.
 Prioritize source_statuses and warnings before making recommendations.
 If one platform failed or was rate-limited, say so in the final brief.
 ```

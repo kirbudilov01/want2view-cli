@@ -54,6 +54,6 @@
     <text x="700" y="284" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">evidence.jsonl</text>
     <text x="700" y="324" fill="#F7F3FF" font-family="SFMono-Regular, Consolas, monospace" font-size="20">codex_tasks.md</text>
     <text x="700" y="390" fill="#28D7C7" font-family="SFMono-Regular, Consolas, monospace" font-size="20">$ want2view start claude --channel</text>
-    <text x="700" y="430" fill="#B9AFD6" font-family="SFMono-Regular, Consolas, monospace" font-size="18">WANT2VIEW Cloud + API access</text>
+    <text x="700" y="430" fill="#B9AFD6" font-family="SFMono-Regular, Consolas, monospace" font-size="18">WANT2VIEW account + API Access</text>
   </g>
 </svg>

@@ -17,7 +17,7 @@ node bin/want2view.js export --for codex
 - Do not commit API keys, cookies, session files, or scraped private data.
 - Preserve raw evidence separately from generated insight.
 - Every generated recommendation should be traceable to evidence rows.
-- Managed high-risk or provider-restricted connectors belong in WANT2VIEW Cloud.
+- Managed high-risk or provider-restricted connectors belong in WANT2VIEW account plan.
 
 ## Pull Requests
 

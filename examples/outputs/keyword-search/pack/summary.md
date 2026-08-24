@@ -18,7 +18,7 @@ This is a local, open-source WANT2VIEW context pack for AI content research.
 
 ## Upgrade Path
 
-Use WANT2VIEW Cloud when you need deeper YouTube, TikTok, and Telegram runs, scheduled refreshes, team workspaces, private projects, and deeper historical indexes. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for the current plan.
+Use WANT2VIEW account plan when you need deeper YouTube, TikTok, and Telegram runs, scheduled refreshes, team workspaces, private projects, and deeper historical indexes. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for the current plan.
 
 API access: https://app.want2view.com/api-access
 Open-source repo: https://github.com/kirbudilov01/want2view-cli

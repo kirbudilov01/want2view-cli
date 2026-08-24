@@ -42,7 +42,7 @@ WANT2VIEW CLI is not a separate product. It is the terminal and agent entrypoint
 - free local packs for discovery;
 - imports and public samples for immediate utility;
 - API Access for private projects;
-- WANT2VIEW Cloud for real social connectors, scheduled refreshes, deeper catalog access, team workspaces, and custom research.
+- WANT2VIEW account plan for real social connectors, scheduled refreshes, deeper catalog access, team workspaces, and custom research.
 
 ## Remaining Manual Steps
 

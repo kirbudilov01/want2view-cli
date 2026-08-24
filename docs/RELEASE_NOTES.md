@@ -4,7 +4,7 @@
 
 This release aligns the connector with the current live source coverage:
 
-- Cloud examples now default to YouTube, TikTok, and Telegram.
+- Account research examples now default to YouTube, TikTok, and Telegram.
 - `want2view install codex` tells Codex that Instagram, X, Reddit, and Threads are roadmap sources unless the API reports them as available.
 - Upgrade prompts now sell deeper collection, saved projects, scheduled refreshes, teams, and subtitles without over-promising unavailable connectors.
 
@@ -24,7 +24,7 @@ WANT2VIEW CLI now includes the Codex install path and a stronger evidence-pack c
 
 - `npx want2view install codex` installs a local `want2view-research` Codex skill.
 - Every export includes `agent_contract.md`, `status.md`, and `upgrade_prompt.md`.
-- Cloud exports can be downloaded while a run is still pending, so agents know what to poll instead of failing on a 202 response.
+- Account exports can be downloaded while a run is still pending, so agents know what to poll instead of failing on a 202 response.
 - The agent contract separates WANT2VIEW as the data layer from Codex as the synthesis layer for hooks, themes, visual patterns, scripts, SEO/content ideas, and research briefs.
 - Free/developer packs stay useful while upgrade prompts are reserved for cross-platform sources, deeper record counts, scheduled refreshes, team access, and bulk subtitle/report jobs.
 
@@ -38,7 +38,7 @@ WANT2VIEW CLI now supports more one-command agent entrypoints:
 - `npx want2view openclaw "ugc ads"`
 - `npx want2view agent "content monitoring"`
 
-Codex, Cursor, OpenClaw, and generic terminal agents receive the Codex-style task pack. Claude receives the Claude-style brief. Every path uses the same WANT2VIEW evidence folder and the same upgrade path into Cloud/API/private projects.
+Codex, Cursor, OpenClaw, and generic terminal agents receive the Codex-style task pack. Claude receives the Claude-style brief. Every path uses the same WANT2VIEW evidence folder and the same account plan across dashboard, CLI, MCP, API, and private projects.
 
 ## v0.2.1
 
@@ -57,13 +57,13 @@ Highlights:
 
 - `want2view start codex|claude ...` creates a pack and prints the exact agent prompt.
 - GitHub-first setup flow modeled around a 60-second onboarding path.
-- Clear Codex, Claude, channel audit, project export, and cloud upgrade paths.
+- Clear Codex, Claude, channel audit, project export, and account connector paths.
 - Prompt library, workflow recipes, launch posts, npm publish guide, and GitHub polish checklist.
 - Updated hero, terminal demo, product preview, GIF, and social preview assets.
 - Credential safety: auth commands only use trusted WANT2VIEW hosts unless explicitly overridden.
 - Stable example outputs for people who want to inspect the value before running commands.
 
-The open-source CLI remains free. WANT2VIEW Cloud unlocks managed social connectors, private projects, deeper catalog access, API tokens, scheduled refreshes, team workflows, and custom research.
+The CLI remains open-source. WANT2VIEW account plan unlocks managed social connectors, private projects, deeper catalog access, API tokens, scheduled refreshes, team workflows, and custom research.
 
 ## v0.1.0
 
@@ -78,9 +78,9 @@ Highlights:
 - limited public catalog access
 - private project export client
 - Developer CLI token flow
-- WANT2VIEW Cloud research client
+- WANT2VIEW account plan research client
 - workflows for keyword search, channel audits, project exports, and content teams
 - demo GIF and social preview assets
 - CI workflow and npm-ready package metadata
 
-The open-source CLI is free. WANT2VIEW Cloud unlocks private projects, deeper catalog access, managed social connectors, scheduled refreshes, API access, team workflows, and custom research.
+The CLI remains open-source. WANT2VIEW account plan unlocks private projects, deeper catalog access, managed social connectors, scheduled refreshes, API access, team workflows, and custom research.

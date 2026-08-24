@@ -12,7 +12,7 @@ Use this when turning the repository into a public acquisition push.
   - who it is for;
   - one command to run;
   - what files it creates;
-  - why WANT2VIEW Cloud is the paid next step.
+  - why WANT2VIEW account plan is the paid next step.
 - Run:
 
 ```bash
