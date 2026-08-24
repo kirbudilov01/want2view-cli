@@ -117,7 +117,7 @@ Usage:
   want2view openclaw "<keyword>" [--channel] [--out .want2view]
   want2view agent "<keyword>" [--channel] [--out .want2view]
   want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
-  want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok] [--goal "hooks, themes, visuals"]
+  want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok,telegram] [--goal "hooks, themes, visuals"]
   want2view mcp
   want2view install codex
   want2view init [--workspace .want2view]
@@ -1038,6 +1038,7 @@ Use this skill when the user asks Codex to analyze videos, competitors, hooks, v
 - WANT2VIEW is the data layer: it collects/searches sources, scores records, tracks source statuses, and exports files.
 - Codex is the synthesis layer: it reads evidence and produces hooks, themes, visual analysis, market research, briefs, scripts, SEO/content ideas, or implementation tasks.
 - Current live cloud sources are YouTube, TikTok, and Telegram. Treat Instagram, X, Reddit, and Threads as roadmap sources unless the API reports them as available for this user's plan.
+- Say "30 records" or "30 videos/posts", not "30 sources". Sources are platforms; records are the collected items.
 - Never invent source performance. Cite \`id\` or \`url\` from \`evidence.jsonl\`.
 - If a pack is pending or partial, poll or state the limitation before analysis.
 - Do not ask for or print API tokens. Use \`WANT2VIEW_API_TOKEN\` or the CLI's private config.
@@ -1078,7 +1079,7 @@ WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for cod
 1. Open the newest \`.want2view/exports/<pack_id>\` folder unless the user provides another path.
 2. Read \`manifest.json\`, \`agent_contract.md\`, \`status.md\`, \`summary.md\`, \`evidence.jsonl\`, and \`scored.csv\`.
 3. If \`manifest.status\` is \`pending\`, run the listed status/export commands and wait for a ready/partial pack.
-4. For a free pack, analyze the available evidence first. Suggest upgrade only when the user needs cross-platform/deeper collection.
+4. For a free pack, analyze the available evidence first. Suggest upgrade only when the user needs deeper collection, higher record limits, saved projects, scheduled refreshes, team access, or bulk subtitle/report jobs.
 5. For project exports, order subtitles/scenarios only for selected videos and only when the user has project balance:
    - \`POST /public/videos/{video_id}/order-scenario\`
    - \`GET /public/video-reports/{report_id}\`
