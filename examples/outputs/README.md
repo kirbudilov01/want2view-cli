@@ -7,14 +7,14 @@ Open these folders before running anything to see what WANT2VIEW CLI creates for
 Command:
 
 ```bash
-npx github:kirbudilov01/want2view-cli search "ai video ads" --demo
-npx github:kirbudilov01/want2view-cli export --for codex
+npx want2view search "ai video ads" --demo
+npx want2view export --for codex
 ```
 
 One-command version:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start codex "ai video ads"
+npx want2view start codex "ai video ads"
 ```
 
 Output:
@@ -30,14 +30,14 @@ Output:
 Command:
 
 ```bash
-npx github:kirbudilov01/want2view-cli channel https://youtube.com/@example --demo
-npx github:kirbudilov01/want2view-cli export --for claude
+npx want2view channel https://youtube.com/@example --demo
+npx want2view export --for claude
 ```
 
 One-command version:
 
 ```bash
-npx github:kirbudilov01/want2view-cli start claude https://youtube.com/@example --channel
+npx want2view start claude https://youtube.com/@example --channel
 ```
 
 Output:
@@ -54,8 +54,8 @@ Private project export requires a WANT2VIEW account and API access:
 
 ```bash
 export WANT2VIEW_PUBLIC_API_KEY="..."
-npx github:kirbudilov01/want2view-cli projects list
-npx github:kirbudilov01/want2view-cli project export <project_id> --for codex
+npx want2view projects list
+npx want2view project export <project_id> --for codex
 ```
 
 Expected output:

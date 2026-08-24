@@ -91,7 +91,7 @@ Then pick your agent and run one command.
 Npm is live. If the npm registry is unavailable, use the GitHub fallback:
 
 ```bash
-npx github:kirbudilov01/want2view-cli codex "ai video ads"
+npx want2view codex "ai video ads"
 ```
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
@@ -245,8 +245,8 @@ npx want2view workflows keyword
 GitHub fallback:
 
 ```bash
-npx github:kirbudilov01/want2view-cli codex "ai video ads"
-npx github:kirbudilov01/want2view-cli claude https://youtube.com/@example --channel
+npx want2view codex "ai video ads"
+npx want2view claude https://youtube.com/@example --channel
 ```
 
 Package status: `want2view@0.2.1` is published on npm.
