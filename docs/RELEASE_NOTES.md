@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.4.1
+
+This release aligns the connector with the current live source coverage:
+
+- Cloud examples now default to YouTube, TikTok, and Telegram.
+- `want2view install codex` tells Codex that Instagram, X, Reddit, and Threads are roadmap sources unless the API reports them as available.
+- Upgrade prompts now sell deeper collection, saved projects, scheduled refreshes, teams, and subtitles without over-promising unavailable connectors.
+
 ## v0.4.0
 
 WANT2VIEW CLI now includes a Codex-compatible MCP server:

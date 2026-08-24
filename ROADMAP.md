@@ -22,7 +22,7 @@
 
 ## Later
 
-- Managed YouTube, TikTok, Instagram, X, Reddit, and Threads connectors.
+- Managed YouTube, TikTok, and Telegram connectors first. Instagram, X, Reddit, and Threads stay roadmap sources until plan/API availability is explicit.
 - Scheduled refreshes.
 - Team workspaces.
 - Historical source index.

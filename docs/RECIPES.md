@@ -79,7 +79,7 @@ Use this when a team already knows the category and wants repeated updates.
 ```bash
 npx want2view login
 npx want2view cloud research "fitness reels" \
-  --sources youtube,tiktok,instagram,x --mode cloud
+  --sources youtube,tiktok,telegram --mode cloud
 npx want2view cloud status w2v_run_abc123
 npx want2view cloud export w2v_run_abc123 --for codex
 ```

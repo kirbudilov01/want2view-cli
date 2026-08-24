@@ -20,7 +20,7 @@ Then:
 
 ```bash
 npx want2view cloud research "ai video ads" \
-  --sources youtube,tiktok,instagram,x --mode cloud
+  --sources youtube,tiktok,telegram --mode cloud
 ```
 
 ## Public API Key

@@ -12,11 +12,11 @@
 
 # WANT2VIEW CLI + MCP
 
-One command gives Codex, Claude, Cursor, OpenClaw, and terminal agents real WANT2VIEW evidence. MCP mode gives Codex live WANT2VIEW tools.
+One command gives Codex, Claude, Cursor, OpenClaw, and terminal agents real WANT2VIEW evidence. MCP mode gives Codex live WANT2VIEW tools for YouTube, TikTok, and Telegram research.
 
 WANT2VIEW CLI is an open-source connector for terminal agents. It turns keyword searches, channel audits, local CSV/JSON imports, public catalog samples, and WANT2VIEW projects into source-of-truth packs your agents can read directly.
 
-Start free in 60 seconds. Upgrade to the same WANT2VIEW Cloud product when you need real social connectors, private projects, deeper catalog access, scheduled refreshes, API tokens, team workspaces, or custom research.
+Start free in 60 seconds. Upgrade to the same WANT2VIEW Cloud product when you need deeper YouTube/TikTok/Telegram runs, private projects, deeper catalog access, scheduled refreshes, API tokens, team workspaces, or custom research.
 
 ```bash
 npx want2view codex "ai video ads"
@@ -25,6 +25,7 @@ npx want2view codex "ai video ads"
 Connect live tools to Codex:
 
 ```bash
+npx want2view install codex
 codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
 ```
 
@@ -199,7 +200,7 @@ Copy these after running `start`.
 | Import your CSV/JSON/JSONL | Included | Included |
 | Public catalog | Limited sample | Deeper catalog and history |
 | Private projects | API client only | Full dashboard, saved projects, reports |
-| Social connectors | Client interface | Managed YouTube, TikTok, Instagram, X, Reddit, Threads |
+| Social connectors | Client interface | Managed YouTube, TikTok, Telegram today; roadmap sources only when enabled by plan/API |
 | Refreshes | Manual | Scheduled and monitored |
 | Agent packs | Codex and Claude exports | Codex, Claude, API, team workflows |
 | Custom research | Not included | Done-for-you reports and briefs |
@@ -220,7 +221,8 @@ WANT2VIEW Cloud adds the paid product:
 
 - deeper catalog data beyond the public sample;
 - private project exports from the WANT2VIEW dashboard;
-- managed YouTube, TikTok, Instagram, X, Reddit, and Threads connectors;
+- managed YouTube, TikTok, and Telegram connectors;
+- roadmap source expansion only when enabled by plan/API;
 - provider keys, retries, source warnings, and cost controls;
 - scheduled refreshes;
 - team workspaces;
@@ -353,7 +355,7 @@ Once authenticated, the CLI can ask WANT2VIEW Cloud to run managed social collec
 
 ```bash
 npx want2view cloud research "fitness reels" \
-  --sources youtube,tiktok,instagram,x --mode cloud
+  --sources youtube,tiktok,telegram --mode cloud
 
 npx want2view cloud status w2v_run_abc123
 npx want2view cloud export w2v_run_abc123 --for codex
@@ -371,7 +373,7 @@ The open-source CLI is the free entrypoint. WANT2VIEW Cloud is for serious, repe
 
 | Product | Best for |
 | --- | --- |
-| Managed connectors | Teams that need YouTube, TikTok, Instagram, X, Reddit, and Threads without maintaining provider access |
+| Managed connectors | Teams that need YouTube, TikTok, and Telegram without maintaining provider access |
 | API access | Agencies, AI agents, automations, and internal tools |
 | Scheduled refreshes | Weekly monitoring of keywords, channels, creator markets, product categories, or competitor sets |
 | Custom research | Done-for-you category reports, competitor maps, content briefs, scripts, and client-ready insights |
@@ -410,7 +412,7 @@ Recommended columns:
 
 | Column | Meaning |
 | --- | --- |
-| `platform` | YouTube, TikTok, Instagram, X, Reddit, Threads, or custom source |
+| `platform` | YouTube, TikTok, Telegram, or custom source |
 | `account` | Creator, channel, author, subreddit, or profile |
 | `title` | Content title or post headline |
 | `url` | Source URL |
@@ -465,7 +467,7 @@ Paid WANT2VIEW Cloud:
 - private project exports;
 - managed platform connectors;
 - approved API/bridge infrastructure;
-- TikTok, Instagram, X, Reddit, Threads production collection;
+- YouTube, TikTok, and Telegram production collection;
 - scheduled refreshes;
 - team workspaces;
 - deeper scoring and historical indexes;
