@@ -728,6 +728,133 @@ function buildAgentRecommendation(manifest = {}, rows = []) {
   };
 }
 
+function evidenceRef(row = {}) {
+  return {
+    id: row.id,
+    title: row.title,
+    url: row.url,
+    platform: row.platform,
+    hook_type: row.hook_type,
+    format_type: row.format_type,
+    relevance_score: row.relevance_score,
+  };
+}
+
+function buildContentOpportunities(topic, rows, manifest = {}) {
+  const sorted = [...rows].sort((a, b) => Number(b.relevance_score || b.score || 0) - Number(a.relevance_score || a.score || 0));
+  const byFormat = countBy(rows, "format_type");
+  const byHook = countBy(rows, "hook_type");
+  const pick = (predicate, limit = 3) => sorted.filter(predicate).slice(0, limit).map(evidenceRef);
+  const opportunities = [
+    {
+      type: "first_person_experiment",
+      priority: 1,
+      concept: "Give an AI agent a real founder/content task and show the result from prompt to output.",
+      recommended_hook: "I let an AI agent decide what videos I should make next.",
+      format: "experiment",
+      why_it_can_work: "Experiment rows create curiosity because the viewer wants to see whether the agent succeeds or fails.",
+      evidence: pick((row) => row.hook_type === "experiment" || row.format_type === "experiment"),
+      codex_pc_work: ["Open evidence URLs", "Check the first 5-15 seconds", "Capture concrete hook wording and screen moments", "Request subtitles only for finalists"],
+    },
+    {
+      type: "tool_battle",
+      priority: 2,
+      concept: "Compare two tools or workflows against one clear business outcome.",
+      recommended_hook: "Codex vs Claude for building a content factory: which one gets usable scripts faster?",
+      format: "battle",
+      why_it_can_work: "Versus packaging gives viewers a simple decision frame and makes SaaS/tool content easier to click.",
+      evidence: pick((row) => row.hook_type === "versus" || row.format_type === "battle"),
+      codex_pc_work: ["Open competitor examples", "List visible comparison structure", "Extract decision criteria", "Draft a proof table"],
+    },
+    {
+      type: "complete_workflow",
+      priority: 3,
+      concept: "Teach the whole workflow from market research to hooks, titles, scripts, and publishing queue.",
+      recommended_hook: "Build an AI content factory from zero using one research pack.",
+      format: "tutorial",
+      why_it_can_work: "Tutorial rows convert curiosity into saved/shared value when they promise an end-to-end workflow.",
+      evidence: pick((row) => row.hook_type === "tutorial" || row.format_type === "tutorial"),
+      codex_pc_work: ["Map steps from evidence titles", "Check thumbnails/screens manually", "Turn the strongest steps into a repeatable SOP"],
+    },
+    {
+      type: "market_news_angle",
+      priority: 4,
+      concept: "Use new models/tools/news as an excuse to explain what founders should do next.",
+      recommended_hook: "A new AI tool changed content production again. Here is the workflow I would rebuild.",
+      format: "news",
+      why_it_can_work: "Breakthrough/news rows create urgency, but they need a practical founder takeaway to avoid generic AI news.",
+      evidence: pick((row) => row.hook_type === "breakthrough" || row.format_type === "news"),
+      codex_pc_work: ["Verify recency from source URLs", "Separate factual news from opinion", "Write a practical next-action section"],
+    },
+  ].filter((item) => item.evidence.length);
+
+  return {
+    topic,
+    status: manifest.status || "completed",
+    source_scope: {
+      requested_sources: manifest.sources || [],
+      records: rows.length,
+      limitations: [
+        "WANT2VIEW provides metadata, scoring, thumbnails, source state, and evidence URLs inside this pack.",
+        "Frame-by-frame screen analysis, exact opening hook transcription, and final script synthesis should be done by Codex on the user's machine from URLs/subtitles.",
+        "Do not claim transcript-level or frame-level findings unless subtitles/screens were fetched and inspected.",
+      ],
+    },
+    pattern_counts: {
+      hook_type: byHook,
+      format_type: byFormat,
+    },
+    opportunities,
+    next_agent_action: "Use prompt_for_codex.md with this pack. Create content concepts and scripts from the evidence; request subtitles/screens only for finalist videos.",
+  };
+}
+
+function buildPromptForCodex(topic, rows, manifest = {}) {
+  return `# Prompt For Codex
+
+Use this WANT2VIEW pack as the source of truth for the user's content strategy.
+
+## User Goal
+
+${topic}
+
+## Required Inputs
+
+Read these files first:
+
+1. \`manifest.json\` for status, limits, source state, and query plan.
+2. \`source_diagnostics.json\` for partial/fallback warnings.
+3. \`content_opportunities.json\` for evidence-backed content directions.
+4. \`evidence.jsonl\` and \`scored.csv\` for source rows.
+5. \`research_brief.md\` for a human summary.
+
+## Your Job
+
+Produce:
+
+1. A market/content map.
+2. 5-7 content pillars.
+3. 20 specific video concepts.
+4. Hooks and titles for each concept.
+5. A prioritized production plan.
+6. 3 complete scripts for the strongest concepts.
+
+## Evidence Rules
+
+- Cite evidence by \`id\` or \`url\`.
+- Do not invent view counts, transcripts, or frame-level visual details.
+- Treat thumbnails as thumbnail-level evidence only.
+- If you need exact opening hooks, screen flow, or subtitle-level proof, open the source URLs or use WANT2VIEW subtitle/report tools for selected videos.
+- If \`source_diagnostics.json\` says partial or fallback was used, state that before recommendations.
+
+## Upgrade Rule
+
+Recommend a paid/deeper WANT2VIEW plan only after giving useful recommendations from the current pack, or when the user asks for deeper validation, more records, saved projects, scheduled refreshes, or bulk subtitles/reports.
+
+Current pack: ${rows.length} records, status ${manifest.status || "completed"}.
+`;
+}
+
 function buildResearchBrief(topic, rows, manifest = {}) {
   const topRows = [...rows].sort((a, b) => Number(b.relevance_score || b.score || 0) - Number(a.relevance_score || a.score || 0)).slice(0, 10);
   const hooks = countBy(rows, "hook_type");
@@ -994,6 +1121,8 @@ function commandExport(args) {
       "research_brief.md",
       "source_diagnostics.json",
       "agent_recommendation.json",
+      "content_opportunities.json",
+      "prompt_for_codex.md",
       target === "codex" ? "codex_tasks.md" : "claude_brief.md",
     ],
     generated_at: new Date().toISOString(),
@@ -1014,6 +1143,8 @@ function commandExport(args) {
   fs.writeFileSync(path.join(exportDir, "research_brief.md"), buildResearchBrief(topic, rows, manifest));
   writeJson(path.join(exportDir, "source_diagnostics.json"), buildSourceDiagnostics(manifest, rows));
   writeJson(path.join(exportDir, "agent_recommendation.json"), buildAgentRecommendation(manifest, rows));
+  writeJson(path.join(exportDir, "content_opportunities.json"), buildContentOpportunities(topic, rows, manifest));
+  fs.writeFileSync(path.join(exportDir, "prompt_for_codex.md"), buildPromptForCodex(topic, rows, manifest));
   fs.writeFileSync(path.join(exportDir, target === "codex" ? "codex_tasks.md" : "claude_brief.md"), target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows));
   writeJson(path.join(exportDir, "manifest.json"), manifest);
   console.log(`Exported ${target} context pack: ${exportDir}`);
@@ -1647,6 +1778,8 @@ ${manifest.warnings.length ? manifest.warnings.map((warning) => `- ${warning}`).
     "research_brief.md": buildResearchBrief(topic, rows, manifest),
     "source_diagnostics.json": JSON.stringify(buildSourceDiagnostics(manifest, rows), null, 2),
     "agent_recommendation.json": JSON.stringify(buildAgentRecommendation(manifest, rows), null, 2),
+    "content_opportunities.json": JSON.stringify(buildContentOpportunities(topic, rows, manifest), null, 2),
+    "prompt_for_codex.md": buildPromptForCodex(topic, rows, manifest),
     "evidence.jsonl": recordsToEvidence(rows),
     "scored.csv": toCsv(rows),
     [target === "codex" ? "codex_tasks.md" : "claude_brief.md"]: target === "codex" ? buildCodexTasks(topic, rows, manifest) : buildClaudeBrief(topic, rows),
@@ -1816,6 +1949,8 @@ async function commandMcp(args) {
           research_brief: path.join(result.export_dir, "research_brief.md"),
           source_diagnostics: path.join(result.export_dir, "source_diagnostics.json"),
           agent_recommendation: path.join(result.export_dir, "agent_recommendation.json"),
+          content_opportunities: path.join(result.export_dir, "content_opportunities.json"),
+          prompt_for_codex: path.join(result.export_dir, "prompt_for_codex.md"),
           tasks: path.join(result.export_dir, "codex_tasks.md"),
         },
         quality: buildSourceDiagnostics(result.manifest, result.rows).quality_gates,
@@ -2008,6 +2143,8 @@ function writePack(root, packId, target, files, options = {}) {
   files["research_brief.md"] ||= buildResearchBrief(manifest.topic || packId, rows, manifest);
   files["source_diagnostics.json"] ||= JSON.stringify(buildSourceDiagnostics(manifest, rows), null, 2);
   files["agent_recommendation.json"] ||= JSON.stringify(buildAgentRecommendation(manifest, rows), null, 2);
+  files["content_opportunities.json"] ||= JSON.stringify(buildContentOpportunities(manifest.topic || packId, rows, manifest), null, 2);
+  files["prompt_for_codex.md"] ||= buildPromptForCodex(manifest.topic || packId, rows, manifest);
   for (const [fileName, content] of Object.entries(files)) {
     fs.writeFileSync(path.join(exportDir, fileName), String(content));
   }
@@ -2029,6 +2166,8 @@ function packManifest(packId, target, topic, artifacts, extra = {}) {
       "research_brief.md",
       "source_diagnostics.json",
       "agent_recommendation.json",
+      "content_opportunities.json",
+      "prompt_for_codex.md",
     ]),
   ];
   return JSON.stringify({
