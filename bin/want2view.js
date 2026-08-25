@@ -1071,7 +1071,7 @@ function commandStart(args) {
   const exportDir = commandExport({ ...args, _: ["export"], for: agent.exportTarget, workspace: root, topic });
   console.log("");
   console.log("Copy this into your agent:");
-  console.log(`Use ${exportDir} as the source of truth. Read manifest.json, summary.md, evidence.jsonl, scored.csv, and ${agent.handoffFile}. Base recommendations only on evidence rows.`);
+  console.log(`Use ${exportDir} as the source of truth. Read prompt_for_codex.md first, then manifest.json, source_diagnostics.json, content_opportunities.json, evidence.jsonl, scored.csv, and ${agent.handoffFile}. Base recommendations only on evidence rows; open URLs or subtitles before claiming exact hooks or screen details.`);
 }
 
 function commandNormalize(args) {
@@ -2424,7 +2424,7 @@ async function commandAccount(args) {
   }
   console.log("");
   console.log("Open Codex and say:");
-  console.log(`Use the WANT2VIEW pack at ${result.export_dir} as source of truth. Analyze hooks, themes, visual patterns, concepts, competitors, and scripts. Cite evidence rows.`);
+  console.log(`Use the WANT2VIEW pack at ${result.export_dir} as source of truth. Read prompt_for_codex.md first, then analyze hooks, themes, visual patterns, concepts, competitors, and scripts. Cite evidence rows; open URLs or subtitles before claiming exact hooks or screen details.`);
 }
 
 async function main() {
