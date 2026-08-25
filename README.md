@@ -19,14 +19,13 @@ WANT2VIEW CLI is the open-source agent interface for your WANT2VIEW account. It 
 Start from your WANT2VIEW account in 60 seconds. CLI and MCP do not create a separate pricing model: they are the agent interface to the same dashboard limits, sources, projects, and API access.
 
 ```bash
-npx -y want2view account research "AI SaaS avatar content factory" --sources youtube,tiktok,telegram --limit 30
+npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
 ```
 
-Connect live tools to Codex:
+That single npm command installs the Codex skill, saves the token privately, connects MCP when the Codex CLI is available, and creates a starter evidence pack. Manual fallback:
 
 ```bash
-npx -y want2view install codex
-codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
+codex mcp add want2view -- npx -y want2view mcp
 ```
 
 Pick any agent:
@@ -70,17 +69,18 @@ npx want2view codex "ugc ads" # OpenClaw
 
 ## Setup In 60 Seconds
 
-For Codex, install the skill once, connect MCP from API Access, then let Codex run research through your WANT2VIEW account.
+For Codex, copy the one-command setup from WANT2VIEW API Access:
 
 ```bash
-npx -y want2view install codex
+npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory" --sources youtube,tiktok,telegram --limit 30 --wait 180
 ```
 
-Then pick your agent and run one command.
+Then restart Codex and ask it to use WANT2VIEW MCP. Manual commands stay available when you need exact control.
 
 | Agent | One command |
 | --- | --- |
-| Codex MCP tools | `codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp` |
+| Codex one-command setup | `npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"` |
+| Codex MCP tools | `codex mcp add want2view -- npx -y want2view mcp` |
 | Codex setup | `npx -y want2view install codex` |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |

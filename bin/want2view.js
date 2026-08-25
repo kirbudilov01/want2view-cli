@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.4.1";
+const VERSION = "0.4.2";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -117,6 +117,7 @@ Usage:
   want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
   want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok,telegram] [--goal "hooks, themes, visuals"]
   want2view mcp
+  want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
   want2view install codex
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
@@ -146,7 +147,8 @@ Usage:
 Examples:
   npx want2view codex "ai video ads"
   npx want2view account research "AI avatar tools for SaaS content" --sources youtube,tiktok,telegram --limit 30
-  codex mcp add want2view --env WANT2VIEW_API_TOKEN=w2v_... -- npx -y want2view mcp
+  codex mcp add want2view -- npx -y want2view mcp
+  npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
   npx want2view install codex
   npx want2view claude https://youtube.com/@example --channel
   npx want2view cursor "b2b saas launch"
@@ -308,7 +310,11 @@ function credentialApiBaseUrl(args) {
 }
 
 function apiToken() {
-  return process.env.WANT2VIEW_API_TOKEN || readUserConfig().api_token || "";
+  const envToken = process.env.WANT2VIEW_API_TOKEN;
+  if (typeof envToken === "string" && envToken.trim().startsWith("w2v_")) return envToken.trim();
+  const configured = readUserConfig().api_token;
+  if (typeof configured === "string" && configured.trim().startsWith("w2v_")) return configured.trim();
+  return "";
 }
 
 function publicApiKey() {
@@ -316,14 +322,19 @@ function publicApiKey() {
 }
 
 function tokenSource() {
-  if (process.env.WANT2VIEW_API_TOKEN) return "env";
-  if (readUserConfig().api_token) return "config";
+  if (typeof process.env.WANT2VIEW_API_TOKEN === "string" && process.env.WANT2VIEW_API_TOKEN.trim().startsWith("w2v_")) return "env";
+  const configured = readUserConfig().api_token;
+  if (typeof configured === "string" && configured.trim().startsWith("w2v_")) return "config";
   return "missing";
 }
 
 function maskToken(token) {
   if (!token) return "";
   return `${token.slice(0, 8)}...${token.slice(-4)}`;
+}
+
+function shellArg(value) {
+  return `'${String(value || "").replace(/'/g, "'\\''")}'`;
 }
 
 function openUrl(url) {
@@ -1195,6 +1206,7 @@ async function commandLogin(args) {
   const userConfig = readUserConfig();
   userConfig.api_base_url = apiBase;
   if (args.token) {
+    if (args.token === true) throw new Error("Missing token value after --token.");
     const token = String(args.token).trim();
     saveUserToken(apiBase, token);
     console.log(`Saved WANT2VIEW API token to ${userConfigPath()}`);
@@ -1447,6 +1459,125 @@ function commandInstall(args) {
   console.log(`Installed Codex skill: ${skillPath}`);
   console.log("Next: open a new Codex session and ask it to use WANT2VIEW for your research.");
   console.log("Account data: run `want2view login` and then `want2view account research \"your goal\"`.");
+}
+
+function runCodexMcpAdd() {
+  const result = spawnSync(
+    "codex",
+    ["mcp", "add", "want2view", "--", "npx", "-y", "want2view", "mcp"],
+    { encoding: "utf8" }
+  );
+  return {
+    ok: result.status === 0,
+    status: result.status,
+    stdout: String(result.stdout || "").trim(),
+    stderr: String(result.stderr || "").trim(),
+    error: result.error?.message || "",
+  };
+}
+
+async function commandConnect(args) {
+  const target = String(args._[1] || "codex").toLowerCase();
+  if (target !== "codex") {
+    throw new Error("Only `want2view connect codex` is supported right now.");
+  }
+
+  const base = credentialApiBaseUrl(args);
+  if (args.token === true) throw new Error("Missing token value after --token.");
+  const passedToken = String(args.token || "").trim();
+  const token = passedToken || apiToken();
+  if (!token) {
+    console.log("Connect needs a WANT2VIEW developer token.");
+    console.log(`Open API Access: ${API_ACCESS_URL}`);
+    console.log("Then run: npx -y want2view connect codex --token w2v_... --topic \"your research goal\"");
+    process.exitCode = 2;
+    return;
+  }
+
+  if (passedToken) {
+    saveUserToken(base, passedToken);
+    console.log(`Saved WANT2VIEW token privately: ${userConfigPath()}`);
+  } else if (tokenSource() === "env") {
+    saveUserToken(base, token);
+    console.log(`Saved WANT2VIEW env token privately for MCP: ${userConfigPath()}`);
+  }
+
+  commandInstall({ ...args, _: ["install", "codex"] });
+
+  let verified = false;
+  try {
+    const me = await verifyToken(base, token);
+    verified = true;
+    console.log(`Verified WANT2VIEW account: ${me.username} (user ${me.user_id})`);
+  } catch (error) {
+    console.log(`Token saved, but verification failed: ${error.message}`);
+  }
+
+  const mcpCommand = "codex mcp add want2view -- npx -y want2view mcp";
+  if (!args["skip-mcp"]) {
+    const mcp = runCodexMcpAdd();
+    if (mcp.ok) {
+      console.log("Codex MCP: connected.");
+      if (mcp.stdout) console.log(mcp.stdout);
+    } else {
+      console.log("Codex MCP: could not auto-connect from this terminal.");
+      if (mcp.error) console.log(`Reason: ${mcp.error}`);
+      else if (mcp.stderr) console.log(`Reason: ${mcp.stderr.split(/\r?\n/)[0]}`);
+      console.log("Run this command manually:");
+      console.log(mcpCommand);
+    }
+  } else {
+    console.log("Skipped Codex MCP auto-connect.");
+    console.log(mcpCommand);
+  }
+
+  const topic = String(args.topic || args._[2] || "").trim();
+  if (!topic) {
+    console.log("");
+    console.log("Next research command:");
+    console.log(`npx -y want2view account research ${shellArg("AI SaaS avatar content factory")} --sources youtube,tiktok,telegram --limit 30 --wait 180`);
+    console.log("");
+    console.log("After restarting Codex, ask:");
+    console.log("Use WANT2VIEW MCP. Create a research plan for the videos I should make next, wait for the pack, and cite evidence URLs.");
+    return;
+  }
+
+  if (args["skip-research"]) {
+    console.log("");
+    console.log("Skipped starter pack. In Codex, ask:");
+    console.log(`Use WANT2VIEW MCP. Create a research plan for ${topic}, wait for the pack, and cite evidence URLs.`);
+    return;
+  }
+
+  console.log("");
+  console.log(`Starting a starter WANT2VIEW pack: ${topic}`);
+  const root = workspacePath(args);
+  const result = await runAccountResearchPlan({
+    base,
+    token,
+    root,
+    topic,
+    target: "codex",
+    args: {
+      ...args,
+      wait: args.wait ?? 180,
+      sources: args.sources || "youtube,tiktok,telegram",
+      limit: args.limit || 30,
+      goal: args.goal || "hooks, themes, visual patterns, concepts, scripts",
+      mode: "cloud",
+    },
+  });
+  console.log(`Starter pack: ${result.export_dir}`);
+  console.log(`Records: ${result.rows.length}`);
+  if (result.manifest.warnings?.length) {
+    result.manifest.warnings.slice(0, 5).forEach((warning) => console.log(`Warning: ${warning}`));
+  }
+  console.log("");
+  console.log("After restarting Codex, ask:");
+  console.log(`Use the WANT2VIEW pack at ${result.export_dir}. Read prompt_for_codex.md first, then give me hooks, themes, visual patterns, concepts, and scripts with evidence URLs.`);
+  if (!verified) {
+    process.exitCode = 2;
+  }
 }
 
 function sleep(ms) {
@@ -2395,6 +2526,7 @@ async function commandAccount(args) {
     throw new Error("Missing goal. Example: want2view account research \"AI avatar tools for SaaS content\"");
   }
   const base = credentialApiBaseUrl(args);
+  if (args.token === true) throw new Error("Missing token value after --token.");
   const passedToken = String(args.token || "").trim();
   if (passedToken) {
     saveUserToken(base, passedToken);
@@ -2435,6 +2567,7 @@ async function main() {
     if (command === "version" || args.version) return console.log(VERSION);
     if (AGENT_TARGETS[command]) return commandStart({ ...args, _: ["start", command, ...args._.slice(1)] });
     if (command === "codex-cloud") return await commandCodexCloud(args);
+    if (command === "connect") return await commandConnect(args);
     if (command === "mcp") return await commandMcp(args);
     if (command === "account") return await commandAccount(args);
     if (command === "start") return commandStart(args);
