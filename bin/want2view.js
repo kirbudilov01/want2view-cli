@@ -7,13 +7,14 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.4.2";
+const VERSION = "0.4.4";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
 const DEVELOPERS_URL = "https://want2view.com/developers";
 const REPO_URL = "https://github.com/kirbudilov01/want2view-cli";
 const DEFAULT_API_BASE_URL = "https://api.want2view.com";
+const DEFAULT_REMOTE_MCP_PATH = "/api/v1/developer/mcp";
 const TRUSTED_API_HOSTS = new Set(["api.want2view.com", "app.want2view.com"]);
 const AGENT_TARGETS = {
   codex: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "Codex" },
@@ -117,7 +118,7 @@ Usage:
   want2view start codex|claude|cursor|openclaw|agent "<keyword>" [--channel] [--out .want2view]
   want2view codex-cloud "<topic>" --token w2v_... [--sources youtube,tiktok,telegram] [--goal "hooks, themes, visuals"]
   want2view mcp
-  want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
+  want2view connect codex --code w2v_setup_... [--remote|--stdio] [--topic "AI SaaS avatar content factory"]
   want2view install codex
   want2view init [--workspace .want2view]
   want2view search "<keyword>" --demo [--out .want2view]
@@ -130,7 +131,7 @@ Usage:
   want2view login [--api https://api.want2view.com] [--token w2v_...]
   want2view auth status
   want2view doctor [--json]
-  want2view account research "<goal>" [--sources youtube,tiktok,telegram] [--limit 30] [--queries "q1,q2"]
+  want2view account research "<goal>" [--sources youtube,tiktok,telegram] [--limit 30] [--queries "q1,q2"] [--production]
   want2view account status <run_id>
   want2view account export <run_id> --for codex|claude
   want2view workflows [keyword|channel|project|monitoring] [--json]
@@ -147,8 +148,10 @@ Usage:
 Examples:
   npx want2view codex "ai video ads"
   npx want2view account research "AI avatar tools for SaaS content" --sources youtube,tiktok,telegram --limit 30
+  npx want2view account research "AI SaaS content that earns views" --sources youtube,tiktok,telegram --production --limit 80 --per-query-limit 60
+  npx -y want2view connect codex --code w2v_setup_...
+  codex mcp add want2view --url https://api.want2view.com/api/v1/developer/mcp
   codex mcp add want2view -- npx -y want2view mcp
-  npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
   npx want2view install codex
   npx want2view claude https://youtube.com/@example --channel
   npx want2view cursor "b2b saas launch"
@@ -702,10 +705,14 @@ function buildSourceDiagnostics(manifest = {}, rows = []) {
     warnings,
     quality_gates: {
       records: rows.length,
+      raw_records: Number(manifest.raw_records || rows.length),
+      unique_records: Number(manifest.unique_records || rows.length),
+      duplicate_records: Number(manifest.duplicate_records || 0),
       has_thumbnails: rows.some((row) => row.thumbnail),
       has_subtitles: rows.some((row) => row.subtitle_available),
       has_hook_types: rows.some((row) => row.hook_type),
       has_format_types: rows.some((row) => row.format_type),
+      production_ready: Boolean(manifest.production_coverage?.ready_for_synthesis),
     },
   };
 }
@@ -1412,6 +1419,12 @@ npx want2view login
 npx want2view account research "digital avatar AI services" --sources youtube,tiktok,telegram --limit 30 --goal "hooks, themes, visual patterns, scripts"
 \`\`\`
 
+For a production decision rather than a quick brief, run:
+
+\`npx want2view account research "what videos should an AI SaaS founder make next" --sources youtube,tiktok,telegram --production --limit 80 --per-query-limit 60\`
+
+It uses the same WANT2VIEW account limits, reports raw versus unique records, and does not silently add catalog rows.
+
 For focused single-keyword runs, the lower-level commands are also available:
 \`want2view cloud research\`, \`want2view cloud status\`, and \`want2view cloud export\`.
 
@@ -1426,8 +1439,10 @@ WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for cod
 1. Open the newest \`.want2view/exports/<pack_id>\` folder unless the user provides another path.
 2. Read \`manifest.json\`, \`agent_contract.md\`, \`status.md\`, \`summary.md\`, \`evidence.jsonl\`, and \`scored.csv\`.
 3. If \`manifest.status\` is \`pending\`, run the listed status/export commands and wait for a ready/partial pack.
-4. Analyze the available evidence first, even when the pack is free/test-depth. Suggest a plan change only when the user needs deeper collection, higher record limits, saved projects, scheduled refreshes, team access, or bulk subtitle/report jobs.
-5. For project exports, order subtitles/scenarios only for selected videos and only when the user has project balance:
+4. For a production corpus, read \`production_coverage.json\` and \`production_queue.json\`. Report raw versus unique records and source gaps. Do not present catalog fallback as live collection.
+5. Do not claim exact screen timing, visual proof, thumbnail composition, or CTA mechanics until the selected evidence URLs have been opened and checked. Use transcript-level claims only for rows with a ready subtitle/report.
+6. Analyze the available evidence first, even when the pack is free/test-depth. Suggest a plan change only when the user needs deeper collection, higher record limits, saved projects, scheduled refreshes, team access, or bulk subtitle/report jobs.
+7. For project exports, order subtitles/scenarios only for selected videos and only when the user has project balance:
    - \`POST /public/videos/{video_id}/order-scenario\`
    - \`GET /public/video-reports/{report_id}\`
 6. Final outputs should separate observed evidence, Codex interpretation, assumptions, and next data gaps.
@@ -1437,7 +1452,7 @@ WANT2VIEW_PUBLIC_API_KEY=... npx want2view project export <project_id> --for cod
 - Source status and data limits.
 - Hook patterns.
 - Topic/theme clusters.
-- Visual and format patterns.
+- Visual and format patterns, labeled as URL/screen-review evidence or title/metadata inference.
 - Audience pains and promises.
 - Competitor/channel opportunities.
 - Script or content recommendations.
@@ -1461,7 +1476,60 @@ function commandInstall(args) {
   console.log("Account data: run `want2view login` and then `want2view account research \"your goal\"`.");
 }
 
-function runCodexMcpAdd() {
+function remoteMcpUrl(base) {
+  return `${String(base || DEFAULT_API_BASE_URL).replace(/\/$/, "")}${DEFAULT_REMOTE_MCP_PATH}`;
+}
+
+function codexConfigPath() {
+  const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
+  return path.join(codexHome, "config.toml");
+}
+
+function tomlBasicString(value) {
+  return `"${String(value || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function writeCodexRemoteMcpConfig(base, token) {
+  const configPath = codexConfigPath();
+  ensureDir(path.dirname(configPath));
+  const existing = fs.existsSync(configPath) ? fs.readFileSync(configPath, "utf8") : "";
+  const block = [
+    "[mcp_servers.want2view]",
+    `url = ${tomlBasicString(remoteMcpUrl(base))}`,
+    'http_headers = { Authorization = "Bearer ' + String(token).replace(/"/g, '\\"') + '" }',
+    'enabled = true',
+    'startup_timeout_sec = 20',
+    'tool_timeout_sec = 180',
+    "",
+  ].join("\n");
+  const pattern = /(?:^|\n)\[mcp_servers\.want2view\]\n(?:[^\n]*(?:\n|$))*?(?=\n\[[^\]]+\]|\s*$)/m;
+  const next = pattern.test(existing)
+    ? existing.replace(pattern, `\n${block}`.trimEnd())
+    : `${existing.trimEnd()}${existing.trim() ? "\n\n" : ""}${block}`;
+  fs.writeFileSync(configPath, next.endsWith("\n") ? next : `${next}\n`, { mode: 0o600 });
+  try {
+    fs.chmodSync(configPath, 0o600);
+  } catch {
+    // Best effort on platforms that support POSIX permissions.
+  }
+  return configPath;
+}
+
+function runCodexMcpAdd(args = {}) {
+  if (args.remote) {
+    const result = spawnSync(
+      "codex",
+      ["mcp", "add", "want2view", "--url", remoteMcpUrl(args.base)],
+      { encoding: "utf8" }
+    );
+    return {
+      ok: result.status === 0,
+      status: result.status,
+      stdout: String(result.stdout || "").trim(),
+      stderr: String(result.stderr || "").trim(),
+      error: result.error?.message || "",
+    };
+  }
   const result = spawnSync(
     "codex",
     ["mcp", "add", "want2view", "--", "npx", "-y", "want2view", "mcp"],
@@ -1484,12 +1552,25 @@ async function commandConnect(args) {
 
   const base = credentialApiBaseUrl(args);
   if (args.token === true) throw new Error("Missing token value after --token.");
+  if (args.code === true) throw new Error("Missing one-time pairing code after --code.");
+  const pairingCode = String(args.code || "").trim();
   const passedToken = String(args.token || "").trim();
-  const token = passedToken || apiToken();
+  let pairedToken = "";
+  if (pairingCode) {
+    const paired = await requestJson(`${base}/api/v1/developer/cli/pair`, {
+      method: "POST",
+      body: JSON.stringify({ code: pairingCode, name: "want2view-codex" }),
+    });
+    pairedToken = String(paired.token || "").trim();
+    if (!pairedToken) throw new Error("WANT2VIEW pairing did not return a developer token.");
+    saveUserToken(base, pairedToken);
+    console.log(`Paired WANT2VIEW privately: ${userConfigPath()}`);
+  }
+  const token = pairedToken || passedToken || apiToken();
   if (!token) {
-    console.log("Connect needs a WANT2VIEW developer token.");
+    console.log("Connect needs a one-time WANT2VIEW pairing code.");
     console.log(`Open API Access: ${API_ACCESS_URL}`);
-    console.log("Then run: npx -y want2view connect codex --token w2v_... --topic \"your research goal\"");
+    console.log("Create a Codex pairing code, then run the command generated by WANT2VIEW.");
     process.exitCode = 2;
     return;
   }
@@ -1513,18 +1594,29 @@ async function commandConnect(args) {
     console.log(`Token saved, but verification failed: ${error.message}`);
   }
 
-  const mcpCommand = "codex mcp add want2view -- npx -y want2view mcp";
+  // Stdio reads the private 0600 CLI config. Remote MCP would require placing a durable
+  // bearer token in Codex config, so it is explicit opt-in only.
+  const useRemoteMcp = args.remote === true && args.stdio !== true;
+  const mcpCommand = useRemoteMcp
+    ? `codex mcp add want2view --url ${remoteMcpUrl(base)}`
+    : "codex mcp add want2view -- npx -y want2view mcp";
   if (!args["skip-mcp"]) {
-    const mcp = runCodexMcpAdd();
-    if (mcp.ok) {
-      console.log("Codex MCP: connected.");
-      if (mcp.stdout) console.log(mcp.stdout);
+    if (useRemoteMcp) {
+      const configPath = writeCodexRemoteMcpConfig(base, token);
+      console.log(`Codex MCP: remote server configured at ${remoteMcpUrl(base)}`);
+      console.log(`Codex config updated: ${configPath}`);
     } else {
-      console.log("Codex MCP: could not auto-connect from this terminal.");
-      if (mcp.error) console.log(`Reason: ${mcp.error}`);
-      else if (mcp.stderr) console.log(`Reason: ${mcp.stderr.split(/\r?\n/)[0]}`);
-      console.log("Run this command manually:");
-      console.log(mcpCommand);
+      const mcp = runCodexMcpAdd({ remote: false });
+      if (mcp.ok) {
+        console.log("Codex MCP: local stdio server connected.");
+        if (mcp.stdout) console.log(mcp.stdout);
+      } else {
+        console.log("Codex MCP: could not auto-connect from this terminal.");
+        if (mcp.error) console.log(`Reason: ${mcp.error}`);
+        else if (mcp.stderr) console.log(`Reason: ${mcp.stderr.split(/\r?\n/)[0]}`);
+        console.log("Run this command manually:");
+        console.log(mcpCommand);
+      }
     }
   } else {
     console.log("Skipped Codex MCP auto-connect.");
@@ -1561,7 +1653,7 @@ async function commandConnect(args) {
     args: {
       ...args,
       wait: args.wait ?? 180,
-      sources: args.sources || "youtube,tiktok,telegram",
+      sources: args.sources || "youtube,tiktok,instagram,telegram",
       limit: args.limit || 30,
       goal: args.goal || "hooks, themes, visual patterns, concepts, scripts",
       mode: "cloud",
@@ -1694,16 +1786,27 @@ function evidenceRowsFromExportPayload(payload) {
   return text.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
 }
 
+function researchTerms(topic, queries = []) {
+  const stopWords = new Set([
+    "the", "and", "for", "with", "from", "about", "what", "which", "video", "videos", "content",
+    "как", "что", "для", "про", "или", "это", "видео", "контент", "снять", "нужно", "своей", "моей",
+  ]);
+  const words = `${topic || ""} ${(queries || []).join(" ")}`
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .split(/\s+/)
+    .filter((word) => word.length >= 3 && !stopWords.has(word));
+  return [...new Set(words)].slice(0, 24);
+}
+
 function accountRelevance(row, topic, queries) {
   const rowText = [row.title, row.text, row.account, row.platform].join(" ").toLowerCase();
-  const wanted = [
-    "ai", "claude", "codex", "agent", "avatar", "saas", "tool", "automation", "content",
-    "neural", "нейро", "ии", "сервис", "аватар", "контент", "автоматизац", "агент",
-  ];
   const title = String(row.title || "");
   const excludedPhysicalFactory = /(ice cream|smartwatch|manufacturing|factory tour|assembly line|mining factory|roblox|rare avatar)/i.test(title);
-  const hasAiSignal = wanted.some((token) => rowText.includes(token));
-  return hasAiSignal && !excludedPhysicalFactory;
+  const terms = researchTerms(topic, queries);
+  const matchedTerms = terms.filter((term) => rowText.includes(term));
+  // Keep broadly relevant social records even when the title is terse; do not hard-code the product to AI only.
+  return !excludedPhysicalFactory && (matchedTerms.length > 0 || terms.length === 0);
 }
 
 function dedupeAccountRows(rows, topic, queries) {
@@ -1711,12 +1814,55 @@ function dedupeAccountRows(rows, topic, queries) {
   const filtered = [];
   for (const row of rows) {
     if (!accountRelevance(row, topic, queries)) continue;
-    const key = String(row.url || row.id || row.title || "").toLowerCase();
+    const key = String(row.url || row.id || `${row.platform || ""}:${row.account || ""}:${row.title || ""}`).toLowerCase();
     if (!key || seen.has(key)) continue;
     seen.add(key);
     filtered.push(row);
   }
   return filtered.sort((a, b) => Number(b.score || b.views || 0) - Number(a.score || a.views || 0));
+}
+
+function buildProductionCoverage({ rawRows, uniqueRows, selectedRows, sources, sourceStatuses, fallbackUsed }) {
+  const rawBySource = countBy(rawRows, "platform");
+  const uniqueBySource = countBy(uniqueRows, "platform");
+  const selectedBySource = countBy(selectedRows, "platform");
+  const liveSources = (sources || []).filter((source) => uniqueBySource[source] > 0);
+  const incompleteSources = (sources || []).filter((source) => sourceStatuses?.[source] !== "completed");
+  const subtitlesReady = selectedRows.filter((row) => row.subtitle_available || row.transcript_status === "ready").length;
+  return {
+    raw_records: rawRows.length,
+    unique_records: uniqueRows.length,
+    duplicate_records: Math.max(0, rawRows.length - uniqueRows.length),
+    records_by_source: { raw: rawBySource, unique: uniqueBySource, selected: selectedBySource },
+    selected_for_deep_analysis: selectedRows.length,
+    transcript_ready: subtitlesReady,
+    transcript_missing: Math.max(0, selectedRows.length - subtitlesReady),
+    visual_xray: {
+      status: "requires_codex_review",
+      candidates: selectedRows.length,
+      rule: "Do not claim screen timing, thumbnail composition, or CTA placement until Codex opens the selected evidence URLs."
+    },
+    fallback_used: fallbackUsed,
+    live_sources: liveSources,
+    incomplete_sources: incompleteSources,
+    ready_for_synthesis: uniqueRows.length >= 20 && !fallbackUsed,
+    ready_for_production_formula: selectedRows.length >= 20 && subtitlesReady >= Math.min(10, selectedRows.length) && !fallbackUsed,
+  };
+}
+
+function buildProductionQueue(rows) {
+  return rows.map((row, index) => ({
+    priority: index + 1,
+    evidence_id: row.id,
+    url: row.url,
+    platform: row.platform,
+    title: row.title,
+    account: row.account,
+    score: row.relevance_score || row.score || 0,
+    subtitle_status: row.subtitle_available || row.transcript_status === "ready" ? "available" : "needs_fetch_or_manual_transcript",
+    visual_xray_status: "open_in_codex",
+    required_checks: ["first_3_seconds", "proof_moment", "screen_or_face_timing", "cta_or_end_frame"],
+  }));
 }
 
 function accountCatalogCategories(topic, queries) {
@@ -1756,7 +1902,7 @@ async function fetchAccountCatalogRows(base, topic, queries, limit) {
 async function startAccountRun(base, token, topic, args = {}, perQueryLimit = 10) {
   const payload = {
     topic,
-    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"],
+    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"],
     mode: args.mode === "demo" ? "demo" : "cloud",
     kind: "outliers",
     language: args.language || "en",
@@ -1787,18 +1933,36 @@ async function exportAccountRun(base, token, runId, target = "codex") {
 
 async function runAccountResearchPlan({ base, token, root, topic, target = "codex", args = {}, quiet = false }) {
   initWorkspace(root);
-  const limit = parseLimit(args, 30, 200);
-  const queries = buildAccountQueryPlan(topic, args);
-  const perQueryLimit = Math.max(10, Number(args["per-query-limit"] || args.per_query_limit || 0), Math.ceil(limit / Math.max(1, queries.length)));
+  // `limit` is the desired corpus size. The backend keeps each connector run at
+  // its own <=200 contract and fans out across focused queries server-side.
+  const limit = parseLimit(args, 30, 2000);
+  const productionMode = args.production === true || args.depth === "production" || args["production-corpus"] === true;
+  const requestedPerQueryLimit = Number(args["per-query-limit"] || args.per_query_limit || 0);
+  const perRunLimit = Math.min(200, Math.max(10, Number(requestedPerQueryLimit || (productionMode ? 120 : Math.min(60, limit)))));
   const waitSeconds = Number(args.wait ?? args["wait-seconds"] ?? 180);
   const deadline = Date.now() + Math.max(0, waitSeconds) * 1000;
-  const runs = [];
-
-  for (const [index, query] of queries.entries()) {
-    const start = await startAccountRun(base, token, query, args, perQueryLimit);
-    runs.push({ query, run_id: start.run_id, status: start.status, records: start.records || 0, warnings: start.warnings || [] });
-    if (!quiet) console.log(`Started ${index + 1}/${queries.length}: ${query} -> ${start.run_id} (${start.status})`);
-  }
+  const plan = await requestJson(`${base}/api/v1/developer/research-plan`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      topic,
+      sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"],
+      queries: parseList(args.queries),
+      goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
+      language: args.language || "en",
+      region_code: args.region_code || "US",
+      lookback_hours: Number(args["lookback-hours"] || args.lookback_hours || 72),
+      limit: perRunLimit,
+      collection_mode: productionMode ? "production" : "quick",
+      per_query_limit: perRunLimit,
+      deep_analysis_limit: Number(args["deep-analysis-limit"] || args.deep_analysis_limit || 40),
+      allow_catalog_fallback: false,
+      execute: true,
+    }),
+  });
+  const queries = plan.query_plan || [];
+  const runs = (plan.runs || []).map((run) => ({ ...run, warnings: [] }));
+  if (!quiet) runs.forEach((run, index) => console.log(`Started ${index + 1}/${runs.length}: ${run.query} -> ${run.run_id} (${run.status})`));
 
   while (Date.now() < deadline) {
     let allTerminal = true;
@@ -1815,24 +1979,19 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
     await sleep(5000);
   }
 
-  const exports = [];
-  for (const run of runs) {
-    try {
-      const payload = await exportAccountRun(base, token, run.run_id, target);
-      exports.push(payload);
-      run.exported = true;
-      run.records = payload.manifest?.records ?? run.records;
-      run.status = payload.manifest?.status || run.status;
-      run.source_statuses = payload.manifest?.source_statuses || run.source_statuses || {};
-      run.warnings = payload.manifest?.warnings || run.warnings || [];
-    } catch (error) {
-      run.exported = false;
-      run.export_error = error.message;
-    }
-  }
-
-  const allRows = exports.flatMap(evidenceRowsFromExportPayload);
-  let rows = dedupeAccountRows(allRows, topic, queries);
+  const mergedExport = await requestJson(`${base}/api/v1/developer/research-plan/export`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      topic,
+      run_ids: runs.map((run) => run.run_id),
+      target,
+      deep_analysis_limit: Number(args["deep-analysis-limit"] || args.deep_analysis_limit || 40),
+    }),
+  });
+  const allRows = evidenceRowsFromExportPayload(mergedExport).map((row) => enrichAgentRecord(row));
+  const uniqueRows = dedupeAccountRows(allRows, topic, queries);
+  let rows = uniqueRows;
   const sourceStatuses = {};
   const warnings = [];
   for (const run of runs) {
@@ -1840,24 +1999,23 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
       sourceStatuses[source] = sourceStatuses[source] === "completed" ? sourceStatuses[source] : status;
     });
     (run.warnings || []).forEach((warning) => warnings.push(`[${run.query}] ${warning}`));
-    if (run.export_error) warnings.push(`[${run.query}] Export failed: ${run.export_error}`);
   }
-  if (rows.length < Number(args["min-records"] || args.min_records || 8)) {
-    try {
-      const catalogRows = await fetchAccountCatalogRows(base, topic, queries, limit);
-      const before = rows.length;
-      rows = dedupeAccountRows([...rows, ...catalogRows], topic, queries);
-      if (rows.length > before) {
-        warnings.push(`Free public catalog fallback added ${rows.length - before} AI records because live account runs returned thin evidence.`);
-      }
-    } catch (error) {
-      warnings.push(`Public catalog fallback failed: ${error.message}`);
-    }
-  }
+  (mergedExport.manifest?.warnings || []).forEach((warning) => warnings.push(String(warning)));
   if (!rows.length) {
     warnings.push("No relevant records were found after query planning. Try --queries with shorter buyer-language keywords.");
   }
   rows = rows.slice(0, limit).map((row) => enrichAgentRecord(row));
+  const fallbackUsed = Boolean(mergedExport.manifest?.delivery_audit?.integrity?.catalog_fallback_included);
+  const deepAnalysisCount = Math.min(rows.length, Math.max(20, Number(args["deep-analysis-limit"] || args.deep_analysis_limit || 40)));
+  const selectedRows = rows.slice(0, deepAnalysisCount);
+  const productionCoverage = buildProductionCoverage({
+    rawRows: allRows,
+    uniqueRows,
+    selectedRows,
+    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"],
+    sourceStatuses,
+    fallbackUsed,
+  });
 
   const packId = `account-${slugify(topic)}-${Date.now()}`;
   const status = rows.length ? (runs.some((run) => run.status === "partial" || run.status === "failed") ? "partial" : "completed") : "failed";
@@ -1867,7 +2025,10 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
     topic,
     status,
     records: rows.length,
-    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"],
+    raw_records: allRows.length,
+    unique_records: uniqueRows.length,
+    duplicate_records: Math.max(0, allRows.length - uniqueRows.length),
+    sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"],
     query_plan: queries,
     runs,
     source_statuses: sourceStatuses,
@@ -1876,13 +2037,18 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
       queued: runs.some((run) => run.status === "queued"),
       collecting: runs.some((run) => ["queued", "processing", "running"].includes(String(run.status))),
       partial: status === "partial",
-      fallback_used: warnings.some((warning) => /fallback|catalog/i.test(String(warning))),
+      fallback_used: fallbackUsed,
       ready: ["completed", "partial"].includes(status),
     },
-    quality: buildSourceDiagnostics({ status, sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"], source_statuses: sourceStatuses, warnings }, rows).quality_gates,
+    production_coverage: productionCoverage,
+    delivery_audit: mergedExport.manifest?.delivery_audit || {
+      integrity: { catalog_fallback_included: false, live_only: true },
+      delivered: { raw_records: allRows.length, unique_records: uniqueRows.length },
+    },
+    quality: buildSourceDiagnostics({ status, sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"], source_statuses: sourceStatuses, warnings }, rows).quality_gates,
     agent_goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
     next_commands: [
-      `want2view account research ${JSON.stringify(topic)} --sources ${(parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "telegram"]).join(",")} --limit ${limit}`,
+      `want2view account research ${JSON.stringify(topic)} --sources ${(parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"]).join(",")} --limit ${limit} --production`,
     ],
     generated_at: new Date().toISOString(),
   };
@@ -1891,6 +2057,9 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
 ## Coverage
 
 - Records: ${rows.length}
+- Raw records: ${allRows.length}
+- Unique records: ${uniqueRows.length}
+- Duplicates removed: ${Math.max(0, allRows.length - uniqueRows.length)}
 - Queries: ${queries.join(", ")}
 - Status: ${status}
 
@@ -1901,10 +2070,21 @@ ${rows.slice(0, 10).map((row, index) => `${index + 1}. ${row.title} (${row.platf
 ## Source Notes
 
 ${manifest.warnings.length ? manifest.warnings.map((warning) => `- ${warning}`).join("\n") : "- No warnings."}
+
+## Production Coverage
+
+- Live sources with records: ${productionCoverage.live_sources.join(", ") || "none"}
+- Selected for transcript + visual review: ${productionCoverage.selected_for_deep_analysis}
+- Transcript-ready finalists: ${productionCoverage.transcript_ready}
+- Visual x-ray: ${productionCoverage.visual_xray.status}
+- Formula readiness: ${productionCoverage.ready_for_production_formula ? "ready" : "not ready - complete subtitle and visual review first"}
 `;
   const files = {
     "manifest.json": JSON.stringify(manifest, null, 2),
     "query_plan.json": JSON.stringify({ topic, queries, runs }, null, 2),
+    "production_coverage.json": JSON.stringify(productionCoverage, null, 2),
+    "delivery_audit.json": JSON.stringify(mergedExport.manifest?.delivery_audit || {}, null, 2),
+    "production_queue.json": JSON.stringify(buildProductionQueue(selectedRows), null, 2),
     "summary.md": summary,
     "research_brief.md": buildResearchBrief(topic, rows, manifest),
     "source_diagnostics.json": JSON.stringify(buildSourceDiagnostics(manifest, rows), null, 2),
@@ -2037,7 +2217,7 @@ async function commandMcp(args) {
       description: "Run a broad WANT2VIEW account research goal end-to-end: split into short queries, wait for source jobs, export runs, merge one evidence pack, and return the local path.",
       inputSchema: {
         topic: z.string().min(1).describe("Broad research goal or market question."),
-        sources: z.array(z.enum(["youtube", "tiktok", "telegram"])).optional(),
+        sources: z.array(z.enum(["youtube", "tiktok", "instagram", "telegram"])).optional(),
         goal: z.string().optional().describe("What the agent should synthesize from the merged pack."),
         queries: z.array(z.string()).optional().describe("Optional exact short queries to run instead of auto-planning."),
         limit: z.number().int().min(1).max(200).optional(),
@@ -2082,11 +2262,74 @@ async function commandMcp(args) {
           agent_recommendation: path.join(result.export_dir, "agent_recommendation.json"),
           content_opportunities: path.join(result.export_dir, "content_opportunities.json"),
           prompt_for_codex: path.join(result.export_dir, "prompt_for_codex.md"),
+          production_coverage: path.join(result.export_dir, "production_coverage.json"),
+          production_queue: path.join(result.export_dir, "production_queue.json"),
           tasks: path.join(result.export_dir, "codex_tasks.md"),
         },
         quality: buildSourceDiagnostics(result.manifest, result.rows).quality_gates,
         recommendation: buildAgentRecommendation(result.manifest, result.rows),
       });
+    }
+  );
+
+  server.registerTool(
+    "create_production_corpus",
+    {
+      title: "Create production research corpus",
+      description: "Build a live, deduplicated WANT2VIEW corpus for a content-production decision. It never silently adds catalog fallback. Returns raw/unique counts, source diagnostics, finalists for subtitles, and a visual-review queue for Codex.",
+      inputSchema: {
+        topic: z.string().min(1).describe("Business goal, niche, or audience question."),
+        sources: z.array(z.enum(["youtube", "tiktok", "instagram", "telegram"])).optional(),
+        queries: z.array(z.string()).optional().describe("Different buyer-language queries; use these to avoid repeated discovery."),
+        target_records: z.number().int().min(20).max(2000).optional().describe("Unique evidence rows to keep after dedupe."),
+        per_query_limit: z.number().int().min(10).max(200).optional().describe("Live depth for each query, subject to the account plan."),
+        deep_analysis_limit: z.number().int().min(20).max(80).optional().describe("Finalists queued for subtitles and visual review."),
+        wait_seconds: z.number().int().min(0).max(900).optional(),
+        workspace: z.string().optional(),
+        language: z.string().optional(),
+        region_code: z.string().optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async ({ topic, sources, queries, target_records, per_query_limit, deep_analysis_limit, wait_seconds, workspace, language, region_code }) => {
+      const { base } = mcpAuthContext(args);
+      const token = requireMcpToken();
+      const root = workspace ? path.resolve(workspace) : workspacePath(args);
+      const result = await runAccountResearchPlan({
+        base,
+        token,
+        root,
+        topic,
+        target: "codex",
+        quiet: true,
+        args: {
+          sources: sources?.join(","),
+          queries: queries?.join(","),
+          limit: target_records || 80,
+          "per-query-limit": per_query_limit || 60,
+          "deep-analysis-limit": deep_analysis_limit || 40,
+          wait: wait_seconds ?? 300,
+          language,
+          region_code,
+          mode: "cloud",
+          production: true,
+        },
+      });
+      const coverage = result.manifest.production_coverage || {};
+      return mcpText(
+        `Created production corpus at ${result.export_dir}: ${coverage.unique_records || result.rows.length} unique from ${coverage.raw_records || result.rows.length} raw records.`,
+        {
+          export_dir: result.export_dir,
+          manifest: result.manifest,
+          coverage,
+          files: {
+            evidence: path.join(result.export_dir, "evidence.jsonl"),
+            coverage: path.join(result.export_dir, "production_coverage.json"),
+            queue: path.join(result.export_dir, "production_queue.json"),
+            diagnostics: path.join(result.export_dir, "source_diagnostics.json"),
+          },
+        }
+      );
     }
   );
 
@@ -2097,7 +2340,7 @@ async function commandMcp(args) {
       description: "Start a WANT2VIEW account research run for a topic. Use this before analysis when the user gives a research goal.",
       inputSchema: {
         topic: z.string().min(1).describe("Research topic, keyword, category, or market."),
-        sources: z.array(z.enum(["youtube", "tiktok", "telegram"])).optional(),
+        sources: z.array(z.enum(["youtube", "tiktok", "instagram", "telegram"])).optional(),
         goal: z.string().optional().describe("What the agent should synthesize from the pack."),
         mode: z.enum(["demo", "cloud"]).optional(),
         limit: z.number().int().min(1).max(200).optional(),
@@ -2112,7 +2355,7 @@ async function commandMcp(args) {
       const token = requireMcpToken();
       const payload = {
         topic,
-        sources: sources?.length ? sources : ["youtube", "tiktok", "telegram"],
+        sources: sources?.length ? sources : ["youtube", "tiktok", "instagram", "telegram"],
         mode: mode || "cloud",
         kind: "outliers",
         language: language || "en",
@@ -2186,31 +2429,43 @@ async function commandMcp(args) {
     "get_subtitles",
     {
       title: "Get video subtitles",
-      description: "Queue or read the WANT2VIEW subtitles/scenario pipeline for a selected video. Requires WANT2VIEW_PUBLIC_API_KEY.",
+      description: "Queue or read the WANT2VIEW subtitles/scenario pipeline for a selected project video. Uses the connected WANT2VIEW account; no second API key is needed.",
       inputSchema: {
         video_id: z.string().optional(),
+        analysis_id: z.string().optional().describe("WANT2VIEW project/analysis ID that owns the selected video."),
         report_id: z.string().optional(),
         wait_seconds: z.number().int().min(0).max(180).optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
-    async ({ video_id, report_id, wait_seconds }) => {
+    async ({ video_id, analysis_id, report_id, wait_seconds }) => {
       const { base } = mcpAuthContext(args);
-      const key = requireMcpPublicKey();
+      const token = requireMcpToken();
       let activeReportId = report_id || "";
       let queued = null;
       if (!activeReportId) {
         if (!video_id) throw new Error("Provide video_id or report_id.");
-        queued = await requestJson(`${base}/public/videos/${encodeURIComponent(video_id)}/order-scenario`, {
+        if (!analysis_id) throw new Error("Provide analysis_id when ordering subtitles for a video.");
+        queued = await requestJson(`${base}/api/v1/developer/video-reports/scenario`, {
           method: "POST",
-          headers: { "X-API-Key": key },
+          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ video_id, analysis_id }),
         });
         activeReportId = queued.report_id || queued.id || "";
       }
       if (!activeReportId) {
         throw new Error("WANT2VIEW did not return a report_id for this video.");
       }
-      const report = await pollVideoReport(base, key, activeReportId, wait_seconds || 0);
+      const deadline = Date.now() + Math.max(0, Number(wait_seconds || 0)) * 1000;
+      let report = await requestJson(`${base}/api/v1/developer/video-reports/${encodeURIComponent(activeReportId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      while (wait_seconds > 0 && Date.now() < deadline && !report.is_ready && report.status !== "failed") {
+        await sleep(2000);
+        report = await requestJson(`${base}/api/v1/developer/video-reports/${encodeURIComponent(activeReportId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       return mcpText(`Video report ${activeReportId}: ${report.status || (report.is_ready ? "ready" : "pending")}.`, {
         queued,
         report_id: activeReportId,

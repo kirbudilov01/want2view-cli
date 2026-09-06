@@ -19,13 +19,14 @@ WANT2VIEW CLI is the open-source agent interface for your WANT2VIEW account. It 
 Start from your WANT2VIEW account in 60 seconds. CLI and MCP do not create a separate pricing model: they are the agent interface to the same dashboard limits, sources, projects, and API access.
 
 ```bash
-npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"
+npx -y want2view connect codex --token w2v_... --remote --skip-research
 ```
 
-That single npm command installs the Codex skill, saves the token privately, connects MCP when the Codex CLI is available, and creates a starter evidence pack. Manual fallback:
+That single npm command installs the Codex skill, saves the token privately, and connects Codex to the remote WANT2VIEW MCP server. After that, tell Codex your niche in plain language.
 
 ```bash
-codex mcp add want2view -- npx -y want2view mcp
+Use WANT2VIEW MCP. My niche is AI SaaS/avatar/content-factory videos.
+Find what videos I should make next: hooks, themes, visuals, and scripts with evidence URLs.
 ```
 
 Pick any agent:
@@ -72,15 +73,16 @@ npx want2view codex "ugc ads" # OpenClaw
 For Codex, copy the one-command setup from WANT2VIEW API Access:
 
 ```bash
-npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory" --sources youtube,tiktok,telegram --limit 30 --wait 180
+npx -y want2view connect codex --token w2v_... --remote --skip-research
 ```
 
-Then restart Codex and ask it to use WANT2VIEW MCP. Manual commands stay available when you need exact control.
+Then restart Codex and ask it to use WANT2VIEW MCP. Local stdio mode stays available when you need exact control.
 
 | Agent | One command |
 | --- | --- |
-| Codex one-command setup | `npx -y want2view connect codex --token w2v_... --topic "AI SaaS avatar content factory"` |
-| Codex MCP tools | `codex mcp add want2view -- npx -y want2view mcp` |
+| Codex remote MCP setup | `npx -y want2view connect codex --token w2v_... --remote --skip-research` |
+| Codex remote MCP URL | `codex mcp add want2view --url https://api.want2view.com/api/v1/developer/mcp` |
+| Codex local MCP mode | `codex mcp add want2view -- npx -y want2view mcp` |
 | Codex setup | `npx -y want2view install codex` |
 | Codex | `npx want2view codex "ai video ads"` |
 | Claude | `npx want2view claude "ugc ads"` |
@@ -97,10 +99,21 @@ npx -y want2view account research "AI SaaS avatar content factory" --sources you
 
 The command creates a local `.want2view/exports/<pack_id>/` folder and prints the exact prompt to paste into your agent.
 
+For a production decision, use the corpus mode. It runs independent live queries, deduplicates canonical URLs, and makes the data gaps explicit. It uses the same account limits; it does not create a CLI-specific plan.
+
+```bash
+npx -y want2view account research "what AI SaaS videos should we make next" \
+  --sources youtube,tiktok,telegram --production --limit 80 --per-query-limit 60
+```
+
+The resulting pack adds `production_coverage.json` and `production_queue.json`: raw/unique counts, source coverage, transcript readiness, and the 20-80 URLs that Codex must open before making screen-level claims. Catalog fallback is off by default and can only be enabled explicitly with `--allow-catalog-fallback`.
+
 MCP mode exposes WANT2VIEW as live tools:
 
 - `doctor` checks auth and connector state.
 - `create_research_plan` turns a business goal into short source queries, waits, exports, and merges one evidence pack.
+- `create_production_corpus` in local MCP builds a live deduplicated corpus and a subtitle/visual-review queue for production decisions.
+- `export_research_plan` in remote MCP merges completed plan runs into the same honest corpus after Codex has checked their status.
 - `create_research` starts a focused WANT2VIEW account research run.
 - `get_status` checks source status and record counts.
 - `export_pack` downloads an agent-ready evidence pack.
@@ -149,6 +162,8 @@ Output:
   codex_tasks.md
   claude_brief.md
   upgrade_prompt.md
+  production_coverage.json  # production corpus mode
+  production_queue.json     # selected URLs for subtitles + screen review
 ```
 
 Then tell your agent:
@@ -243,14 +258,13 @@ npx want2view claude https://youtube.com/@example --channel
 npx want2view workflows keyword
 ```
 
-GitHub fallback:
+NPM is the stable path:
 
 ```bash
-npx want2view codex "ai video ads"
-npx want2view claude https://youtube.com/@example --channel
+npx -y want2view connect codex --token w2v_... --remote --skip-research
 ```
 
-Package status: use npm for stable installs; use the GitHub fallback when the repository has newer connector fixes before the next npm publish.
+Use GitHub only when testing unreleased connector fixes.
 
 The fastest real path is account-first: open [WANT2VIEW API Access](https://app.want2view.com/api-access), create a Developer token, connect MCP once, then let Codex run inside your WANT2VIEW limits. Local sample packs are only there so an agent can inspect the format before login.
 
