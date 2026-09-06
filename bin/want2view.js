@@ -1954,6 +1954,7 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
       region_code: args.region_code || "US",
       lookback_hours: Number(args["lookback-hours"] || args.lookback_hours || 72),
       limit: perRunLimit,
+      content_type: args["content-type"] || args.content_type || "all",
       collection_mode: productionMode ? "production" : "quick",
       per_query_limit: perRunLimit,
       deep_analysis_limit: Number(args["deep-analysis-limit"] || args.deep_analysis_limit || 40),
@@ -2226,6 +2227,7 @@ async function commandMcp(args) {
         workspace: z.string().optional(),
         language: z.string().optional(),
         region_code: z.string().optional(),
+        content_type: z.enum(["all", "shorts", "long"]).optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
@@ -2292,7 +2294,7 @@ async function commandMcp(args) {
       },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
-    async ({ topic, sources, queries, target_records, per_query_limit, deep_analysis_limit, wait_seconds, workspace, language, region_code }) => {
+    async ({ topic, sources, queries, target_records, per_query_limit, deep_analysis_limit, wait_seconds, workspace, language, region_code, content_type }) => {
       const { base } = mcpAuthContext(args);
       const token = requireMcpToken();
       const root = workspace ? path.resolve(workspace) : workspacePath(args);
@@ -2312,6 +2314,7 @@ async function commandMcp(args) {
           wait: wait_seconds ?? 300,
           language,
           region_code,
+          "content-type": content_type || "all",
           mode: "cloud",
           production: true,
         },
@@ -2348,10 +2351,11 @@ async function commandMcp(args) {
         language: z.string().optional(),
         region_code: z.string().optional(),
         lookback_hours: z.number().int().min(1).max(2160).optional(),
+        content_type: z.enum(["all", "shorts", "long"]).optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
-    async ({ topic, sources, goal, mode, limit, language, region_code, lookback_hours }) => {
+    async ({ topic, sources, goal, mode, limit, language, region_code, lookback_hours, content_type }) => {
       const { base } = mcpAuthContext(args);
       const token = requireMcpToken();
       const payload = {
@@ -2363,7 +2367,7 @@ async function commandMcp(args) {
         region_code: region_code || "US",
         lookback_hours: lookback_hours || 72,
         limit: limit || 30,
-        content_type: "all",
+        content_type: content_type || "all",
         agent_goal: goal || "hooks, themes, visual patterns, scripts",
       };
       const result = await requestJson(`${base}/api/v1/developer/cloud/research`, {
