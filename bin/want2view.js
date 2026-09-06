@@ -15,6 +15,7 @@ const DEVELOPERS_URL = "https://want2view.com/developers";
 const REPO_URL = "https://github.com/kirbudilov01/want2view-cli";
 const DEFAULT_API_BASE_URL = "https://api.want2view.com";
 const DEFAULT_REMOTE_MCP_PATH = "/api/v1/developer/mcp";
+const CLI_PACKAGE_SPEC = process.env.WANT2VIEW_CLI_PACKAGE_SPEC || "github:kirbudilov01/want2view-cli#main";
 const TRUSTED_API_HOSTS = new Set(["api.want2view.com", "app.want2view.com"]);
 const AGENT_TARGETS = {
   codex: { exportTarget: "codex", handoffFile: "codex_tasks.md", label: "Codex" },
@@ -1532,7 +1533,7 @@ function runCodexMcpAdd(args = {}) {
   }
   const result = spawnSync(
     "codex",
-    ["mcp", "add", "want2view", "--", "npx", "-y", "want2view", "mcp"],
+    ["mcp", "add", "want2view", "--", "npx", "-y", CLI_PACKAGE_SPEC, "mcp"],
     { encoding: "utf8" }
   );
   return {
@@ -1599,7 +1600,7 @@ async function commandConnect(args) {
   const useRemoteMcp = args.remote === true && args.stdio !== true;
   const mcpCommand = useRemoteMcp
     ? `codex mcp add want2view --url ${remoteMcpUrl(base)}`
-    : "codex mcp add want2view -- npx -y want2view mcp";
+    : `codex mcp add want2view -- npx -y ${CLI_PACKAGE_SPEC} mcp`;
   if (!args["skip-mcp"]) {
     if (useRemoteMcp) {
       const configPath = writeCodexRemoteMcpConfig(base, token);
