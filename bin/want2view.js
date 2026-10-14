@@ -7,7 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import readline from "node:readline/promises";
 
-const VERSION = "0.4.4";
+const VERSION = "0.4.5";
 const DEFAULT_WORKSPACE = ".want2view";
 const APP_URL = "https://app.want2view.com/register";
 const API_ACCESS_URL = "https://app.want2view.com/api-access";
@@ -1759,27 +1759,13 @@ function parseList(value) {
 
 function buildAccountQueryPlan(topic, args = {}) {
   const explicit = parseList(args.queries || args.query);
-  if (explicit.length) return [...new Set(explicit)].slice(0, parseLimit({ limit: args.query_count || args["query-count"] || explicit.length }, explicit.length, 12));
-
-  const text = String(topic || "").toLowerCase();
-  const candidates = [];
-  const add = (...items) => items.forEach((item) => candidates.push(item));
-
-  if (/(avatar|аватар|digital human|heygen|synthesia)/i.test(text)) {
-    add("AI avatar tools", "digital avatar AI services", "AI avatar method");
-  }
-  if (/(saas|tool|сервис|нейрокни|нейро|ai service|software)/i.test(text)) {
-    add("SaaS AI tools review", "AI tools for business", "нейросети сервисы обзор");
-  }
-  if (/(codex|claude|agent|агент|automation|автоматизац|mcp)/i.test(text)) {
-    add("Claude Code agents", "Codex Claude agents", "AI agent tools");
-  }
-  if (/(content|контент|factory|завод|ugc|youtube|tiktok|shorts|reels)/i.test(text)) {
-    add("AI content factory", "content factory AI", "faceless YouTube AI tools");
-  }
-
-  add(String(topic).trim());
-  return [...new Set(candidates.filter(Boolean))].slice(0, parseLimit({ limit: args.query_count || args["query-count"] }, 10, 12));
+  const production = args.production === true || args.depth === "production";
+  if (explicit.length) return [...new Set(explicit)].slice(0, production ? 12 : 2);
+  const text = String(topic || "").replace(/\s+/g, " ").trim();
+  if (text.split(" ").length <= 8 && text.length <= 90) return [text];
+  const queryText = text.includes(":") ? text.slice(text.indexOf(":") + 1).trim() : text;
+  const focused = queryText.split(/[,;\n]/).map((part) => part.trim()).find((part) => part.split(/\s+/).length >= 2 && part.split(/\s+/).length <= 6 && part.length <= 70);
+  return [focused || text.split(" ").slice(0, 8).join(" ").slice(0, 90).trim()];
 }
 
 function evidenceRowsFromExportPayload(payload) {
@@ -1948,7 +1934,7 @@ async function runAccountResearchPlan({ base, token, root, topic, target = "code
     body: JSON.stringify({
       topic,
       sources: parseList(args.sources).length ? parseList(args.sources) : ["youtube", "tiktok", "instagram", "telegram"],
-      queries: parseList(args.queries),
+      queries: buildAccountQueryPlan(topic, args),
       goal: args.goal || args.agent_goal || "hooks, themes, visual patterns, scripts",
       language: args.language || "en",
       region_code: args.region_code || "US",
