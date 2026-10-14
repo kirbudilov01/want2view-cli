@@ -1387,6 +1387,20 @@ description: Use WANT2VIEW evidence packs for content, trend, competitor, hook, 
 
 Use this skill when the user asks Codex to analyze videos, competitors, hooks, visual patterns, AI tools/services, digital avatars, vertical videos, long-form videos, trend research, or content strategy with WANT2VIEW data.
 
+## Conversation before collection
+
+Use the native remote WANT2VIEW MCP tools. Discuss the task before collecting:
+clarify objective, audience, scope, exclusions, deliverable and success criteria.
+Use existing context; ask only unanswered questions, in small batches. Submit
+research_brief with execute=false, show the final brief, plan, budget and limits,
+and wait for explicit human approval. Only then reuse approval_id and returned
+arguments with execute=true and confirmed_by_user=true. A changed brief requires
+another preview and approval. The initial request alone is not confirmation.
+After collection export the evidence, analyze it with citations, and continue
+the conversation. Any additional collection needs its own agreed plan.
+For 100 channels use create_project_research: 100 unique channels with video
+evidence, not 100 videos. A partial pack is not a completed study.
+
 ## Operating Contract
 
 - WANT2VIEW is the data layer: it collects/searches sources, scores records, tracks source statuses, and exports files.
@@ -1595,9 +1609,9 @@ async function commandConnect(args) {
     console.log(`Token saved, but verification failed: ${error.message}`);
   }
 
-  // Stdio reads the private 0600 CLI config. Remote MCP would require placing a durable
-  // bearer token in Codex config, so it is explicit opt-in only.
-  const useRemoteMcp = args.remote === true && args.stdio !== true;
+  // Native remote MCP keeps planning and collection policy on the server.
+  // --stdio remains an explicit legacy option.
+  const useRemoteMcp = args.stdio !== true;
   const mcpCommand = useRemoteMcp
     ? `codex mcp add want2view --url ${remoteMcpUrl(base)}`
     : `codex mcp add want2view -- npx -y ${CLI_PACKAGE_SPEC} mcp`;
@@ -1631,7 +1645,7 @@ async function commandConnect(args) {
     console.log(`npx -y want2view account research ${shellArg("AI SaaS avatar content factory")} --sources youtube,tiktok,telegram --limit 30 --wait 180`);
     console.log("");
     console.log("After restarting Codex, ask:");
-    console.log("Use WANT2VIEW MCP. Create a research plan for the videos I should make next, wait for the pack, and cite evidence URLs.");
+    console.log("Use WANT2VIEW MCP. Discuss my research goal, clarify the brief, show the plan and budget, and wait for my confirmation before collection.");
     return;
   }
 
