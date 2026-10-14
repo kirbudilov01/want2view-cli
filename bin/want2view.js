@@ -1765,7 +1765,8 @@ function buildAccountQueryPlan(topic, args = {}) {
   if (text.split(" ").length <= 8 && text.length <= 90) return [text];
   const queryText = text.includes(":") ? text.slice(text.indexOf(":") + 1).trim() : text;
   const focused = queryText.split(/[,;\n]/).map((part) => part.trim()).find((part) => part.split(/\s+/).length >= 2 && part.split(/\s+/).length <= 6 && part.length <= 70);
-  return [focused || text.split(" ").slice(0, 8).join(" ").slice(0, 90).trim()];
+  const query = focused || text.split(" ").slice(0, 8).join(" ").slice(0, 90).trim();
+  return [/\bai\b/i.test(text) && !/\bai\b/i.test(query) ? `AI ${query}` : query];
 }
 
 function evidenceRowsFromExportPayload(payload) {
